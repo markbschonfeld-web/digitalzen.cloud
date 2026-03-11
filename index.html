@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Zen — Fuel The Moment | KORFYR</title>
+  <meta name="description" content="Precision-engineered lifestyle technology. Explore the EMBERFYR and TWINFYR collection from KORFYR." />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="KORFYR — Fuel The Moment" />
+  <meta property="og:description" content="Precision-engineered lifestyle technology. Explore the EMBERFYR and TWINFYR collection." />
+  <meta property="og:url" content="https://digitalzen.cloud" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://digitalzen.cloud/og-preview.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="Digital Zen by KORFYR" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="KORFYR — Fuel The Moment" />
+  <meta name="twitter:description" content="Precision-engineered lifestyle technology. Explore the EMBERFYR and TWINFYR collection." />
+  <meta name="twitter:image" content="https://digitalzen.cloud/og-preview.png" />
+
+  <!-- Favicon placeholder -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       AGE VERIFICATION GATE
+  ============================================================ -->
+  <div id="age-gate" class="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+    <div class="age-gate__backdrop"></div>
+    <div class="age-gate__content">
+      <div class="age-gate__logo">DIGITAL ZEN</div>
+      <div class="age-gate__subtitle">by KORFYR</div>
+
+      <h1 id="age-gate-title" class="age-gate__title">Age Verification Required</h1>
+      <p class="age-gate__desc">
+        This site contains products intended for individuals 21 years of age or older.
+        Please confirm your date of birth to continue.
+      </p>
+
+      <div class="age-gate__fields">
+        <select id="age-month" class="age-gate__select" aria-label="Birth Month">
+          <option value="" disabled selected>Month</option>
+        </select>
+        <select id="age-year" class="age-gate__select" aria-label="Birth Year">
+          <option value="" disabled selected>Year</option>
+        </select>
+      </div>
+
+      <p id="age-error" class="age-gate__error" role="alert"></p>
+
+      <button id="age-verify-btn" class="age-gate__btn">Verify Age &amp; Enter</button>
+
+      <p class="age-gate__legal">
+        By entering this site, you confirm you are 21 or older and agree to our Terms of Service and Privacy Policy.
+        Products on this site are not intended for use with nicotine, e-juice, or e-liquids.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <div id="main-content" class="main-content">
+
+    <!-- Particle canvas -->
+    <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+    <!-- ---- Header ---- -->
+    <header class="site-header" role="banner">
+      <div class="header__brand">
+        <span class="header__logo">DIGITAL ZEN</span>
+        <span class="header__tagline">The Art of the Ritual</span>
+      </div>
+      <nav class="header__nav" aria-label="Main navigation">
+        <a href="#products" class="header__link">The Collection</a>
+        <a href="#brand" class="header__link">Our Story</a>
+        <a href="https://www.korfyr.com" target="_blank" rel="noopener" class="header__cta" id="header-shop-cta">Shop KORFYR</a>
+      </nav>
+    </header>
+
+    <!-- ---- Hero ---- -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__glow" aria-hidden="true"></div>
+
+      <div class="hero__badge" aria-label="Precision Lifestyle Technology">
+        <span class="hero__badge-dot" aria-hidden="true"></span>
+        Precision Lifestyle Technology
+      </div>
+
+      <h1 id="hero-title" class="hero__title">
+        Ignite<br />
+        <span class="hero__title-accent">Your Ritual</span>
+      </h1>
+
+      <p class="hero__desc">
+        The moment matters. How you step into it matters more.
+        Join thousands who've discovered KORFYR — precision-engineered
+        technology for those who live with intention.
+      </p>
+
+      <div class="hero__actions">
+        <a href="#products" class="btn-primary" id="hero-explore-cta">
+          See What You're Missing
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="https://www.korfyr.com" target="_blank" rel="noopener" class="btn-secondary" id="hero-korfyr-cta">
+          Explore KORFYR
+        </a>
+      </div>
+
+      <div class="hero__scroll" aria-hidden="true">
+        <div class="hero__scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <!-- ---- Products ---- -->
+    <section id="products" class="section products" aria-labelledby="products-title">
+      <div class="section__header">
+        <span class="section__label reveal">The Collection</span>
+        <h2 id="products-title" class="section__title reveal reveal-delay-1">Engineered for Your Ritual</h2>
+        <p class="section__desc reveal reveal-delay-2">
+          Every KORFYR product is designed with one purpose: to make your ritual
+          extraordinary. Clean lines, precision engineering, and uncompromising
+          quality — because settling is not in your nature.
+        </p>
+      </div>
+
+      <div class="products__grid">
+
+        <!-- EMBERFYR Card -->
+        <article class="product-card reveal" aria-label="EMBERFYR Product">
+          <div class="product-card__image">
+            <img
+              src="emberfyr.png"
+              alt="EMBERFYR — premium dry herb device by KORFYR"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            />
+            <div class="product-card__image-glow" aria-hidden="true"></div>
+          </div>
+          <div class="product-card__body">
+            <h3 class="product-card__name">EMBERFYR</h3>
+            <p class="product-card__tagline">Burn Cleanly. Burn Boldly.</p>
+            <p class="product-card__desc">
+              Feel the difference precision makes. The EMBERFYR delivers a clean,
+              controlled experience you won't find anywhere else — sleek enough
+              for your pocket, powerful enough to transform your ritual.
+            </p>
+            <div class="product-card__features">
+              <span class="product-card__feature">Dry Herb Compatible</span>
+              <span class="product-card__feature">Premium Build</span>
+              <span class="product-card__feature">Pocket-Ready</span>
+              <span class="product-card__feature">Precise Control</span>
+            </div>
+            <a
+              href="https://www.korfyr.com/products/emberfyr"
+              target="_blank"
+              rel="noopener"
+              class="product-card__cta"
+              id="emberfyr-shop-link"
+              aria-label="Get the EMBERFYR on KORFYR"
+            >
+              Get the EMBERFYR — $149.99
+              <svg class="product-card__cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- TWINFYR Card -->
+        <article class="product-card reveal reveal-delay-1" aria-label="TWINFYR Product">
+          <div class="product-card__image">
+            <img
+              src="twinfyr.png"
+              alt="TWINFYR — dual flavor 510-thread battery by KORFYR"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            />
+            <div class="product-card__image-glow" aria-hidden="true"></div>
+          </div>
+          <div class="product-card__body">
+            <h3 class="product-card__name">TWINFYR</h3>
+            <p class="product-card__tagline">Double the Fire. Double the Flavor.</p>
+            <p class="product-card__desc">
+              Why choose when you can have both? The world's first dual-flavor
+              510-thread battery lets you switch between two cartridges — or run
+              both at once. 650mAh power, smart LED display, and a body that
+              commands attention.
+            </p>
+            <div class="product-card__features">
+              <span class="product-card__feature">510-Thread</span>
+              <span class="product-card__feature">Dual Cartridge</span>
+              <span class="product-card__feature">650mAh</span>
+              <span class="product-card__feature">Universal Compatible</span>
+            </div>
+            <a
+              href="https://www.korfyr.com/products/twinfyr-dual-flavor-510-thread-650mah-battery-black"
+              target="_blank"
+              rel="noopener"
+              class="product-card__cta"
+              id="twinfyr-shop-link"
+              aria-label="Get the TWINFYR on KORFYR"
+            >
+              Get the TWINFYR — $49.99
+              <svg class="product-card__cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ---- Brand Story ---- -->
+    <section id="brand" class="section brand-story" aria-labelledby="brand-title">
+      <div class="brand-story__container">
+        <div class="brand-story__divider reveal" aria-hidden="true"></div>
+
+        <span class="section__label reveal">Our Philosophy</span>
+
+        <div class="brand-story__korfyr reveal reveal-delay-1">KORFYR</div>
+        <div class="brand-story__motto reveal reveal-delay-1">Fuel The Moment</div>
+
+        <p class="brand-story__text reveal reveal-delay-2">
+          Some moments are ordinary. Others become rituals — quiet acts of
+          intention that mark the passage of time, punctuate the day, and
+          remind us that we are present. KORFYR exists to make those moments
+          exceptional.
+        </p>
+
+        <p class="brand-story__text reveal reveal-delay-3">
+          Every product is designed from the ground up by engineers who
+          understand that the ritual is as important as the result.
+          Precision materials. Intuitive controls. Form that earns its function.
+          This is lifestyle technology for those who know what they want —
+          and refuse to settle for anything less.
+        </p>
+
+        <div class="brand-story__cta reveal reveal-delay-3">
+          <a
+            href="https://www.korfyr.com/collections/all"
+            target="_blank"
+            rel="noopener"
+            class="btn-primary"
+            id="brand-korfyr-cta"
+          >
+            See the Full Collection
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Footer ---- -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer__main">
+        <div class="footer__brand">
+          <div class="footer__brand-logo">DIGITAL ZEN</div>
+          <p class="footer__brand-desc">
+            A curated gateway to KORFYR — precision-engineered lifestyle technology.
+            digitalzen.cloud is an independent bridge page for KORFYR products.
+          </p>
+        </div>
+        <div class="footer__col">
+          <div class="footer__col-title">Shop</div>
+          <ul class="footer__links">
+            <li><a href="https://www.korfyr.com/products/emberfyr" target="_blank" rel="noopener" class="footer__link">EMBERFYR</a></li>
+            <li><a href="https://www.korfyr.com/products/twinfyr-dual-flavor-510-thread-650mah-battery-black" target="_blank" rel="noopener" class="footer__link">TWINFYR</a></li>
+            <li><a href="https://www.korfyr.com/collections/all" target="_blank" rel="noopener" class="footer__link">Full Collection</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <div class="footer__col-title">Legal</div>
+          <ul class="footer__links">
+            <li><a href="https://www.korfyr.com/policies/terms-of-service" target="_blank" rel="noopener" class="footer__link">Terms of Service</a></li>
+            <li><a href="https://www.korfyr.com/policies/privacy-policy" target="_blank" rel="noopener" class="footer__link">Privacy Policy</a></li>
+            <li><a href="https://www.korfyr.com/policies/refund-policy" target="_blank" rel="noopener" class="footer__link">Refund Policy</a></li>
+            <li><a href="https://www.korfyr.com/pages/support" target="_blank" rel="noopener" class="footer__link">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__disclaimer">
+          <strong>21+ Only.</strong> Products on this site and on korfyr.com are intended for use by individuals 21 years of age or older.
+          Products are not intended for use with nicotine, tobacco, e-juice, or e-liquids.
+          These products may produce vapors or aerosols — use responsibly and in accordance with all applicable local laws and regulations.
+          This website is not intended to market to or be accessed by minors.
+        </p>
+        <p class="footer__copyright">
+          © 2026 KORFYR. All rights reserved. &nbsp;|&nbsp; digitalzen.cloud
+        </p>
+      </div>
+    </footer>
+
+  </div><!-- /#main-content -->
+
+  <script src="script.js"></script>
+</body>
+</html>
