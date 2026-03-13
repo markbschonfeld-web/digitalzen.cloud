@@ -1,95 +1,13 @@
 /* ============================================
-   Digital Zen — Interactivity & Age Gate
+   Digital Zen — Campaign Bridge Interactivity
    ============================================ */
 
 (function () {
   'use strict';
 
-  // ---- Age Verification ----
-  const AGE_KEY = 'digitalzen_age_verified';
-
-  function initAgeGate() {
-    const gate = document.getElementById('age-gate');
-    const mainContent = document.getElementById('main-content');
-    const verifyBtn = document.getElementById('age-verify-btn');
-    const errorEl = document.getElementById('age-error');
-    const monthSelect = document.getElementById('age-month');
-    const yearSelect = document.getElementById('age-year');
-
-    // Check if already verified this session
-    if (sessionStorage.getItem(AGE_KEY) === 'true') {
-      gate.classList.add('hidden');
-      mainContent.classList.add('visible');
-      initPageAnimations();
-      return;
-    }
-
-    // Populate month options
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    months.forEach((m, i) => {
-      const opt = document.createElement('option');
-      opt.value = i + 1;
-      opt.textContent = m;
-      monthSelect.appendChild(opt);
-    });
-
-    // Populate year options (1930 to current year)
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear; y >= 1930; y--) {
-      const opt = document.createElement('option');
-      opt.value = y;
-      opt.textContent = y;
-      yearSelect.appendChild(opt);
-    }
-
-    verifyBtn.addEventListener('click', function () {
-      const month = parseInt(monthSelect.value, 10);
-      const year = parseInt(yearSelect.value, 10);
-
-      if (!month || !year) {
-        showError('Please select your birth month and year.');
-        return;
-      }
-
-      // Calculate age — use last day of month 
-      const birthDate = new Date(year, month, 0); // last day of selected month
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-
-      if (age < 21) {
-        // Under-age: redirect away
-        window.location.href = 'https://www.google.com';
-        return;
-      }
-
-      // Verified — let them in
-      sessionStorage.setItem(AGE_KEY, 'true');
-      gate.classList.add('hidden');
-      mainContent.classList.add('visible');
-      initPageAnimations();
-    });
-
-    function showError(msg) {
-      errorEl.textContent = msg;
-      errorEl.classList.add('visible');
-      // Re-trigger shake animation
-      errorEl.style.animation = 'none';
-      errorEl.offsetHeight; // force reflow
-      errorEl.style.animation = '';
-    }
-  }
-
-  // ---- Scroll Reveal ----
+  // ---- Scroll Reveal (IntersectionObserver) ----
   function initScrollReveal() {
     const reveals = document.querySelectorAll('.reveal');
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -99,30 +17,49 @@
           }
         });
       },
-      {
-        threshold: 0.15,
-        rootMargin: '0px 0px -40px 0px',
-      }
+      { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }
     );
-
     reveals.forEach((el) => observer.observe(el));
   }
 
-  // ---- Header Scroll Effect ----
-  function initHeaderScroll() {
-    const header = document.querySelector('.site-header');
-    if (!header) return;
-
-    let ticking = false;
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
-        requestAnimationFrame(function () {
-          header.classList.toggle('scrolled', window.scrollY > 60);
-          ticking = false;
+  // ---- Animated Counter ----
+  function initCounters() {
+    const counters = document.querySelectorAll('[data-target]');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = parseInt(el.getAttribute('data-target'), 10);
+            animateCount(el, target);
+            observer.unobserve(el);
+          }
         });
-        ticking = true;
+      },
+      { threshold: 0.5 }
+    );
+    counters.forEach((el) => observer.observe(el));
+  }
+
+  function animateCount(el, target) {
+    const duration = 1800;
+    const start = performance.now();
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * target);
+      el.textContent = current.toLocaleString();
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        el.textContent = target.toLocaleString();
       }
-    });
+    }
+
+    requestAnimationFrame(update);
   }
 
   // ---- Particle Background ----
@@ -132,7 +69,6 @@
 
     const ctx = canvas.getContext('2d');
     let particles = [];
-    let animId;
     let w, h;
 
     function resize() {
@@ -140,17 +76,17 @@
       h = canvas.height = window.innerHeight;
     }
 
-    function createParticles() {
+    function create() {
       particles = [];
-      const count = Math.min(50, Math.floor((w * h) / 25000));
+      const count = Math.min(40, Math.floor((w * h) / 30000));
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          r: Math.random() * 1.5 + 0.3,
-          dx: (Math.random() - 0.5) * 0.3,
-          dy: (Math.random() - 0.5) * 0.3,
-          opacity: Math.random() * 0.3 + 0.05,
+          r: Math.random() * 1.2 + 0.3,
+          dx: (Math.random() - 0.5) * 0.25,
+          dy: (Math.random() - 0.5) * 0.25,
+          opacity: Math.random() * 0.25 + 0.05,
           pulse: Math.random() * Math.PI * 2,
         });
       }
@@ -161,35 +97,29 @@
       particles.forEach((p) => {
         p.x += p.dx;
         p.y += p.dy;
-        p.pulse += 0.01;
+        p.pulse += 0.008;
 
-        // Wrap around edges
         if (p.x < -10) p.x = w + 10;
         if (p.x > w + 10) p.x = -10;
         if (p.y < -10) p.y = h + 10;
         if (p.y > h + 10) p.y = -10;
 
-        const currentOpacity = p.opacity + Math.sin(p.pulse) * 0.1;
-
+        const alpha = p.opacity + Math.sin(p.pulse) * 0.08;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, currentOpacity)})`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, alpha)})`;
         ctx.fill();
       });
-      animId = requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
     }
 
     resize();
-    createParticles();
+    create();
     draw();
-
-    window.addEventListener('resize', function () {
-      resize();
-      createParticles();
-    });
+    window.addEventListener('resize', () => { resize(); create(); });
   }
 
-  // ---- Smooth Scroll for Internal Links ----
+  // ---- Smooth Scroll for anchor links ----
   function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener('click', function (e) {
@@ -202,14 +132,11 @@
     });
   }
 
-  // ---- Init Page Animations (called after age gate) ----
-  function initPageAnimations() {
+  // ---- Boot ----
+  document.addEventListener('DOMContentLoaded', function () {
     initParticles();
     initScrollReveal();
-    initHeaderScroll();
+    initCounters();
     initSmoothScroll();
-  }
-
-  // ---- Boot ----
-  document.addEventListener('DOMContentLoaded', initAgeGate);
+  });
 })();
