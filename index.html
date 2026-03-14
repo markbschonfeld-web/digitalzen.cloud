@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Zen — The Night Ritual Index</title>
-  <meta name="description" content="A curated index of the rituals that make the late hours worth staying up for. Essays on presence." />
+  <title>Digital Zen — What's Your Night Frequency?</title>
+  <meta name="description" content="Find your night ritual archetype. A 30-second frequency check from Digital Zen." />
   <meta name="robots" content="index, follow" />
 
-  <meta property="og:title" content="The Night Ritual Index" />
-  <meta property="og:description" content="Your wind-down ritual says everything about you." />
+  <meta property="og:title" content="What's Your Night Frequency?" />
+  <meta property="og:description" content="Find your night ritual archetype in 30 seconds." />
   <meta property="og:url" content="https://digitalzen.cloud" />
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="website" />
   <meta property="og:image" content="https://digitalzen.cloud/og-preview.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Digital Zen" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="The Night Ritual Index" />
-  <meta name="twitter:description" content="Your wind-down ritual says everything about you." />
+  <meta name="twitter:title" content="What's Your Night Frequency?" />
+  <meta name="twitter:description" content="Find your night ritual archetype in 30 seconds." />
   <meta name="twitter:image" content="https://digitalzen.cloud/og-preview.png" />
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
@@ -38,258 +38,227 @@
         <span class="nav__logo">DIGITAL ZEN</span>
         <span class="nav__tagline">Essays on Presence</span>
       </div>
+      <span class="nav__issue">Issue 001</span>
     </div>
   </nav>
 
-  <!-- Hero -->
-  <header class="hero">
-    <div class="hero__ambient" aria-hidden="true"></div>
-    <div class="hero__content">
-      <span class="hero__issue">Issue 001</span>
-      <h1 class="hero__title">The Night<br />Ritual Index</h1>
-      <p class="hero__subtitle">
-        Your wind-down ritual says everything about you.<br />
-        Here are the ones worth protecting.
-      </p>
-      <div class="hero__scroll" aria-hidden="true">
-        <div class="hero__scroll-line"></div>
-        <span class="hero__scroll-text">Scroll</span>
-      </div>
-    </div>
-  </header>
+  <!-- Quiz Container -->
+  <main class="quiz" id="quiz">
 
-  <!-- Intro -->
-  <section class="intro">
-    <div class="intro__container">
-      <p class="intro__text reveal">
-        There's a version of your night that belongs entirely to you. No notifications. No obligations. Just the hours after the world gets quiet and the things you choose to fill them with.
-      </p>
-      <p class="intro__text reveal reveal-d1">
-        We started cataloging them — the rituals people build around the edges of their day. Not productivity hacks. Not self-care routines marketed on Instagram. The real ones. The ones you'd never post about but would never give up.
-      </p>
-      <p class="intro__text reveal reveal-d2">
-        This is the index.
-      </p>
-    </div>
-  </section>
-
-  <!-- Ritual Cards -->
-  <section class="rituals" aria-label="The Ritual Index">
-
-    <!-- Ritual 01 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--01" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">01</span>
-        <h2 class="ritual__title">The 11 PM Album Listen</h2>
-        <p class="ritual__desc">
-          Not a playlist. An album. Front to back, the way someone arranged it. Headphones on, lights low, phone face-down on the table. You're not multitasking. You're not doing anything else. For forty-five minutes, you're exactly where the artist wanted you to be.
+    <!-- Intro Screen -->
+    <section class="screen screen--intro active" data-screen="intro">
+      <div class="screen__ambient" aria-hidden="true"></div>
+      <div class="screen__content">
+        <span class="screen__label">A 30-Second Frequency Check</span>
+        <h1 class="screen__title">What's Your<br />Night Frequency?</h1>
+        <p class="screen__subtitle">
+          You already have a ritual.<br />
+          Let's find out what kind.
         </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">After Hours</span>
-          <span class="ritual__tag">Solo</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 85%"></span></span>
-          </span>
+        <button class="btn btn--start" id="startBtn" type="button">
+          <span>Begin</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Question Screens -->
+    <section class="screen screen--q" data-screen="q1">
+      <div class="screen__ambient screen__ambient--q1" aria-hidden="true"></div>
+      <div class="screen__content">
+        <div class="progress" aria-label="Question 1 of 4">
+          <div class="progress__bar"><div class="progress__fill" style="width: 25%"></div></div>
+          <span class="progress__label">1 / 4</span>
+        </div>
+        <h2 class="question">Pick your hour.</h2>
+        <div class="options" data-question="hour">
+          <button class="option" data-scores="curator:2,architect:1" type="button">
+            <span class="option__time">10 PM</span>
+            <span class="option__sub">Early and deliberate</span>
+          </button>
+          <button class="option" data-scores="architect:2,curator:1" type="button">
+            <span class="option__time">Midnight</span>
+            <span class="option__sub">Right on the threshold</span>
+          </button>
+          <button class="option" data-scores="alchemist:2,nighthawk:1" type="button">
+            <span class="option__time">2 AM</span>
+            <span class="option__sub">When the world forgets you exist</span>
+          </button>
+          <button class="option" data-scores="nighthawk:2,alchemist:1" type="button">
+            <span class="option__time">When it finds me</span>
+            <span class="option__sub">No schedule. Just instinct.</span>
+          </button>
         </div>
       </div>
-    </article>
+    </section>
 
-    <!-- Ritual 02 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--02" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">02</span>
-        <h2 class="ritual__title">The Balcony Moment</h2>
-        <p class="ritual__desc">
-          Step outside. Nothing in your hands, nothing in your ears. Just the temperature of the air and whatever the city sounds like at this hour. Two minutes or twenty — it doesn't matter. The point is the threshold. Inside is everything you have to deal with. Out here is just the night.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">Midnight</span>
-          <span class="ritual__tag">Intentional</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 92%"></span></span>
-          </span>
+    <section class="screen screen--q" data-screen="q2">
+      <div class="screen__ambient screen__ambient--q2" aria-hidden="true"></div>
+      <div class="screen__content">
+        <div class="progress" aria-label="Question 2 of 4">
+          <div class="progress__bar"><div class="progress__fill" style="width: 50%"></div></div>
+          <span class="progress__label">2 / 4</span>
+        </div>
+        <h2 class="question">Choose your setting.</h2>
+        <div class="options" data-question="setting">
+          <button class="option" data-scores="curator:2,architect:1" type="button">
+            <span class="option__time">Headphones. Door closed.</span>
+            <span class="option__sub">The world can wait.</span>
+          </button>
+          <button class="option" data-scores="architect:2,nighthawk:1" type="button">
+            <span class="option__time">Balcony. Nothing else.</span>
+            <span class="option__sub">Just you and the air.</span>
+          </button>
+          <button class="option" data-scores="nighthawk:2,alchemist:1" type="button">
+            <span class="option__time">Moving. Anywhere.</span>
+            <span class="option__sub">Stillness isn't your thing.</span>
+          </button>
+          <button class="option" data-scores="alchemist:2,curator:1" type="button">
+            <span class="option__time">Kitchen counter. Hands busy.</span>
+            <span class="option__sub">You think better when you're making.</span>
+          </button>
         </div>
       </div>
-    </article>
+    </section>
 
-    <!-- Ritual 03 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--03" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">03</span>
-        <h2 class="ritual__title">The Solo Drive to Nowhere</h2>
-        <p class="ritual__desc">
-          No destination. No ETA. Just roads you half-know and music you fully know. The windows are down or they're not. You might end up at a gas station buying something you don't need. You might just loop back home. The point was never arriving. The point was the in-between.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">Late Night</span>
-          <span class="ritual__tag">Kinetic</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 78%"></span></span>
-          </span>
+    <section class="screen screen--q" data-screen="q3">
+      <div class="screen__ambient screen__ambient--q3" aria-hidden="true"></div>
+      <div class="screen__content">
+        <div class="progress" aria-label="Question 3 of 4">
+          <div class="progress__bar"><div class="progress__fill" style="width: 75%"></div></div>
+          <span class="progress__label">3 / 4</span>
+        </div>
+        <h2 class="question">What drives your ritual?</h2>
+        <div class="options" data-question="driver">
+          <button class="option" data-scores="curator:2,alchemist:1" type="button">
+            <span class="option__time">The details. Every one.</span>
+            <span class="option__sub">Precision is the point.</span>
+          </button>
+          <button class="option" data-scores="architect:2,curator:1" type="button">
+            <span class="option__time">The quiet. Uninterrupted.</span>
+            <span class="option__sub">Silence is a material you build with.</span>
+          </button>
+          <button class="option" data-scores="nighthawk:2,architect:1" type="button">
+            <span class="option__time">The energy. Restless.</span>
+            <span class="option__sub">You don't wind down. You redirect.</span>
+          </button>
+          <button class="option" data-scores="alchemist:2,nighthawk:1" type="button">
+            <span class="option__time">The process. Start to finish.</span>
+            <span class="option__sub">Making something changes how you feel.</span>
+          </button>
         </div>
       </div>
-    </article>
+    </section>
 
-    <!-- Ritual 04 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--04" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">04</span>
-        <h2 class="ritual__title">The 2 AM Kitchen Session</h2>
-        <p class="ritual__desc">
-          Something about cooking when nobody's awake. The precision of a sharp knife on a cutting board. The sound of oil in a pan. You're not following a recipe — you're following instinct. It doesn't matter if it's elaborate or just eggs. What matters is you chose to make it instead of ordering it.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">2 AM</span>
-          <span class="ritual__tag">Deliberate</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 71%"></span></span>
-          </span>
+    <section class="screen screen--q" data-screen="q4">
+      <div class="screen__ambient screen__ambient--q4" aria-hidden="true"></div>
+      <div class="screen__content">
+        <div class="progress" aria-label="Question 4 of 4">
+          <div class="progress__bar"><div class="progress__fill" style="width: 100%"></div></div>
+          <span class="progress__label">4 / 4</span>
+        </div>
+        <h2 class="question">Pick what stays with you.</h2>
+        <div class="options" data-question="stays">
+          <button class="option" data-scores="curator:2,architect:1" type="button">
+            <span class="option__time">The album you chose perfectly</span>
+            <span class="option__sub">Not a single skip.</span>
+          </button>
+          <button class="option" data-scores="architect:2,alchemist:1" type="button">
+            <span class="option__time">The moment before you went back inside</span>
+            <span class="option__sub">Three seconds of nothing.</span>
+          </button>
+          <button class="option" data-scores="nighthawk:2,curator:1" type="button">
+            <span class="option__time">The road with no destination</span>
+            <span class="option__sub">You still don't know where you went.</span>
+          </button>
+          <button class="option" data-scores="alchemist:2,nighthawk:1" type="button">
+            <span class="option__time">The thing you made at 2 AM</span>
+            <span class="option__sub">Nobody asked for it. That's why it's good.</span>
+          </button>
         </div>
       </div>
-    </article>
+    </section>
 
-    <!-- Ritual 05 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--05" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">05</span>
-        <h2 class="ritual__title">The Rooftop Frequency</h2>
-        <p class="ritual__desc">
-          Every city has a different sound from above. You found your spot — fire escape, parking garage, actual rooftop if you're lucky. The elevation changes something. Problems look smaller from up here. Time moves differently. You come up here when you need to recalibrate, and you always leave a little more level than you arrived.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">Elevated</span>
-          <span class="ritual__tag">Solo</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 88%"></span></span>
-          </span>
+    <!-- Result Screen -->
+    <section class="screen screen--result" data-screen="result">
+      <div class="screen__ambient screen__ambient--result" aria-hidden="true"></div>
+      <div class="result">
+        <div class="result__reveal">
+          <span class="result__label">Your Night Frequency</span>
+          <h2 class="result__archetype" id="resultArchetype">The Curator</h2>
+          <p class="result__desc" id="resultDesc">
+            You're deliberate about every detail.
+          </p>
+          <div class="result__freq">
+            <span class="result__freq-label">Frequency Match</span>
+            <div class="result__freq-bar"><div class="result__freq-fill" id="resultFreq"></div></div>
+          </div>
+        </div>
+
+        <div class="result__insight" id="resultInsight">
+          <p>The difference between a routine and a ritual is intention. You already know this.</p>
+        </div>
+
+        <!-- Share -->
+        <div class="result__share">
+          <button class="btn btn--share" id="shareBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>Share Result</span>
+          </button>
+          <span class="result__copied" id="copiedMsg">Copied to clipboard</span>
+        </div>
+
+        <!-- Email Capture -->
+        <div class="capture">
+          <div class="capture__divider" aria-hidden="true"></div>
+          <h3 class="capture__headline">The Index Continues</h3>
+          <p class="capture__text">
+            Issue 002 is already in the works — new rituals, deeper dives, and
+            something we've been building that we're not ready to talk about yet.
+          </p>
+          <p class="capture__hook">If you made it this far, you're who we made it for.</p>
+          <form class="capture__form" id="captureForm">
+            <div class="capture__input-wrap">
+              <input
+                type="email"
+                class="capture__input"
+                id="captureEmail"
+                placeholder="Your email"
+                required
+                autocomplete="email"
+                aria-label="Email address"
+              />
+              <button type="submit" class="btn btn--capture">I'm in</button>
+            </div>
+            <span class="capture__note">No spam. Just signal.</span>
+          </form>
+          <div class="capture__success" id="captureSuccess">
+            <span class="capture__check">&#10003;</span>
+            <span>You're on the list. Issue 002 is coming.</span>
+          </div>
+        </div>
+
+        <!-- Sponsor / KORFYR Curiosity Engine -->
+        <div class="sponsor">
+          <div class="sponsor__divider" aria-hidden="true"></div>
+          <span class="sponsor__label">Sponsored Content</span>
+          <p class="sponsor__hook">
+            Every ritual has a centerpiece.<br />
+            We made ours.
+          </p>
+          <a href="https://www.korfyr.com" target="_blank" rel="noopener" class="sponsor__cta">
+            <span>KORFYR</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <p class="sponsor__disclosure">
+            This content is sponsored by KORFYR (Helixirin LLC). Digital Zen is an
+            independent editorial publication. Sponsorship does not influence editorial content.
+          </p>
         </div>
       </div>
-    </article>
+    </section>
 
-    <!-- Ritual 06 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--06" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">06</span>
-        <h2 class="ritual__title">The Sunday Reset</h2>
-        <p class="ritual__desc">
-          Not chores. Not meal prep. The other thing — the one where you make your space feel like yours again. Clean surfaces, fresh sheets, a candle you actually like. You're not getting ready for Monday. You're drawing a line between the week that happened and the one that hasn't yet. This is the ritual that makes everything else possible.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">Ritual</span>
-          <span class="ritual__tag">Presence</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 95%"></span></span>
-          </span>
-        </div>
-      </div>
-    </article>
-
-    <!-- Ritual 07 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--07" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">07</span>
-        <h2 class="ritual__title">The Midnight Sketch</h2>
-        <p class="ritual__desc">
-          You don't call yourself creative, but something happens after midnight. The notebook comes out, or the guitar, or the laptop with a half-finished project. Nobody asked you to make this. Nobody will see it if you don't want them to. That's exactly the point. The best things you've ever made happened when you had no audience and no deadline.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">After Hours</span>
-          <span class="ritual__tag">Generative</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 82%"></span></span>
-          </span>
-        </div>
-      </div>
-    </article>
-
-    <!-- Ritual 08 -->
-    <article class="ritual reveal">
-      <div class="ritual__visual ritual__visual--08" aria-hidden="true">
-        <div class="ritual__gradient"></div>
-        <div class="ritual__grain"></div>
-      </div>
-      <div class="ritual__body">
-        <span class="ritual__number">08</span>
-        <h2 class="ritual__title">The Long Pour</h2>
-        <p class="ritual__desc">
-          The drink doesn't matter — tea, coffee, something from a bottle you've been saving. What matters is the intention behind it. You chose a specific vessel. You're standing at the counter or sitting somewhere with purpose. This is three minutes of ceremony in a day that had none. It's not about what's in the cup. It's about the fact that you stopped.
-        </p>
-        <div class="ritual__meta">
-          <span class="ritual__tag">Curated</span>
-          <span class="ritual__tag">Precision</span>
-          <span class="ritual__vibe">
-            <span class="ritual__vibe-label">Frequency</span>
-            <span class="ritual__vibe-bar"><span class="ritual__vibe-fill" style="width: 90%"></span></span>
-          </span>
-        </div>
-      </div>
-    </article>
-
-  </section>
-
-  <!-- Closing -->
-  <section class="closing">
-    <div class="closing__container">
-      <div class="closing__divider reveal" aria-hidden="true"></div>
-      <p class="closing__text reveal">
-        The rituals that matter most are the ones nobody sees.
-      </p>
-      <p class="closing__subtext reveal reveal-d1">
-        Issue 002 is coming. We're collecting rituals from readers. If you have one worth indexing, we want to hear it.
-      </p>
-    </div>
-  </section>
-
-  <!-- Sponsor Disclosure -->
-  <section class="sponsor" aria-label="Sponsored content disclosure">
-    <div class="sponsor__container">
-      <div class="sponsor__line" aria-hidden="true"></div>
-      <span class="sponsor__label">Sponsored Content</span>
-      <a href="https://www.korfyr.com" target="_blank" rel="noopener" class="sponsor__link">
-        KORFYR — Fuel The Moment
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
-      </a>
-      <p class="sponsor__disclosure">
-        This content is sponsored by KORFYR (Helixirin LLC). Digital Zen is an independent editorial publication. Sponsorship does not influence editorial content. This page contains a paid commercial placement.
-      </p>
-      <div class="sponsor__line" aria-hidden="true"></div>
-    </div>
-  </section>
+  </main>
 
   <!-- Footer -->
   <footer class="footer">
