@@ -338,8 +338,7 @@
   }
 
   // ---- Email capture ----
-  // TODO: Replace with your deployed Cloudflare Worker URL (see worker/shopify-subscribe.js)
-  var CAPTURE_ENDPOINT = 'YOUR_WORKER_URL';
+  var CAPTURE_ENDPOINT = 'https://dz-subscribe.helixirin.workers.dev';
 
   function handleCapture(e) {
     e.preventDefault();

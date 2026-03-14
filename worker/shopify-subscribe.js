@@ -4,23 +4,36 @@
  * Receives { email, archetype } from digitalzen.cloud and creates a
  * subscribed customer in your Shopify store via the Admin API.
  *
- * SETUP:
- * 1. In Shopify Admin, go to Settings > Apps and sales channels > Develop apps
- * 2. Create a new app (e.g., "Digital Zen Signup")
- * 3. Under "API credentials", configure Admin API scopes:
- *    - write_customers
- * 4. Install the app and copy the Admin API access token
- * 5. Deploy this worker to Cloudflare:
- *    - npx wrangler init dz-subscribe
- *    - Replace the generated worker code with this file
- *    - npx wrangler secret put SHOPIFY_TOKEN  (paste your Admin API token)
- *    - npx wrangler secret put SHOPIFY_STORE  (e.g., "korfyr" — just the subdomain)
- *    - npx wrangler deploy
- * 6. Copy the worker URL (e.g., https://dz-subscribe.your-account.workers.dev)
- *    and set it as CAPTURE_ENDPOINT in script.js
+ * Auth: OAuth 2.0 client credentials grant (Dev Dashboard apps).
+ * The worker exchanges SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET for
+ * a temporary access token on each request.
+ *
+ * Secrets configured in Cloudflare:
+ *   SHOPIFY_CLIENT_ID     — from Dev Dashboard app
+ *   SHOPIFY_CLIENT_SECRET — from Dev Dashboard app
+ *   SHOPIFY_STORE         — store admin handle (e.g., "helixirin")
+ *
+ * Deployed at: https://dz-subscribe.helixirin.workers.dev
  */
 
 const ALLOWED_ORIGIN = 'https://digitalzen.cloud';
+
+async function getAccessToken(env) {
+  const res = await fetch(
+    `https://${env.SHOPIFY_STORE}.myshopify.com/admin/oauth/access_token`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: env.SHOPIFY_CLIENT_ID,
+        client_secret: env.SHOPIFY_CLIENT_SECRET,
+        grant_type: 'client_credentials',
+      }),
+    }
+  );
+  const data = await res.json();
+  return data.access_token;
+}
 
 export default {
   async fetch(request, env) {
@@ -47,6 +60,8 @@ export default {
         return respond(400, { error: 'Invalid email' });
       }
 
+      const token = await getAccessToken(env);
+
       // Create customer in Shopify with marketing consent
       const shopifyRes = await fetch(
         `https://${env.SHOPIFY_STORE}.myshopify.com/admin/api/2024-01/customers.json`,
@@ -54,7 +69,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Shopify-Access-Token': env.SHOPIFY_TOKEN,
+            'X-Shopify-Access-Token': token,
           },
           body: JSON.stringify({
             customer: {
@@ -74,7 +89,7 @@ export default {
 
       // Shopify returns 422 if customer already exists — that's OK
       if (shopifyRes.ok || shopifyRes.status === 422) {
-        return respond(200, { ok: true });
+        return respond(200, { success: true });
       }
 
       return respond(shopifyRes.status, { error: data.errors || 'Shopify error' });
