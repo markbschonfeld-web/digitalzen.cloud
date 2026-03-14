@@ -532,7 +532,7 @@ em, i, cite { font-style: normal; }
 }
 .korfyr__wordmark {
   display: block;
-  width: clamp(160px, 40vw, 280px);
+  width: clamp(200px, 50vw, 360px);
   height: auto;
   margin: 0 auto 0.75rem;
 }
