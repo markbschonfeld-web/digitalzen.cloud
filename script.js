@@ -153,10 +153,64 @@
 
   // ---- State ----
   var traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
-  var screenOrder = ['intro', 'q1', 'q2', 'q3', 'q4', 'result'];
+  var screenOrder = ['intro', 'q1', 'q2', 'q3', 'q4', 'analyzing', 'result'];
   var currentScreen = 0;
   var currentArchKey = null;
   var transitioning = false;
+  var quizProgress = 0;
+  var particleProfile = null;
+  var analyzingActive = false;
+  var quizColor = null;        // choice-reactive color during quiz
+  var bursts = [];             // click-point particle bursts
+  var particleProfiles = {
+    architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
+    ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
+    circuit:   { speed: 1.5, r: 232, g: 93,  b: 58,  o: 0.18 },
+    twam:      { speed: 0.5, r: 200, g: 160, b: 40,  o: 0.14 },
+    minimalist:{ speed: 0.3, r: 210, g: 210, b: 210, o: 0.06 },
+    operator:  { speed: 1.1, r: 100, g: 130, b: 220, o: 0.14 },
+    engineer:  { speed: 0.6, r: 80,  g: 130, b: 200, o: 0.12 },
+    phantom:   { speed: 0.9, r: 150, g: 100, b: 190, o: 0.13 },
+    builder:   { speed: 0.35,r: 165, g: 130, b: 85,  o: 0.10 },
+    nocturnal: { speed: 1.4, r: 230, g: 45,  b: 45,  o: 0.22 }
+  };
+  // Trait → color mapping for choice-reactive particles
+  var traitColors = {
+    precision:  { r: 170, g: 185, b: 210 },
+    stillness:  { r: 160, g: 170, b: 185 },
+    kinetic:    { r: 220, g: 75,  b: 40  },
+    generative: { r: 200, g: 160, b: 40  }
+  };
+
+  function getQuizColor() {
+    var total = 0;
+    var keys = Object.keys(traits);
+    keys.forEach(function (k) { total += traits[k]; });
+    if (!total) return null;
+    var r = 0, g = 0, b = 0;
+    keys.forEach(function (k) {
+      var w = traits[k] / total;
+      r += traitColors[k].r * w;
+      g += traitColors[k].g * w;
+      b += traitColors[k].b * w;
+    });
+    return { r: Math.round(r), g: Math.round(g), b: Math.round(b) };
+  }
+
+  function spawnBurst(clientX, clientY) {
+    for (var i = 0; i < 8; i++) {
+      var angle = (Math.PI * 2 / 8) * i + (Math.random() - 0.5) * 0.5;
+      bursts.push({
+        x: clientX,
+        y: clientY,
+        dx: Math.cos(angle) * (1.5 + Math.random() * 2),
+        dy: Math.sin(angle) * (1.5 + Math.random() * 2),
+        r: 1.5 + Math.random(),
+        life: 1,
+        decay: 0.015 + Math.random() * 0.01
+      });
+    }
+  }
 
   // ---- DOM ----
   var quiz = document.getElementById('quiz');
@@ -207,6 +261,16 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
       transitioning = false;
+
+      // Auto-advance from analyzing interstitial
+      if (name === 'analyzing') {
+        analyzingActive = true;
+        renderResult(getResult());
+        setTimeout(function () {
+          analyzingActive = false;
+          nextScreen();
+        }, 2500);
+      }
     }, 260); // matches CSS fade-out duration
   }
 
@@ -236,6 +300,10 @@
     var arch = archetypes[archKey];
     if (!arch) arch = archetypes.precision;
     currentArchKey = archKey;
+
+    // Apply archetype visual theme
+    quiz.querySelector('[data-screen="result"]').setAttribute('data-archetype', arch.key);
+    particleProfile = particleProfiles[arch.key] || null;
 
     resultArchetype.textContent = arch.name;
     resultFreqTag.textContent = arch.freqTag;
@@ -324,14 +392,23 @@
     });
     btn.classList.add('selected');
     traits[trait]++;
+    quizProgress++;
+
+    // Choice-reactive: update particle color based on accumulated traits
+    quizColor = getQuizColor();
+
+    // Vignette deepening
+    quiz.style.setProperty('--vignette', (quizProgress * 0.07).toFixed(3));
+
+    // Particle burst from click point
+    spawnBurst(e.clientX, e.clientY);
+
+    // Micro-shake feedback
+    quiz.classList.add('shake');
+    setTimeout(function () { quiz.classList.remove('shake'); }, 150);
 
     // Wait 420ms (let user see selection + ripple settle), then transition
     setTimeout(function () {
-      var screenName = screenOrder[currentScreen];
-      if (screenName === 'q4') {
-        renderResult(getResult());
-      }
-
       nextScreen();
 
       // Re-enable options + clear states after transition
@@ -375,7 +452,7 @@
 
     // Require consent checkbox
     if (!captureConsent.checked) {
-      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR (Helixirin LLC).';
+      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR.';
       captureError.classList.add('show');
       return;
     }
@@ -453,5 +530,129 @@
 
     shareBtn.addEventListener('click', handleShare);
     captureForm.addEventListener('submit', handleCapture);
+
+    // ---- Keyboard navigation (1-4 for options, Enter/Space for buttons) ----
+    document.addEventListener('keydown', function (e) {
+      if (transitioning) return;
+      var screenName = screenOrder[currentScreen];
+
+      if (screenName === 'intro' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        nextScreen();
+        return;
+      }
+
+      if (screenName === 'splash' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        splashBtn.click();
+        return;
+      }
+
+      if (screenName.charAt(0) === 'q') {
+        var num = parseInt(e.key, 10);
+        if (num >= 1 && num <= 4) {
+          var activeScreen = quiz.querySelector('[data-screen="' + screenName + '"]');
+          var opts = activeScreen ? activeScreen.querySelectorAll('.option') : [];
+          if (opts[num - 1]) {
+            var rect = opts[num - 1].getBoundingClientRect();
+            opts[num - 1].dispatchEvent(new MouseEvent('click', {
+              clientX: rect.left + rect.width / 2,
+              clientY: rect.top + rect.height / 2,
+              bubbles: true
+            }));
+          }
+        }
+      }
+    });
+
+    // ---- Particle background ----
+    (function () {
+      var canvas = document.getElementById('particleBg');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var pts = [];
+      var count = 18;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function spawn() {
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.5 + 0.5,
+          dx: (Math.random() - 0.5) * 0.25,
+          dy: -(Math.random() * 0.3 + 0.08),
+          o: Math.random() * 0.12 + 0.04
+        };
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      for (var i = 0; i < count; i++) pts.push(spawn());
+
+      // Lerp state for smooth transitions
+      var lR = 196, lG = 30, lB = 30, lSpeed = 1, lOp = 1;
+
+      (function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var progress = 1 + quizProgress * 0.25;
+
+        // Priority: archetype profile > quiz color > default red
+        var tR = 196, tG = 30, tB = 30, tSpeed = 1, tOp = 1;
+        if (particleProfile) {
+          tR = particleProfile.r; tG = particleProfile.g; tB = particleProfile.b;
+          tSpeed = particleProfile.speed;
+          tOp = particleProfile.o / 0.08;
+        } else if (quizColor) {
+          tR = quizColor.r; tG = quizColor.g; tB = quizColor.b;
+        }
+        if (analyzingActive) {
+          tSpeed = 2.5;
+          progress = Math.max(progress, 2.5);
+        }
+
+        // Smooth lerp (~2s convergence at 60fps)
+        lR += (tR - lR) * 0.025;
+        lG += (tG - lG) * 0.025;
+        lB += (tB - lB) * 0.025;
+        lSpeed += (tSpeed - lSpeed) * 0.03;
+        lOp += (tOp - lOp) * 0.025;
+
+        var cr = Math.round(lR), cg = Math.round(lG), cb = Math.round(lB);
+
+        // Main particles
+        for (var i = 0; i < pts.length; i++) {
+          var p = pts[i];
+          p.x += p.dx * lSpeed;
+          p.y += p.dy * lSpeed;
+          if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+          if (p.x < -10 || p.x > canvas.width + 10) p.x = Math.random() * canvas.width;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * progress, 0, 6.283);
+          ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + Math.min(p.o * progress * lOp, 0.4) + ')';
+          ctx.fill();
+        }
+
+        // Click-point burst particles
+        for (var j = bursts.length - 1; j >= 0; j--) {
+          var b = bursts[j];
+          b.x += b.dx;
+          b.y += b.dy;
+          b.dx *= 0.97;
+          b.dy *= 0.97;
+          b.life -= b.decay;
+          if (b.life <= 0) { bursts.splice(j, 1); continue; }
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r * b.life, 0, 6.283);
+          ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (0.5 * b.life) + ')';
+          ctx.fill();
+        }
+
+        requestAnimationFrame(loop);
+      })();
+    })();
   });
 })();

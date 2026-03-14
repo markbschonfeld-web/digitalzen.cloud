@@ -31,6 +31,8 @@
 </head>
 <body>
 
+  <canvas id="particleBg" class="particle-canvas" aria-hidden="true"></canvas>
+
   <noscript>
     <div style="background:#0c0c0e;color:#f0ede8;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:sans-serif;text-align:center;padding:2rem;">
       <p style="font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(196,30,30,0.7);margin-bottom:1.5rem;">A 30-Second Read</p>
@@ -205,6 +207,19 @@
       </div>
     </section>
 
+    <!-- Analyzing Interstitial -->
+    <section class="screen screen--analyzing" data-screen="analyzing">
+      <div class="screen__ambient" aria-hidden="true"></div>
+      <div class="analyzing">
+        <div class="analyzing__scanner" aria-hidden="true"></div>
+        <div class="analyzing__ring" aria-hidden="true"></div>
+        <span class="analyzing__label">Reading your frequency</span>
+        <div class="analyzing__dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Result Screen -->
     <section class="screen screen--result" data-screen="result">
       <div class="screen__ambient screen__ambient--result" aria-hidden="true"></div>
@@ -265,7 +280,7 @@
             </div>
             <label class="capture__consent">
               <input type="checkbox" id="captureConsent" class="capture__checkbox" />
-              <span class="capture__consent-text">I agree to receive emails from <strong>KORFYR</strong> (Helixirin LLC), the sponsor of this experience. You can unsubscribe anytime.</span>
+              <span class="capture__consent-text">I agree to receive emails from <strong>KORFYR</strong>, the sponsor of this experience. You can unsubscribe anytime.</span>
             </label>
             <span class="capture__error" id="captureError"></span>
             <span class="capture__note">No spam. Just signal.</span>
@@ -282,7 +297,7 @@
 
   <footer class="footer">
     <div class="footer__inner">
-      <span class="footer__copy">&copy; 2026 Digital Zen &middot; All rights reserved &middot; Sponsored by KORFYR (Helixirin LLC)</span>
+      <span class="footer__copy">&copy; 2026 Digital Zen &middot; All rights reserved &middot; Sponsored by KORFYR</span>
     </div>
   </footer>
 
