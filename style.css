@@ -861,10 +861,6 @@ em, i, cite { font-style: normal; }
   from { letter-spacing: 0.04em; }
   to   { letter-spacing: 0.12em; }
 }
-.screen--result.active .korfyr__wordmark {
-  animation: wordmarkReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--delay-korfyr, 2s) both;
-}
-
 /* ─── Per-screen ambient edge tints (barely there) ─── */
 [data-screen="q1"] .screen__ambient {
   background: radial-gradient(ellipse 55% 45% at 88% 12%,
@@ -1171,5 +1167,213 @@ em, i, cite { font-style: normal; }
 [data-archetype="nocturnal"] .result__archetype {
   text-shadow: 0 0 60px rgba(230, 45, 45, 0.35),
                0 0 120px rgba(230, 45, 45, 0.1);
+}
+
+/* ============================================
+   CTA ATTENTION DIRECTION
+   Game-inspired visual magnets for key actions
+   ============================================ */
+
+/* ─── "SEE WHAT WE BUILT" — shimmer sweep + breathing glow ─── */
+.btn--korfyr {
+  position: relative;
+  overflow: hidden;
+  animation: ctaBreathe 3s ease-in-out 0.5s infinite;
+}
+@keyframes ctaBreathe {
+  0%, 100% { box-shadow: 0 0 0 rgba(240, 237, 232, 0); }
+  50%      { box-shadow: 0 0 24px rgba(240, 237, 232, 0.08),
+                         0 0 60px rgba(240, 237, 232, 0.03); }
+}
+
+/* Light shimmer sweeps across the button like an interactable game object */
+.btn--korfyr::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent);
+  pointer-events: none;
+  animation: ctaShimmer 4s ease-in-out 2s infinite;
+  opacity: 0;
+}
+@keyframes ctaShimmer {
+  0%       { left: -50%; opacity: 0; }
+  10%      { opacity: 1; }
+  40%      { left: 100%; opacity: 0; }
+  100%     { left: 100%; opacity: 0; }
+}
+
+/* Arrow nudge — points the way, like a directional hint */
+.btn--korfyr svg {
+  animation: arrowNudge 2.5s ease-in-out 1.5s infinite;
+}
+@keyframes arrowNudge {
+  0%, 55%, 100% { transform: translateX(0); }
+  65%           { transform: translateX(5px); }
+  75%           { transform: translateX(0); }
+  85%           { transform: translateX(3px); }
+}
+
+/* Outer ring pulse — like a quest objective marker */
+.btn--korfyr::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid rgba(240, 237, 232, 0.2);
+  pointer-events: none;
+  animation: ctaRingPulse 3s cubic-bezier(0.16, 1, 0.3, 1) 2.5s infinite;
+  opacity: 0;
+}
+@keyframes ctaRingPulse {
+  0%   { transform: scale(1);    opacity: 0; }
+  12%  { opacity: 0.5; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+/* ─── KORFYR wordmark — subtle glow pulse ─── */
+.screen--result.active .korfyr__wordmark {
+  text-shadow: 0 0 40px rgba(240, 237, 232, 0.06);
+  animation: wordmarkReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--delay-korfyr, 2s) both,
+             wordmarkGlow 4s ease-in-out 3s infinite;
+}
+@keyframes wordmarkGlow {
+  0%, 100% { text-shadow: 0 0 40px rgba(240, 237, 232, 0.04); }
+  50%      { text-shadow: 0 0 60px rgba(240, 237, 232, 0.1),
+                          0 0 120px rgba(240, 237, 232, 0.03); }
+}
+
+/* ─── Email Capture — waypoint beacon + input glow ─── */
+
+/* Divider pulses like a quest waypoint */
+.capture__divider {
+  animation: beaconPulse 2.5s ease-in-out infinite;
+}
+@keyframes beaconPulse {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 0 transparent; }
+  50%      { opacity: 0.8; box-shadow: 0 0 12px rgba(196, 30, 30, 0.4),
+                                       0 0 30px rgba(196, 30, 30, 0.15); }
+}
+
+/* Input field has a subtle breathing border glow */
+.capture__input-wrap {
+  animation: inputBreathe 3.5s ease-in-out 1s infinite;
+}
+@keyframes inputBreathe {
+  0%, 100% { box-shadow: 0 0 0 transparent; border-color: var(--border); }
+  50%      { box-shadow: 0 0 15px rgba(196, 30, 30, 0.08);
+             border-color: rgba(196, 30, 30, 0.25); }
+}
+/* Kill breathing when user is typing */
+.capture__input-wrap:focus-within {
+  animation: none;
+  border-color: var(--border-active);
+  box-shadow: 0 0 15px rgba(196, 30, 30, 0.12);
+}
+
+/* I'M IN button subtle shimmer */
+.btn--capture {
+  position: relative;
+  overflow: hidden;
+}
+.btn--capture::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent);
+  pointer-events: none;
+  animation: ctaShimmer 5s ease-in-out 3s infinite;
+  opacity: 0;
+}
+
+
+/* ============================================
+   GAME-LIKE POLISH
+   Subtle environmental effects throughout
+   ============================================ */
+
+/* ─── Option hover — edge light trace (desktop) ─── */
+@media (hover: hover) {
+  .option {
+    position: relative;
+    overflow: hidden;
+  }
+  .option::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; right: 100%; bottom: 0;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(196, 30, 30, 0.08),
+      transparent);
+    transition: none;
+    pointer-events: none;
+  }
+  .option:hover::after {
+    animation: optionSweep 0.5s ease-out forwards;
+  }
+  @keyframes optionSweep {
+    from { left: -100%; right: 100%; }
+    to   { left: 100%; right: -100%; }
+  }
+}
+
+/* ─── Question heading — projected glow ─── */
+.question {
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.04),
+               0 0 80px rgba(255, 255, 255, 0.02);
+}
+
+/* ─── Start/Splash button — breathing after reveal ─── */
+.btn--pulse {
+  animation: clipReveal 0.3s linear 0.9s forwards,
+             startBtnBreathe 3s ease-in-out 2s infinite;
+}
+@keyframes startBtnBreathe {
+  0%, 100% { box-shadow: 0 0 0 rgba(240, 237, 232, 0); }
+  50%      { box-shadow: 0 0 20px rgba(240, 237, 232, 0.08); }
+}
+
+/* ─── Analyzing screen — CRT scan lines overlay ─── */
+.screen--analyzing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(196, 30, 30, 0.015) 3px,
+    rgba(196, 30, 30, 0.015) 4px
+  );
+  animation: scanLinesScroll 2s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes scanLinesScroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(4px); }
+}
+
+/* ─── Result screen body — content "materializes" with subtle glow ─── */
+.screen--result.active .result__body p {
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.03);
+}
+
+/* ─── Insight quote — gentle float animation ─── */
+.screen--result.active .result__insight p {
+  animation: insightFloat 6s ease-in-out 3s infinite;
+}
+@keyframes insightFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
 }
 
