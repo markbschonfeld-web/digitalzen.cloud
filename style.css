@@ -310,9 +310,11 @@ em, i, cite { font-style: normal; }
   transition: none;
   pointer-events: none;
 }
-.option:hover {
-  background: var(--bg-elevated);
-  box-shadow: inset 3px 0 0 var(--red);
+@media (hover: hover) {
+  .option:hover {
+    background: var(--bg-elevated);
+    box-shadow: inset 3px 0 0 var(--red);
+  }
 }
 .option:active { transform: scale(0.98); }
 .option.selected {
@@ -790,19 +792,21 @@ em, i, cite { font-style: normal; }
   animation: optionEntry 0.32s cubic-bezier(0.16, 1, 0.3, 1) var(--stagger-ms, 110ms) both;
 }
 
-/* ─── Option hover: nudge right + border ─── */
+/* ─── Option hover: nudge right + border (desktop only) ─── */
 .option {
   transition: background 120ms, border-color 120ms,
               box-shadow 120ms, transform 120ms cubic-bezier(0.16, 1, 0.3, 1),
               opacity 200ms linear;
 }
-.option:hover {
-  background: var(--bg-elevated);
-  border-color: rgba(255, 255, 255, 0.13);
-  box-shadow: inset 3px 0 0 var(--red);
-  transform: translateX(3px);
+@media (hover: hover) {
+  .option:hover {
+    background: var(--bg-elevated);
+    border-color: rgba(255, 255, 255, 0.13);
+    box-shadow: inset 3px 0 0 var(--red);
+    transform: translateX(3px);
+  }
+  .option:active { transform: translateX(3px) scale(0.985); }
 }
-.option:active { transform: translateX(3px) scale(0.985); }
 
 /* ─── Option selected: lock-in with inner glow ─── */
 .option.selected {
