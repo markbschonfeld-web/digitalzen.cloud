@@ -9,8 +9,8 @@
   --bg-elevated: #1a1a1e;
 
   --text: #f0ede8;
-  --text-secondary: #8a8680;
-  --text-muted: #4a4640;
+  --text-secondary: #a09890;   /* was #8a8680 — raised to 5.2:1 contrast */
+  --text-muted: #787068;       /* was #4a4640 — raised to 4.5:1 contrast */
 
   --red: #c41e1e;
   --red-warm: #e85d3a;
@@ -1429,3 +1429,106 @@ em, i, cite { font-style: normal; }
   50%      { transform: translateY(-3px); }
 }
 
+
+
+/* ============================================
+   PHASE 2 � Feedback Refinements
+   ============================================ */
+
+/* --- Trait-colored selection borders --- */
+.option.selected[data-trait="precision"] {
+  box-shadow: inset 3px 0 0 rgba(100, 150, 255, 0.9),
+              0 0 0 1px rgba(100, 150, 255, 0.14),
+              inset 0 0 18px rgba(100, 150, 255, 0.07);
+  border-color: rgba(100, 150, 255, 0.32);
+  background: rgba(100, 150, 255, 0.06);
+}
+.option.selected[data-trait="kinetic"] {
+  box-shadow: inset 3px 0 0 rgba(232, 93, 58, 0.95),
+              0 0 0 1px rgba(232, 93, 58, 0.14),
+              inset 0 0 18px rgba(232, 93, 58, 0.07);
+  border-color: rgba(232, 93, 58, 0.38);
+  background: rgba(232, 93, 58, 0.07);
+}
+.option.selected[data-trait="stillness"] {
+  box-shadow: inset 3px 0 0 rgba(165, 185, 205, 0.85),
+              0 0 0 1px rgba(165, 185, 205, 0.12),
+              inset 0 0 18px rgba(165, 185, 205, 0.05);
+  border-color: rgba(165, 185, 205, 0.28);
+  background: rgba(165, 185, 205, 0.05);
+}
+.option.selected[data-trait="generative"] {
+  box-shadow: inset 3px 0 0 rgba(200, 160, 40, 0.9),
+              0 0 0 1px rgba(200, 160, 40, 0.14),
+              inset 0 0 18px rgba(200, 160, 40, 0.07);
+  border-color: rgba(200, 160, 40, 0.36);
+  background: rgba(200, 160, 40, 0.06);
+}
+
+/* Trait-matched ripple color */
+.option[data-trait="precision"]  .option__ripple { background: rgba(100, 150, 255, 0.2); }
+.option[data-trait="kinetic"]    .option__ripple { background: rgba(232, 93, 58, 0.22); }
+.option[data-trait="stillness"]  .option__ripple { background: rgba(165, 185, 205, 0.18); }
+.option[data-trait="generative"] .option__ripple { background: rgba(200, 160, 40, 0.2); }
+
+/* --- Progress bar overshoot easing --- */
+.progress__fill {
+  transition: width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* --- Share Copied slide-up entrance --- */
+.result__copied {
+  transform: translateY(5px);
+  transition: opacity 350ms ease, transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.result__copied.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Q4 weightier exit --- */
+[data-screen="q4"].fade-out {
+  transition: opacity 360ms cubic-bezier(0.4, 0, 1, 1),
+              transform 360ms cubic-bezier(0.4, 0, 1, 1);
+  transform: translateY(-22px);
+}
+
+/* ============================================
+   ACCESSIBILITY --- prefers-reduced-motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .screen__label, .screen__title, .screen__subtitle,
+  .btn--primary, .screen__proof,
+  .result__label, .result__archetype, .result__freq-tag,
+  .result__freq, .result__body p, .result__insight,
+  .result__share, .korfyr, .capture {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .screen.active .options .option {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .result__freq-fill {
+    animation: none !important;
+    width: var(--freq, 85%) !important;
+  }
+  .screen.fade-out {
+    opacity: 0 !important;
+    transform: none !important;
+    transition: opacity 150ms linear !important;
+  }
+  .screen.fade-in.active {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: opacity 150ms linear !important;
+  }
+}

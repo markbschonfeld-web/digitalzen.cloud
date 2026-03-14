@@ -348,6 +348,30 @@
     shareEl.style.setProperty('--delay-share', (afterBody + 0.8) + 's');
     captureEl.style.setProperty('--delay-capture', (afterBody + 1) + 's');
 
+    // Rarity slot machine — random numbers tick before settling on real %
+    var rarityFinal = arch.rarity;
+    var rarityMatch = rarityFinal.match(/(\d+)%/);
+    resultRarity.textContent = rarityFinal;
+    if (rarityMatch && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var rarityNum = rarityMatch[1];
+      var rarityPre = rarityFinal.substring(0, rarityFinal.indexOf(rarityNum));
+      var raritySuf = rarityFinal.substring(rarityFinal.indexOf(rarityNum) + rarityNum.length);
+      var totalDelay = Math.round((afterBody + 1) * 1000) + 2800; // ~time result becomes visible
+      setTimeout(function () {
+        var ticks = 0;
+        var maxTicks = 10;
+        var interval = setInterval(function () {
+          ticks++;
+          if (ticks >= maxTicks) {
+            clearInterval(interval);
+            resultRarity.textContent = rarityFinal;
+          } else {
+            resultRarity.textContent = rarityPre + (Math.floor(Math.random() * 28) + 4) + raritySuf;
+          }
+        }, 75);
+      }, totalDelay);
+    }
+
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', '?r=' + arch.key);
     }
@@ -514,6 +538,27 @@
   document.addEventListener('DOMContentLoaded', function () {
     initNav();
     checkReferral();
+
+    // Social proof count-up
+    (function () {
+      var proofEl = document.querySelector('.screen__proof');
+      if (!proofEl) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var target = 6200;
+      var start = 5690;
+      var duration = 1400; // ms
+      var startTime = null;
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+      var suffix = proofEl.textContent.replace(/^[\d,]+/, '').trim(); // '+ people checked'
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var prog = Math.min((ts - startTime) / duration, 1);
+        var val = Math.round(start + (target - start) * easeOut(prog));
+        proofEl.textContent = val.toLocaleString() + suffix;
+        if (prog < 1) requestAnimationFrame(step);
+      }
+      setTimeout(function () { requestAnimationFrame(step); }, 1350);
+    })();
 
     startBtn.addEventListener('click', function () { nextScreen(); });
     splashBtn.addEventListener('click', function () {
