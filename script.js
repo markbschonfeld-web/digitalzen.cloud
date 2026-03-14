@@ -1,6 +1,6 @@
 /* ============================================
    Digital Zen — What's Your Night Mode?
-   Quiz engine: scoring, 10 archetypes, share URLs
+   Quiz engine: transitions, staggered reveals
    ============================================ */
 
 (function () {
@@ -60,7 +60,6 @@
       ],
       insight: 'Nobody asked for it. That\u2019s why it\u2019s good.'
     },
-    // ---- Hybrids ----
     'precision+stillness': {
       key: 'minimalist',
       name: 'The Minimalist',
@@ -129,7 +128,6 @@
     }
   };
 
-  // URL param key -> archetype lookup key
   var urlKeyMap = {
     architect: 'precision',
     ghost: 'stillness',
@@ -148,6 +146,7 @@
   var screenOrder = ['intro', 'q1', 'q2', 'q3', 'q4', 'result'];
   var currentScreen = 0;
   var currentArchKey = null;
+  var transitioning = false;
 
   // ---- DOM ----
   var quiz = document.getElementById('quiz');
@@ -165,21 +164,44 @@
   var captureEmail = document.getElementById('captureEmail');
   var captureSuccess = document.getElementById('captureSuccess');
 
-  // ---- Navigation ----
-  function showScreen(index) {
-    var screens = quiz.querySelectorAll('.screen');
-    screens.forEach(function (s) { s.classList.remove('active'); });
+  // ---- Screen transitions ----
+  function transitionTo(index) {
+    if (transitioning) return;
+    transitioning = true;
+
+    var currentEl = quiz.querySelector('.screen.active');
     var name = screenOrder[index];
-    var target = quiz.querySelector('[data-screen="' + name + '"]');
-    if (target) {
-      target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'instant' });
+    var nextEl = quiz.querySelector('[data-screen="' + name + '"]');
+    if (!nextEl) { transitioning = false; return; }
+
+    // Fade out current
+    if (currentEl) {
+      currentEl.classList.add('fade-out');
     }
-    currentScreen = index;
+
+    setTimeout(function () {
+      // Hide current
+      if (currentEl) {
+        currentEl.classList.remove('active', 'fade-out');
+      }
+
+      // Prepare next
+      nextEl.classList.add('fade-in');
+      nextEl.classList.add('active');
+
+      // Force reflow then animate in
+      void nextEl.offsetHeight;
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      currentScreen = index;
+      transitioning = false;
+    }, 200);
   }
 
   function nextScreen() {
-    if (currentScreen < screenOrder.length - 1) showScreen(currentScreen + 1);
+    if (currentScreen < screenOrder.length - 1) {
+      transitionTo(currentScreen + 1);
+    }
   }
 
   // ---- Scoring ----
@@ -197,7 +219,7 @@
     return winners[0] + '+' + winners[1];
   }
 
-  // ---- Render Result ----
+  // ---- Render Result (with stagger timing) ----
   function renderResult(archKey) {
     var arch = archetypes[archKey];
     if (!arch) arch = archetypes.precision;
@@ -209,12 +231,27 @@
     resultRarity.textContent = arch.rarity;
     resultInsight.textContent = '\u201C' + arch.insight + '\u201D';
 
+    // Build body paragraphs with staggered delays
     resultBody.innerHTML = '';
-    arch.body.forEach(function (para) {
+    var baseDelay = 1.2; // seconds
+    arch.body.forEach(function (para, i) {
       var p = document.createElement('p');
       p.textContent = para;
+      p.style.setProperty('--delay', (baseDelay + i * 0.2) + 's');
       resultBody.appendChild(p);
     });
+
+    // Set timing for elements after the body paragraphs
+    var afterBody = baseDelay + arch.body.length * 0.2;
+    var insightEl = document.querySelector('.result__insight');
+    var shareEl = document.querySelector('.result__share');
+    var captureEl = document.querySelector('.capture');
+    var sponsorEl = document.querySelector('.sponsor');
+
+    insightEl.style.setProperty('--delay-insight', afterBody + 's');
+    shareEl.style.setProperty('--delay-share', (afterBody + 0.2) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.8) + 's');
+    sponsorEl.style.setProperty('--delay-sponsor', (afterBody + 1) + 's');
 
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', '?r=' + arch.key);
@@ -224,10 +261,11 @@
   // ---- Option clicks ----
   function handleOptionClick(e) {
     var btn = e.target.closest('.option');
-    if (!btn) return;
+    if (!btn || transitioning) return;
     var trait = btn.getAttribute('data-trait');
     if (!trait || traits[trait] === undefined) return;
 
+    // Immediate visual feedback
     var options = btn.parentElement;
     options.querySelectorAll('.option').forEach(function (o) {
       o.classList.remove('selected');
@@ -236,18 +274,22 @@
     btn.classList.add('selected');
     traits[trait]++;
 
+    // Wait 400ms (let user see selection), then transition
     setTimeout(function () {
       var screenName = screenOrder[currentScreen];
       if (screenName === 'q4') {
         renderResult(getResult());
-        nextScreen();
-      } else {
-        nextScreen();
       }
-      options.querySelectorAll('.option').forEach(function (o) {
-        o.style.pointerEvents = '';
-        o.classList.remove('selected');
-      });
+
+      nextScreen();
+
+      // Re-enable options after transition
+      setTimeout(function () {
+        options.querySelectorAll('.option').forEach(function (o) {
+          o.style.pointerEvents = '';
+          o.classList.remove('selected');
+        });
+      }, 300);
     }, 400);
   }
 
@@ -336,7 +378,7 @@
     startBtn.addEventListener('click', function () { nextScreen(); });
     splashBtn.addEventListener('click', function () {
       screenOrder[0] = 'intro';
-      showScreen(0);
+      transitionTo(0);
       if (window.history && window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname);
       }
