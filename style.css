@@ -27,7 +27,7 @@
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --radius: 2px;
+  --radius: 12px;
 }
 
 /* ---- Reset ---- */
@@ -41,7 +41,13 @@ body {
   overflow-x: hidden;
   overscroll-behavior: none;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 80% 50% at 50% 0%,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.025) 20%,
+      rgba(255, 255, 255, 0.015) 40%,
+      rgba(255, 255, 255, 0.006) 60%,
+      transparent 80%);
   background-attachment: fixed;
   font-style: normal;
 }
@@ -117,7 +123,11 @@ em, i, cite { font-style: normal; }
 .screen__ambient {
   position: absolute; inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  background: radial-gradient(ellipse 80% 40% at 50% 0%,
+    rgba(255, 255, 255, 0.025) 0%,
+    rgba(255, 255, 255, 0.015) 25%,
+    rgba(255, 255, 255, 0.006) 50%,
+    transparent 75%);
 }
 
 /* ---- Screen transitions (fast, linear) ---- */
@@ -260,11 +270,11 @@ em, i, cite { font-style: normal; }
   display: flex; flex-direction: column; gap: 0.15rem;
   padding: 0.8rem 1.15rem;
   border: 1px solid var(--border);
-  border-left: 2px solid transparent;
   border-radius: var(--radius);
   background: var(--bg-card);
   text-align: left;
   transition: all 100ms linear;
+  box-shadow: inset 3px 0 0 transparent;
   min-height: 56px;
   position: relative;
   overflow: hidden;
@@ -279,12 +289,12 @@ em, i, cite { font-style: normal; }
 }
 .option:hover {
   background: var(--bg-elevated);
-  border-left-color: var(--red);
+  box-shadow: inset 3px 0 0 var(--red);
 }
 .option:active { transform: scale(0.98); }
 .option.selected {
   border-color: var(--border-active);
-  border-left-color: var(--red);
+  box-shadow: inset 3px 0 0 var(--red);
   background: rgba(196, 30, 30, 0.06);
 }
 .option.selected::after {
