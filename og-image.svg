@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="rgba(201,168,76,0.08)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="30%" cy="65%" r="40%">
+      <stop offset="0%" stop-color="rgba(100,80,160,0.05)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0a0a0c"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+  <text x="600" y="200" text-anchor="middle" font-family="Georgia, serif" font-size="18" font-weight="400" letter-spacing="8" fill="rgba(201,168,76,0.7)">A 30-SECOND FREQUENCY CHECK</text>
+  <text x="600" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="82" font-weight="300" fill="#e8e6e1" letter-spacing="-1">What's Your</text>
+  <text x="600" y="395" text-anchor="middle" font-family="Georgia, serif" font-size="82" font-weight="300" fill="#e8e6e1" letter-spacing="-1">Night Frequency?</text>
+  <text x="600" y="470" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="300" fill="rgba(232,230,225,0.4)" letter-spacing="1">You already have a ritual. Let's find out what kind.</text>
+  <text x="600" y="560" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" letter-spacing="4" fill="rgba(232,230,225,0.2)">DIGITAL ZEN</text>
+</svg>
