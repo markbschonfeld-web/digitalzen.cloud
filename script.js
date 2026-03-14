@@ -195,7 +195,7 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
       transitioning = false;
-    }, 200);
+    }, 150);
   }
 
   function nextScreen() {
