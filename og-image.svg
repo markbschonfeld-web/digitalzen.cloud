@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="rgba(196,30,30,0.08)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="75%" cy="65%" r="40%">
+      <stop offset="0%" stop-color="rgba(42,111,255,0.05)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0c0c0e"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+  <text x="600" y="210" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="500" letter-spacing="6" fill="rgba(196,30,30,0.8)">A 30-SECOND READ</text>
+  <text x="600" y="310" text-anchor="middle" font-family="sans-serif" font-size="88" font-weight="700" fill="#f0ede8" letter-spacing="-2">WHAT'S YOUR</text>
+  <text x="600" y="405" text-anchor="middle" font-family="sans-serif" font-size="88" font-weight="700" fill="#f0ede8" letter-spacing="-2">NIGHT MODE?</text>
+  <text x="600" y="475" text-anchor="middle" font-family="sans-serif" font-size="17" font-weight="300" fill="rgba(138,134,128,0.8)" letter-spacing="1">You already have a ritual. Let's see what it says about you.</text>
+  <text x="600" y="560" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" letter-spacing="5" fill="rgba(240,237,232,0.2)">DIGITAL ZEN</text>
+</svg>
