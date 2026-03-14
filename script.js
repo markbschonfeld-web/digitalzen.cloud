@@ -16,8 +16,7 @@
       rarity: 'Only 14% of people get this result.',
       body: [
         'You don\u2019t react. You set the conditions. By the time the night starts, you\u2019ve already decided how it ends.',
-        'Every detail is a decision. The playlist. The setup. The exact moment you decide to shut the world out. Other people call it overthinking. You call it the baseline. You don\u2019t do \u201Cgood enough\u201D because good enough is just a different word for settling.',
-        'Your ritual isn\u2019t about relaxation. It\u2019s about control \u2014 the right inputs producing the right results. Every time.'
+        'Every detail is a decision. The playlist. The setup. The exact moment you decide to shut the world out. Other people call it overthinking. You call it the baseline. You don\u2019t do \u201Cgood enough\u201D because good enough is just a different word for settling.'
       ],
       insight: 'You built this. Down to the last detail.'
     },
@@ -29,8 +28,7 @@
       rarity: 'Only 11% of people get this result.',
       body: [
         'You don\u2019t chase the moment. You strip everything away until it shows up on its own.',
-        'While everyone else is adding \u2014 more noise, more stimulation, more everything \u2014 you\u2019ve figured out that the best version of your night is the one with the least in it. That\u2019s not emptiness. That\u2019s refinement. You\u2019ve learned that silence has weight, and the right kind of nothing is the hardest thing to build.',
-        'Other people fill space. You protect it.'
+        'While everyone else is adding \u2014 more noise, more stimulation, more everything \u2014 you\u2019ve figured out that the best version of your night is the one with the least in it. That\u2019s not emptiness. That\u2019s refinement. You\u2019ve learned that silence has weight, and the right kind of nothing is the hardest thing to build.'
       ],
       insight: 'The less there is, the more it matters.'
     },
@@ -42,8 +40,7 @@
       rarity: 'Only 18% of people get this result.',
       body: [
         'You don\u2019t wind down. You change direction.',
-        'The energy doesn\u2019t leave when the day ends \u2014 it redirects. Into the drive. Into the walk. Into the thing you can\u2019t name that only happens when you\u2019re moving. People confuse this with restlessness. It\u2019s not. It\u2019s a different kind of focus \u2014 one that only unlocks when your body stops sitting still.',
-        'The road with no destination isn\u2019t aimless. It\u2019s the only route that makes sense when you already know every mapped one.'
+        'The energy doesn\u2019t leave when the day ends \u2014 it redirects. Into the drive. Into the walk. Into the thing you can\u2019t name that only happens when you\u2019re moving. People confuse this with restlessness. It\u2019s not. It\u2019s a different kind of focus \u2014 one that only unlocks when your body stops sitting still.'
       ],
       insight: 'You don\u2019t stop. You shift gears.'
     },
@@ -55,8 +52,7 @@
       rarity: 'Only 9% of people get this result.',
       body: [
         'Your best work happens when nobody\u2019s watching. Not because it\u2019s secret \u2014 because the audience is the thing that gets in the way.',
-        'Between midnight and sunrise, something changes. The pressure to perform disappears. What\u2019s left is just you and the thing you\u2019re making. The sketch. The beat. The idea that won\u2019t let you sleep until it exists. You don\u2019t set an alarm for this. It sets its own schedule.',
-        'The thing you made at 2 AM \u2014 nobody asked for it. That\u2019s why it\u2019s the best thing you\u2019ve made all week.'
+        'Between midnight and sunrise, something changes. The pressure to perform disappears. What\u2019s left is just you and the thing you\u2019re making. The sketch. The beat. The idea that won\u2019t let you sleep until it exists. You don\u2019t set an alarm for this. It sets its own schedule.'
       ],
       insight: 'Nobody asked for it. That\u2019s why it\u2019s good.'
     },
@@ -261,6 +257,15 @@
       bridgeEl.textContent = bridgeLines[arch.key];
     }
 
+    // Set UTM-tagged outbound link
+    var korfyrLink = document.querySelector('.btn--korfyr');
+    if (korfyrLink) {
+      korfyrLink.href = 'https://www.korfyr.com?utm_source=digitalzen'
+        + '&utm_medium=quiz'
+        + '&utm_campaign=nightmode'
+        + '&utm_content=' + arch.key;
+    }
+
     // Set timing for elements after the body paragraphs
     var afterBody = baseDelay + arch.body.length * 0.2;
     var insightEl = document.querySelector('.result__insight');
@@ -336,21 +341,20 @@
     var email = captureEmail.value.trim();
     if (!email) return;
 
-    // TODO: Replace with real endpoint (Mailchimp, ConvertKit, etc.)
-    // fetch('YOUR_ENDPOINT', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email: email, archetype: currentArchKey })
-    // });
-
-    try {
-      var stored = JSON.parse(localStorage.getItem('dz_emails') || '[]');
-      stored.push({ email: email, ts: Date.now(), archetype: currentArchKey });
-      localStorage.setItem('dz_emails', JSON.stringify(stored));
-    } catch (_) {}
-
-    captureForm.classList.add('hidden');
-    captureSuccess.classList.add('show');
+    // TODO: Replace YOUR_ENDPOINT_URL with a real endpoint (Mailchimp, ConvertKit, Formspree, etc.)
+    fetch('YOUR_ENDPOINT_URL', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, archetype: currentArchKey })
+    })
+    .then(function () {
+      captureForm.classList.add('hidden');
+      captureSuccess.classList.add('show');
+    })
+    .catch(function () {
+      captureForm.classList.add('hidden');
+      captureSuccess.classList.add('show');
+    });
   }
 
   // ---- Friend referral splash ----
