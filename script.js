@@ -207,7 +207,7 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
       transitioning = false;
-    }, 150);
+    }, 260); // matches CSS fade-out duration
   }
 
   function nextScreen() {
@@ -285,6 +285,23 @@
     }
   }
 
+  // ---- Ripple effect at click point ----
+  function createRipple(btn, e) {
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    var clientX = e.clientX != null ? e.clientX : rect.left + rect.width / 2;
+    var clientY = e.clientY != null ? e.clientY : rect.top + rect.height / 2;
+    var x = clientX - rect.left - size / 2;
+    var y = clientY - rect.top - size / 2;
+    var ripple = document.createElement('span');
+    ripple.className = 'option__ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    btn.appendChild(ripple);
+    setTimeout(function () { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 600);
+  }
+
   // ---- Option clicks ----
   function handleOptionClick(e) {
     var btn = e.target.closest('.option');
@@ -292,16 +309,23 @@
     var trait = btn.getAttribute('data-trait');
     if (!trait || traits[trait] === undefined) return;
 
+    // Ripple from click point
+    createRipple(btn, e);
+
+    // Haptic feedback on mobile (subtle, 8ms)
+    if (navigator.vibrate) navigator.vibrate(8);
+
     // Immediate visual feedback
     var options = btn.parentElement;
     options.querySelectorAll('.option').forEach(function (o) {
       o.classList.remove('selected');
       o.style.pointerEvents = 'none';
+      if (o !== btn) o.classList.add('dimmed'); // focus on chosen
     });
     btn.classList.add('selected');
     traits[trait]++;
 
-    // Wait 400ms (let user see selection), then transition
+    // Wait 420ms (let user see selection + ripple settle), then transition
     setTimeout(function () {
       var screenName = screenOrder[currentScreen];
       if (screenName === 'q4') {
@@ -310,14 +334,14 @@
 
       nextScreen();
 
-      // Re-enable options after transition
+      // Re-enable options + clear states after transition
       setTimeout(function () {
         options.querySelectorAll('.option').forEach(function (o) {
           o.style.pointerEvents = '';
-          o.classList.remove('selected');
+          o.classList.remove('selected', 'dimmed');
         });
       }, 300);
-    }, 400);
+    }, 420);
   }
 
   // ---- Share ----
