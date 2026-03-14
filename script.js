@@ -262,12 +262,52 @@
       currentScreen = index;
       transitioning = false;
 
-      // Auto-advance from analyzing interstitial
+      // Enhanced analyzing interstitial with concentric rings + data readout
       if (name === 'analyzing') {
         analyzingActive = true;
         renderResult(getResult());
+
+        var analyzingEl = document.querySelector('.analyzing');
+
+        // Inject outer concentric rings (positioned around the center ring)
+        var ring2 = document.createElement('div');
+        ring2.className = 'analyzing__ring analyzing__ring--2';
+        var ring3 = document.createElement('div');
+        ring3.className = 'analyzing__ring analyzing__ring--3';
+        analyzingEl.insertBefore(ring3, analyzingEl.firstChild);
+        analyzingEl.insertBefore(ring2, analyzingEl.firstChild);
+
+        // Inject data readout lines that stagger in
+        var dataDiv = document.createElement('div');
+        dataDiv.className = 'analyzing__data';
+        var dataLines = ['FREQ_SCAN •••', 'TRAIT_MAP •••', 'MATCH_QUERY •••', 'ARCHETYPE_LOCK'];
+        dataLines.forEach(function (text, i) {
+          var line = document.createElement('span');
+          line.className = 'analyzing__data-line';
+          line.textContent = text;
+          dataDiv.appendChild(line);
+          setTimeout(function () { line.style.opacity = '1'; }, 200 + i * 450);
+        });
+        analyzingEl.appendChild(dataDiv);
+
+        // LOCKED state at T=2000ms — rings slow, screen shakes, final line lights up
+        setTimeout(function () {
+          analyzingEl.classList.add('analyzing--locked');
+          var lockLine = dataDiv.querySelectorAll('.analyzing__data-line');
+          if (lockLine[3]) {
+            lockLine[3].classList.add('analyzing__data-line--locked');
+            lockLine[3].style.opacity = '1';
+            lockLine[3].textContent = 'ARCHETYPE_LOCKED ✓';
+          }
+        }, 2000);
+
+        // Clean up + advance after 2.5s
         setTimeout(function () {
           analyzingActive = false;
+          analyzingEl.classList.remove('analyzing--locked');
+          [ring2, ring3, dataDiv].forEach(function (el) {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          });
           nextScreen();
         }, 2500);
       }
@@ -374,6 +414,22 @@
 
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', '?r=' + arch.key);
+    }
+
+    // One-time attention ping on the KORFYR button when block first appears
+    if (!window._korfyrPinged) {
+      var pingDelay = 2760 + Math.round((afterBody + 0.3) * 1000);
+      setTimeout(function () {
+        var kBtn = document.querySelector('.btn--korfyr');
+        if (kBtn) {
+          window._korfyrPinged = true;
+          var ping = document.createElement('span');
+          ping.className = 'korfyr-ping';
+          kBtn.style.position = 'relative';
+          kBtn.appendChild(ping);
+          setTimeout(function () { if (ping.parentNode) ping.parentNode.removeChild(ping); }, 1100);
+        }
+      }, pingDelay);
     }
   }
 
@@ -575,6 +631,39 @@
 
     shareBtn.addEventListener('click', handleShare);
     captureForm.addEventListener('submit', handleCapture);
+
+    // ---- KORFYR button — cursor spotlight + click burst ----
+    (function () {
+      var kBtn = document.querySelector('.btn--korfyr');
+      if (!kBtn) return;
+
+      // Cursor-aware spotlight (radial gradient follows mouse inside button)
+      kBtn.addEventListener('mousemove', function (e) {
+        var rect = this.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        this.style.setProperty('--mx', x + '%');
+        this.style.setProperty('--my', y + '%');
+      });
+      kBtn.addEventListener('mouseleave', function () {
+        this.style.removeProperty('--mx');
+        this.style.removeProperty('--my');
+      });
+
+      // Click burst ring — expands from button center, navigates normally
+      kBtn.addEventListener('click', function (e) {
+        var rect = this.getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height);
+        var burst = document.createElement('div');
+        burst.className = 'korfyr-burst';
+        burst.style.cssText =
+          'width:' + size + 'px;height:' + size + 'px;' +
+          'left:' + (rect.left + (rect.width - size) / 2) + 'px;' +
+          'top:'  + (rect.top  + (rect.height - size) / 2) + 'px;';
+        document.body.appendChild(burst);
+        setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
+      });
+    })();
 
     // ---- Keyboard navigation (1-4 for options, Enter/Space for buttons) ----
     document.addEventListener('keydown', function (e) {
