@@ -153,10 +153,11 @@
 
   // ---- State ----
   var traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
-  var screenOrder = ['intro', 'q1', 'q2', 'q3', 'q4', 'result'];
+  var screenOrder = ['intro', 'q1', 'q2', 'q3', 'q4', 'analyzing', 'result'];
   var currentScreen = 0;
   var currentArchKey = null;
   var transitioning = false;
+  var quizProgress = 0;
 
   // ---- DOM ----
   var quiz = document.getElementById('quiz');
@@ -207,6 +208,12 @@
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
       transitioning = false;
+
+      // Auto-advance from analyzing interstitial
+      if (name === 'analyzing') {
+        renderResult(getResult());
+        setTimeout(function () { nextScreen(); }, 2500);
+      }
     }, 260); // matches CSS fade-out duration
   }
 
@@ -324,14 +331,14 @@
     });
     btn.classList.add('selected');
     traits[trait]++;
+    quizProgress++;
+
+    // Micro-shake feedback
+    quiz.classList.add('shake');
+    setTimeout(function () { quiz.classList.remove('shake'); }, 150);
 
     // Wait 420ms (let user see selection + ripple settle), then transition
     setTimeout(function () {
-      var screenName = screenOrder[currentScreen];
-      if (screenName === 'q4') {
-        renderResult(getResult());
-      }
-
       nextScreen();
 
       // Re-enable options + clear states after transition
@@ -453,5 +460,85 @@
 
     shareBtn.addEventListener('click', handleShare);
     captureForm.addEventListener('submit', handleCapture);
+
+    // ---- Keyboard navigation (1-4 for options, Enter/Space for buttons) ----
+    document.addEventListener('keydown', function (e) {
+      if (transitioning) return;
+      var screenName = screenOrder[currentScreen];
+
+      if (screenName === 'intro' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        nextScreen();
+        return;
+      }
+
+      if (screenName === 'splash' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        splashBtn.click();
+        return;
+      }
+
+      if (screenName.charAt(0) === 'q') {
+        var num = parseInt(e.key, 10);
+        if (num >= 1 && num <= 4) {
+          var activeScreen = quiz.querySelector('[data-screen="' + screenName + '"]');
+          var opts = activeScreen ? activeScreen.querySelectorAll('.option') : [];
+          if (opts[num - 1]) {
+            var rect = opts[num - 1].getBoundingClientRect();
+            opts[num - 1].dispatchEvent(new MouseEvent('click', {
+              clientX: rect.left + rect.width / 2,
+              clientY: rect.top + rect.height / 2,
+              bubbles: true
+            }));
+          }
+        }
+      }
+    });
+
+    // ---- Particle background ----
+    (function () {
+      var canvas = document.getElementById('particleBg');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var pts = [];
+      var count = 18;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function spawn() {
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.5 + 0.5,
+          dx: (Math.random() - 0.5) * 0.25,
+          dy: -(Math.random() * 0.3 + 0.08),
+          o: Math.random() * 0.12 + 0.04
+        };
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      for (var i = 0; i < count; i++) pts.push(spawn());
+
+      (function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var mult = 1 + quizProgress * 0.25;
+        for (var i = 0; i < pts.length; i++) {
+          var p = pts[i];
+          p.x += p.dx;
+          p.y += p.dy;
+          if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+          if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * mult, 0, 6.283);
+          ctx.fillStyle = 'rgba(196,30,30,' + Math.min(p.o * mult, 0.35) + ')';
+          ctx.fill();
+        }
+        requestAnimationFrame(loop);
+      })();
+    })();
   });
 })();

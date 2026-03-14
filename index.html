@@ -31,6 +31,8 @@
 </head>
 <body>
 
+  <canvas id="particleBg" class="particle-canvas" aria-hidden="true"></canvas>
+
   <noscript>
     <div style="background:#0c0c0e;color:#f0ede8;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:sans-serif;text-align:center;padding:2rem;">
       <p style="font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(196,30,30,0.7);margin-bottom:1.5rem;">A 30-Second Read</p>
@@ -201,6 +203,19 @@
             <span class="option__text">The thing you made at 2 AM.</span>
             <span class="option__sub">Nobody asked for it.</span>
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analyzing Interstitial -->
+    <section class="screen screen--analyzing" data-screen="analyzing">
+      <div class="screen__ambient" aria-hidden="true"></div>
+      <div class="analyzing">
+        <div class="analyzing__scanner" aria-hidden="true"></div>
+        <div class="analyzing__ring" aria-hidden="true"></div>
+        <span class="analyzing__label">Reading your frequency</span>
+        <div class="analyzing__dots" aria-hidden="true">
+          <span></span><span></span><span></span>
         </div>
       </div>
     </section>
