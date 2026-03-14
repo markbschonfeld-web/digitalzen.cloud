@@ -262,9 +262,9 @@
     // Set UTM-tagged outbound link
     var korfyrLink = document.querySelector('.btn--korfyr');
     if (korfyrLink) {
-      korfyrLink.href = 'https://www.korfyr.com?utm_source=digitalzen'
+      korfyrLink.href = 'https://www.korfyr.com?utm_campaign=3ae82b'
+        + '&utm_source=digitalzen'
         + '&utm_medium=quiz'
-        + '&utm_campaign=nightmode'
         + '&utm_content=' + arch.key;
     }
 
