@@ -510,6 +510,27 @@ em, i, cite { font-style: normal; }
   white-space: nowrap; transition: all 150ms linear;
 }
 .btn--capture:hover { background: #fff; }
+.capture__consent {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  margin-top: 0.75rem; cursor: pointer;
+}
+.capture__checkbox {
+  flex-shrink: 0; width: 16px; height: 16px;
+  margin-top: 2px; accent-color: var(--red);
+  cursor: pointer;
+}
+.capture__consent-text {
+  font-size: 0.65rem; color: var(--text-muted);
+  line-height: 1.6; letter-spacing: 0.02em;
+}
+.capture__consent-text strong { color: var(--text-secondary); }
+.capture__error {
+  display: none; text-align: center;
+  font-size: 0.68rem; color: var(--red);
+  line-height: 1.6; margin-top: 0.6rem;
+  max-width: 380px;
+}
+.capture__error.show { display: block; }
 .capture__note {
   display: block; text-align: center;
   font-family: var(--font-mono);

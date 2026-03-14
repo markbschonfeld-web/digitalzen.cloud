@@ -172,6 +172,8 @@
   var copiedMsg = document.getElementById('copiedMsg');
   var captureForm = document.getElementById('captureForm');
   var captureEmail = document.getElementById('captureEmail');
+  var captureConsent = document.getElementById('captureConsent');
+  var captureError = document.getElementById('captureError');
   var captureSuccess = document.getElementById('captureSuccess');
 
   // ---- Screen transitions ----
@@ -336,18 +338,32 @@
   }
 
   // ---- Email capture ----
+  // TODO: Replace with your deployed Cloudflare Worker URL (see worker/shopify-subscribe.js)
+  var CAPTURE_ENDPOINT = 'YOUR_WORKER_URL';
+
   function handleCapture(e) {
     e.preventDefault();
     var email = captureEmail.value.trim();
     if (!email) return;
 
-    // TODO: Replace YOUR_ENDPOINT_URL with a real endpoint (Mailchimp, ConvertKit, Formspree, etc.)
-    fetch('YOUR_ENDPOINT_URL', {
+    // Clear previous error
+    captureError.textContent = '';
+    captureError.classList.remove('show');
+
+    // Require consent checkbox
+    if (!captureConsent.checked) {
+      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR (Helixirin LLC).';
+      captureError.classList.add('show');
+      return;
+    }
+
+    fetch(CAPTURE_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, archetype: currentArchKey })
     })
-    .then(function () {
+    .then(function (res) {
+      if (!res.ok) throw new Error('Request failed');
       captureForm.classList.add('hidden');
       captureSuccess.classList.add('show');
     })
