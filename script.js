@@ -351,7 +351,7 @@
 
     // Require consent checkbox
     if (!captureConsent.checked) {
-      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR (Helixirin LLC).';
+      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR.';
       captureError.classList.add('show');
       return;
     }
