@@ -158,6 +158,20 @@
   var currentArchKey = null;
   var transitioning = false;
   var quizProgress = 0;
+  var particleProfile = null;
+  var analyzingActive = false;
+  var particleProfiles = {
+    architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
+    ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
+    circuit:   { speed: 1.5, r: 232, g: 93,  b: 58,  o: 0.18 },
+    twam:      { speed: 0.5, r: 200, g: 160, b: 40,  o: 0.14 },
+    minimalist:{ speed: 0.3, r: 210, g: 210, b: 210, o: 0.06 },
+    operator:  { speed: 1.1, r: 100, g: 130, b: 220, o: 0.14 },
+    engineer:  { speed: 0.6, r: 80,  g: 130, b: 200, o: 0.12 },
+    phantom:   { speed: 0.9, r: 150, g: 100, b: 190, o: 0.13 },
+    builder:   { speed: 0.35,r: 165, g: 130, b: 85,  o: 0.10 },
+    nocturnal: { speed: 1.4, r: 230, g: 45,  b: 45,  o: 0.22 }
+  };
 
   // ---- DOM ----
   var quiz = document.getElementById('quiz');
@@ -211,8 +225,12 @@
 
       // Auto-advance from analyzing interstitial
       if (name === 'analyzing') {
+        analyzingActive = true;
         renderResult(getResult());
-        setTimeout(function () { nextScreen(); }, 2500);
+        setTimeout(function () {
+          analyzingActive = false;
+          nextScreen();
+        }, 2500);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -243,6 +261,10 @@
     var arch = archetypes[archKey];
     if (!arch) arch = archetypes.precision;
     currentArchKey = archKey;
+
+    // Apply archetype visual theme
+    quiz.querySelector('[data-screen="result"]').setAttribute('data-archetype', arch.key);
+    particleProfile = particleProfiles[arch.key] || null;
 
     resultArchetype.textContent = arch.name;
     resultFreqTag.textContent = arch.freqTag;
@@ -523,18 +545,43 @@
       window.addEventListener('resize', resize);
       for (var i = 0; i < count; i++) pts.push(spawn());
 
+      // Lerp state for smooth archetype transitions
+      var lR = 196, lG = 30, lB = 30, lSpeed = 1, lOp = 1;
+
       (function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        var mult = 1 + quizProgress * 0.25;
+        var progress = 1 + quizProgress * 0.25;
+
+        // Target color/speed from archetype profile or defaults
+        var tR = 196, tG = 30, tB = 30, tSpeed = 1, tOp = 1;
+        if (particleProfile) {
+          tR = particleProfile.r; tG = particleProfile.g; tB = particleProfile.b;
+          tSpeed = particleProfile.speed;
+          tOp = particleProfile.o / 0.08;
+        }
+        if (analyzingActive) {
+          tSpeed = 2.5;
+          progress = Math.max(progress, 2.5);
+        }
+
+        // Smooth lerp (~2s convergence at 60fps)
+        lR += (tR - lR) * 0.025;
+        lG += (tG - lG) * 0.025;
+        lB += (tB - lB) * 0.025;
+        lSpeed += (tSpeed - lSpeed) * 0.03;
+        lOp += (tOp - lOp) * 0.025;
+
+        var cr = Math.round(lR), cg = Math.round(lG), cb = Math.round(lB);
+
         for (var i = 0; i < pts.length; i++) {
           var p = pts[i];
-          p.x += p.dx;
-          p.y += p.dy;
+          p.x += p.dx * lSpeed;
+          p.y += p.dy * lSpeed;
           if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
-          if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
+          if (p.x < -10 || p.x > canvas.width + 10) p.x = Math.random() * canvas.width;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * mult, 0, 6.283);
-          ctx.fillStyle = 'rgba(196,30,30,' + Math.min(p.o * mult, 0.35) + ')';
+          ctx.arc(p.x, p.y, p.r * progress, 0, 6.283);
+          ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + Math.min(p.o * progress * lOp, 0.4) + ')';
           ctx.fill();
         }
         requestAnimationFrame(loop);

@@ -997,3 +997,156 @@ em, i, cite { font-style: normal; }
   animation: microShake 0.12s linear;
 }
 
+/* ─── Analyzing screen flash ─── */
+.screen--analyzing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.04);
+  animation: analyzeFlash 0.4s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes analyzeFlash {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ─── Result screen — scan line sweep on reveal ─── */
+.screen--result::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  box-shadow: 0 0 30px rgba(196, 30, 30, 0.8),
+              0 0 80px rgba(196, 30, 30, 0.3);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+}
+.screen--result.active::before {
+  animation: resultScan 0.8s ease-out 0.1s forwards;
+}
+@keyframes resultScan {
+  0%   { top: 0; opacity: 1; }
+  80%  { opacity: 0.5; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ─── Progressive intensity — later questions glow harder ─── */
+[data-screen="q3"] .progress__fill,
+[data-screen="q4"] .progress__fill {
+  box-shadow: 0 0 12px rgba(196, 30, 30, 0.7),
+              0 0 24px rgba(196, 30, 30, 0.25);
+}
+
+/* ============================================
+   Per-archetype result themes
+   Each gets unique ambient + text glow
+   ============================================ */
+
+/* Architect — structured steel blue, precision */
+[data-archetype="architect"] .screen__ambient--result {
+  background: radial-gradient(ellipse 60% 40% at 50% 0%,
+    rgba(170, 185, 210, 0.06) 0%, transparent 70%);
+}
+[data-archetype="architect"] .result__archetype {
+  text-shadow: 0 0 60px rgba(170, 185, 210, 0.3),
+               0 0 120px rgba(170, 185, 210, 0.08);
+}
+
+/* Ghost — absence is the design */
+[data-archetype="ghost"] .screen__ambient--result {
+  background: none;
+}
+[data-archetype="ghost"] .result__archetype {
+  text-shadow: 0 0 80px rgba(255, 255, 255, 0.06);
+}
+
+/* Circuit — warm orange heat from edges */
+[data-archetype="circuit"] .screen__ambient--result {
+  background:
+    radial-gradient(ellipse 40% 55% at 5% 50%, rgba(232, 93, 58, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 55% at 95% 50%, rgba(232, 93, 58, 0.06) 0%, transparent 70%);
+}
+[data-archetype="circuit"] .result__archetype {
+  text-shadow: 0 0 60px rgba(232, 93, 58, 0.3),
+               0 0 120px rgba(232, 93, 58, 0.08);
+}
+
+/* 2AM — amber glow rising from below */
+[data-archetype="twam"] .screen__ambient--result {
+  background: radial-gradient(ellipse 70% 40% at 50% 90%,
+    rgba(200, 160, 40, 0.06) 0%, transparent 70%);
+}
+[data-archetype="twam"] .result__archetype {
+  text-shadow: 0 0 60px rgba(200, 160, 40, 0.3),
+               0 0 120px rgba(200, 160, 40, 0.08);
+}
+
+/* Minimalist — single clean beam, nothing else */
+[data-archetype="minimalist"] .screen__ambient--result {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.025) 0%, transparent 25%);
+}
+[data-archetype="minimalist"] .result__archetype {
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.12);
+}
+
+/* Operator — tactical split, blue-red */
+[data-archetype="operator"] .screen__ambient--result {
+  background:
+    radial-gradient(ellipse 35% 50% at 0% 30%, rgba(42, 111, 255, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 50% at 100% 70%, rgba(196, 30, 30, 0.05) 0%, transparent 70%);
+}
+[data-archetype="operator"] .result__archetype {
+  text-shadow: -2px 0 40px rgba(42, 111, 255, 0.2),
+               2px 0 40px rgba(196, 30, 30, 0.2);
+}
+
+/* Night Engineer — deep blueprint blue */
+[data-archetype="engineer"] .screen__ambient--result {
+  background: radial-gradient(ellipse 55% 50% at 50% 50%,
+    rgba(80, 130, 200, 0.05) 0%, transparent 70%);
+}
+[data-archetype="engineer"] .result__archetype {
+  text-shadow: 0 0 60px rgba(80, 130, 200, 0.3),
+               0 0 120px rgba(80, 130, 200, 0.08);
+}
+
+/* Phantom — pulsing contradiction, can't hold still */
+[data-archetype="phantom"] .screen__ambient--result {
+  background: radial-gradient(ellipse 50% 50% at 50% 50%,
+    rgba(150, 100, 190, 0.05) 0%, transparent 70%);
+  animation: phantomPulse 4s ease-in-out infinite;
+}
+@keyframes phantomPulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+[data-archetype="phantom"] .result__archetype {
+  text-shadow: 0 0 60px rgba(150, 100, 190, 0.3),
+               0 0 120px rgba(150, 100, 190, 0.08);
+}
+
+/* Quiet Builder — warm earth glow from below */
+[data-archetype="builder"] .screen__ambient--result {
+  background: radial-gradient(ellipse 60% 35% at 50% 100%,
+    rgba(165, 130, 85, 0.06) 0%, transparent 70%);
+}
+[data-archetype="builder"] .result__archetype {
+  text-shadow: 0 0 60px rgba(165, 130, 85, 0.3),
+               0 0 120px rgba(165, 130, 85, 0.08);
+}
+
+/* Nocturnal — hot red center, most intense */
+[data-archetype="nocturnal"] .screen__ambient--result {
+  background: radial-gradient(ellipse 50% 50% at 50% 40%,
+    rgba(230, 45, 45, 0.07) 0%, transparent 60%);
+}
+[data-archetype="nocturnal"] .result__archetype {
+  text-shadow: 0 0 60px rgba(230, 45, 45, 0.35),
+               0 0 120px rgba(230, 45, 45, 0.1);
+}
+
