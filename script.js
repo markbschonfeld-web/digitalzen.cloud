@@ -160,6 +160,8 @@
   var quizProgress = 0;
   var particleProfile = null;
   var analyzingActive = false;
+  var quizColor = null;        // choice-reactive color during quiz
+  var bursts = [];             // click-point particle bursts
   var particleProfiles = {
     architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
     ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
@@ -172,6 +174,43 @@
     builder:   { speed: 0.35,r: 165, g: 130, b: 85,  o: 0.10 },
     nocturnal: { speed: 1.4, r: 230, g: 45,  b: 45,  o: 0.22 }
   };
+  // Trait → color mapping for choice-reactive particles
+  var traitColors = {
+    precision:  { r: 170, g: 185, b: 210 },
+    stillness:  { r: 160, g: 170, b: 185 },
+    kinetic:    { r: 220, g: 75,  b: 40  },
+    generative: { r: 200, g: 160, b: 40  }
+  };
+
+  function getQuizColor() {
+    var total = 0;
+    var keys = Object.keys(traits);
+    keys.forEach(function (k) { total += traits[k]; });
+    if (!total) return null;
+    var r = 0, g = 0, b = 0;
+    keys.forEach(function (k) {
+      var w = traits[k] / total;
+      r += traitColors[k].r * w;
+      g += traitColors[k].g * w;
+      b += traitColors[k].b * w;
+    });
+    return { r: Math.round(r), g: Math.round(g), b: Math.round(b) };
+  }
+
+  function spawnBurst(clientX, clientY) {
+    for (var i = 0; i < 8; i++) {
+      var angle = (Math.PI * 2 / 8) * i + (Math.random() - 0.5) * 0.5;
+      bursts.push({
+        x: clientX,
+        y: clientY,
+        dx: Math.cos(angle) * (1.5 + Math.random() * 2),
+        dy: Math.sin(angle) * (1.5 + Math.random() * 2),
+        r: 1.5 + Math.random(),
+        life: 1,
+        decay: 0.015 + Math.random() * 0.01
+      });
+    }
+  }
 
   // ---- DOM ----
   var quiz = document.getElementById('quiz');
@@ -354,6 +393,15 @@
     btn.classList.add('selected');
     traits[trait]++;
     quizProgress++;
+
+    // Choice-reactive: update particle color based on accumulated traits
+    quizColor = getQuizColor();
+
+    // Vignette deepening
+    quiz.style.setProperty('--vignette', (quizProgress * 0.07).toFixed(3));
+
+    // Particle burst from click point
+    spawnBurst(e.clientX, e.clientY);
 
     // Micro-shake feedback
     quiz.classList.add('shake');
@@ -545,19 +593,21 @@
       window.addEventListener('resize', resize);
       for (var i = 0; i < count; i++) pts.push(spawn());
 
-      // Lerp state for smooth archetype transitions
+      // Lerp state for smooth transitions
       var lR = 196, lG = 30, lB = 30, lSpeed = 1, lOp = 1;
 
       (function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         var progress = 1 + quizProgress * 0.25;
 
-        // Target color/speed from archetype profile or defaults
+        // Priority: archetype profile > quiz color > default red
         var tR = 196, tG = 30, tB = 30, tSpeed = 1, tOp = 1;
         if (particleProfile) {
           tR = particleProfile.r; tG = particleProfile.g; tB = particleProfile.b;
           tSpeed = particleProfile.speed;
           tOp = particleProfile.o / 0.08;
+        } else if (quizColor) {
+          tR = quizColor.r; tG = quizColor.g; tB = quizColor.b;
         }
         if (analyzingActive) {
           tSpeed = 2.5;
@@ -573,6 +623,7 @@
 
         var cr = Math.round(lR), cg = Math.round(lG), cb = Math.round(lB);
 
+        // Main particles
         for (var i = 0; i < pts.length; i++) {
           var p = pts[i];
           p.x += p.dx * lSpeed;
@@ -584,6 +635,22 @@
           ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + Math.min(p.o * progress * lOp, 0.4) + ')';
           ctx.fill();
         }
+
+        // Click-point burst particles
+        for (var j = bursts.length - 1; j >= 0; j--) {
+          var b = bursts[j];
+          b.x += b.dx;
+          b.y += b.dy;
+          b.dx *= 0.97;
+          b.dy *= 0.97;
+          b.life -= b.decay;
+          if (b.life <= 0) { bursts.splice(j, 1); continue; }
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, b.r * b.life, 0, 6.283);
+          ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (0.5 * b.life) + ')';
+          ctx.fill();
+        }
+
         requestAnimationFrame(loop);
       })();
     })();
