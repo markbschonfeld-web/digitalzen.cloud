@@ -128,6 +128,20 @@
     }
   };
 
+  // ---- Bridge lines per archetype (curiosity copy for KORFYR block) ----
+  var bridgeLines = {
+    architect: 'You set the conditions before the night starts. Someone else designed something with that same precision.',
+    ghost: 'You stripped everything down to what matters. We did the same thing.',
+    circuit: 'You don\u2019t stop moving. We made something for people who shift gears, not wind down.',
+    twam: 'You make things at hours that don\u2019t exist. So did we.',
+    minimalist: 'You subtract until only the essential remains. We kept only what matters.',
+    operator: 'Controlled chaos. Engineered spontaneity. We created something for that exact frequency.',
+    engineer: 'Precision at hours nobody\u2019s watching. We made something with the same tolerances.',
+    phantom: 'Motion and silence at the same time. We made something for the contradiction.',
+    builder: 'No audience. No deadline. Just the thing and your attention. We work the same way.',
+    nocturnal: 'You surface at 4 AM having made something real. So did we.'
+  };
+
   var urlKeyMap = {
     architect: 'precision',
     ghost: 'stillness',
@@ -241,17 +255,23 @@
       resultBody.appendChild(p);
     });
 
+    // Set bridge line for KORFYR block
+    var bridgeEl = document.getElementById('korfyrBridge');
+    if (bridgeEl && bridgeLines[arch.key]) {
+      bridgeEl.textContent = bridgeLines[arch.key];
+    }
+
     // Set timing for elements after the body paragraphs
     var afterBody = baseDelay + arch.body.length * 0.2;
     var insightEl = document.querySelector('.result__insight');
+    var korfyrEl = document.querySelector('.korfyr');
     var shareEl = document.querySelector('.result__share');
     var captureEl = document.querySelector('.capture');
-    var sponsorEl = document.querySelector('.sponsor');
 
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    shareEl.style.setProperty('--delay-share', (afterBody + 0.2) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 0.8) + 's');
-    sponsorEl.style.setProperty('--delay-sponsor', (afterBody + 1) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.2) + 's');
+    shareEl.style.setProperty('--delay-share', (afterBody + 0.8) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 1) + 's');
 
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', '?r=' + arch.key);
