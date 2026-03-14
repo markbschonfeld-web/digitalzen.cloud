@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Zen — What's Your Night Frequency?</title>
-  <meta name="description" content="A 30-second frequency check. You already have a ritual. Let's find out what kind." />
+  <title>Digital Zen — What's Your Night Mode?</title>
+  <meta name="description" content="A 30-second read. You already have a ritual. Let's see what it says about you." />
   <meta name="robots" content="index, follow" />
 
-  <meta property="og:title" content="What's Your Night Frequency?" />
-  <meta property="og:description" content="A 30-second frequency check. You already have a ritual. Let's find out what kind." />
+  <meta property="og:title" content="What's Your Night Mode?" />
+  <meta property="og:description" content="A 30-second read. You already have a ritual. Let's see what it says about you." />
   <meta property="og:url" content="https://digitalzen.cloud" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://digitalzen.cloud/og-image.svg" />
@@ -17,25 +17,25 @@
   <meta property="og:site_name" content="Digital Zen" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="What's Your Night Frequency?" />
-  <meta name="twitter:description" content="A 30-second frequency check." />
+  <meta name="twitter:title" content="What's Your Night Mode?" />
+  <meta name="twitter:description" content="A 30-second read." />
   <meta name="twitter:image" content="https://digitalzen.cloud/og-image.svg" />
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <noscript>
-    <div style="background:#0a0a0c;color:#e8e6e1;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Georgia,serif;text-align:center;padding:2rem;">
-      <p style="font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(201,168,76,0.7);margin-bottom:1.5rem;">A 30-Second Frequency Check</p>
-      <h1 style="font-size:2.5rem;font-weight:300;line-height:1;margin-bottom:1rem;">What's Your Night Frequency?</h1>
-      <p style="color:rgba(232,230,225,0.5);font-size:0.95rem;font-style:italic;">Please enable JavaScript to take the quiz.</p>
+    <div style="background:#0c0c0e;color:#f0ede8;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:sans-serif;text-align:center;padding:2rem;">
+      <p style="font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(196,30,30,0.7);margin-bottom:1.5rem;">A 30-Second Read</p>
+      <h1 style="font-size:2.5rem;font-weight:700;line-height:1;margin-bottom:1rem;text-transform:uppercase;letter-spacing:-0.02em;">WHAT'S YOUR NIGHT MODE?</h1>
+      <p style="color:#8a8680;font-size:0.9rem;">Please enable JavaScript to take the quiz.</p>
     </div>
   </noscript>
 
@@ -44,23 +44,26 @@
     <div class="nav__inner">
       <div class="nav__brand">
         <span class="nav__logo">DIGITAL ZEN</span>
-        <span class="nav__tagline">Essays on Presence</span>
+        <span class="nav__tagline">After Dark</span>
       </div>
       <span class="nav__issue">Issue 001</span>
     </div>
   </nav>
 
+  <!-- Film grain overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
   <!-- Quiz Container -->
   <main class="quiz" id="quiz">
 
-    <!-- Friend Splash (shown when ?r= param present) -->
+    <!-- Friend Splash -->
     <section class="screen screen--splash" data-screen="splash">
       <div class="screen__ambient" aria-hidden="true"></div>
       <div class="screen__inner">
         <span class="screen__label">Your friend's result</span>
-        <h2 class="splash__archetype" id="splashArchetype">The Architect of Silence</h2>
-        <p class="splash__sub">What's <em>your</em> night frequency?</p>
-        <button class="btn btn--start btn--pulse" id="splashBtn" type="button">
+        <h2 class="splash__archetype" id="splashArchetype">The Architect</h2>
+        <p class="splash__sub">What's <em>your</em> night mode?</p>
+        <button class="btn btn--primary btn--pulse" id="splashBtn" type="button">
           <span>Find Out</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
@@ -71,17 +74,17 @@
     <section class="screen screen--intro active" data-screen="intro">
       <div class="screen__ambient" aria-hidden="true"></div>
       <div class="screen__inner">
-        <span class="screen__label">A 30-Second Frequency Check</span>
-        <h1 class="screen__title">What's Your<br />Night Frequency?</h1>
+        <span class="screen__label">A 30-Second Read</span>
+        <h1 class="screen__title">WHAT'S YOUR<br />NIGHT MODE?</h1>
         <p class="screen__subtitle">
           You already have a ritual.<br />
-          Let's find out what kind.
+          Let's see what it says about you.
         </p>
-        <button class="btn btn--start btn--pulse" id="startBtn" type="button">
+        <button class="btn btn--primary btn--pulse" id="startBtn" type="button">
           <span>Begin</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
-        <span class="screen__proof">4,200+ rituals cataloged</span>
+        <span class="screen__proof">6,200+ people checked</span>
       </div>
     </section>
 
@@ -93,22 +96,22 @@
           <div class="progress__bar"><div class="progress__fill" style="width: 25%"></div></div>
           <span class="progress__label">1 / 4</span>
         </div>
-        <h2 class="question">Pick your hour.</h2>
+        <h2 class="question">When does your night start?</h2>
         <div class="options" data-question="hour">
           <button class="option" data-trait="precision" type="button">
-            <span class="option__time">10 PM</span>
-            <span class="option__sub">Early and deliberate</span>
+            <span class="option__text">10 PM</span>
+            <span class="option__sub">Early. Deliberate.</span>
           </button>
           <button class="option" data-trait="stillness" type="button">
-            <span class="option__time">Midnight</span>
-            <span class="option__sub">Right on the threshold</span>
+            <span class="option__text">Midnight</span>
+            <span class="option__sub">When the clock resets.</span>
           </button>
           <button class="option" data-trait="kinetic" type="button">
-            <span class="option__time">2 AM</span>
-            <span class="option__sub">When the world forgets you exist</span>
+            <span class="option__text">2 AM</span>
+            <span class="option__sub">When everyone else is done.</span>
           </button>
           <button class="option" data-trait="generative" type="button">
-            <span class="option__time">When it finds me</span>
+            <span class="option__text">When it hits</span>
             <span class="option__sub">No schedule. Just instinct.</span>
           </button>
         </div>
@@ -123,23 +126,23 @@
           <div class="progress__bar"><div class="progress__fill" style="width: 50%"></div></div>
           <span class="progress__label">2 / 4</span>
         </div>
-        <h2 class="question">Choose your setting.</h2>
+        <h2 class="question">Pick your setting.</h2>
         <div class="options" data-question="setting">
           <button class="option" data-trait="precision" type="button">
-            <span class="option__time">Headphones. Door closed.</span>
-            <span class="option__sub">The world can wait.</span>
+            <span class="option__text">Headphones. Door locked.</span>
+            <span class="option__sub">Control the inputs.</span>
           </button>
           <button class="option" data-trait="stillness" type="button">
-            <span class="option__time">Balcony. Nothing else.</span>
-            <span class="option__sub">Just you and the air.</span>
+            <span class="option__text">Outside. Just the air.</span>
+            <span class="option__sub">Nothing between you and it.</span>
           </button>
           <button class="option" data-trait="kinetic" type="button">
-            <span class="option__time">Moving. Anywhere.</span>
-            <span class="option__sub">Stillness isn't your thing.</span>
+            <span class="option__text">Moving. Doesn't matter where.</span>
+            <span class="option__sub">Stillness isn't the move.</span>
           </button>
           <button class="option" data-trait="generative" type="button">
-            <span class="option__time">Kitchen counter. Hands busy.</span>
-            <span class="option__sub">You think better when you're making.</span>
+            <span class="option__text">Counter. Hands busy.</span>
+            <span class="option__sub">You think by making.</span>
           </button>
         </div>
       </div>
@@ -153,23 +156,23 @@
           <div class="progress__bar"><div class="progress__fill" style="width: 75%"></div></div>
           <span class="progress__label">3 / 4</span>
         </div>
-        <h2 class="question">What drives your ritual?</h2>
+        <h2 class="question">What's the priority?</h2>
         <div class="options" data-question="driver">
           <button class="option" data-trait="precision" type="button">
-            <span class="option__time">The details. Every one.</span>
-            <span class="option__sub">Precision is the point.</span>
+            <span class="option__text">Every detail right.</span>
+            <span class="option__sub">Precision is the standard.</span>
           </button>
           <button class="option" data-trait="stillness" type="button">
-            <span class="option__time">The quiet. Uninterrupted.</span>
-            <span class="option__sub">Silence is a material you build with.</span>
+            <span class="option__text">Silence. Uncut.</span>
+            <span class="option__sub">You don't add. You subtract.</span>
           </button>
           <button class="option" data-trait="kinetic" type="button">
-            <span class="option__time">The energy. Restless.</span>
+            <span class="option__text">The energy. All of it.</span>
             <span class="option__sub">You don't wind down. You redirect.</span>
           </button>
           <button class="option" data-trait="generative" type="button">
-            <span class="option__time">The process. Start to finish.</span>
-            <span class="option__sub">Making something changes how you feel.</span>
+            <span class="option__text">The thing you're building.</span>
+            <span class="option__sub">Start to finish. No breaks.</span>
           </button>
         </div>
       </div>
@@ -183,23 +186,23 @@
           <div class="progress__bar"><div class="progress__fill" style="width: 100%"></div></div>
           <span class="progress__label">4 / 4</span>
         </div>
-        <h2 class="question">Pick what stays with you.</h2>
+        <h2 class="question">What stays with you?</h2>
         <div class="options" data-question="stays">
           <button class="option" data-trait="precision" type="button">
-            <span class="option__time">The album you chose perfectly</span>
+            <span class="option__text">The album you picked perfectly.</span>
             <span class="option__sub">Not a single skip.</span>
           </button>
           <button class="option" data-trait="stillness" type="button">
-            <span class="option__time">The moment before you went back inside</span>
-            <span class="option__sub">Three seconds of nothing.</span>
+            <span class="option__text">The three seconds before you went back in.</span>
+            <span class="option__sub">That was the whole point.</span>
           </button>
           <button class="option" data-trait="kinetic" type="button">
-            <span class="option__time">The road with no destination</span>
+            <span class="option__text">The road. No destination.</span>
             <span class="option__sub">You still don't know where you went.</span>
           </button>
           <button class="option" data-trait="generative" type="button">
-            <span class="option__time">The thing you made at 2 AM</span>
-            <span class="option__sub">Nobody asked for it. That's why it's good.</span>
+            <span class="option__text">The thing you made at 2 AM.</span>
+            <span class="option__sub">Nobody asked for it.</span>
           </button>
         </div>
       </div>
@@ -209,26 +212,22 @@
     <section class="screen screen--result" data-screen="result">
       <div class="screen__ambient screen__ambient--result" aria-hidden="true"></div>
       <div class="result">
-        <!-- Archetype reveal -->
         <div class="result__reveal">
-          <span class="result__label">Your Night Frequency</span>
+          <span class="result__label">Your Night Mode</span>
           <h2 class="result__archetype" id="resultArchetype"></h2>
           <div class="result__freq-tag" id="resultFreqTag"></div>
           <div class="result__freq">
-            <span class="result__freq-label">Frequency Match</span>
+            <span class="result__freq-label">Frequency</span>
             <div class="result__freq-bar"><div class="result__freq-fill" id="resultFreq"></div></div>
           </div>
         </div>
 
-        <!-- Description (multi-paragraph) -->
         <div class="result__body" id="resultBody"></div>
 
-        <!-- Insight quote -->
         <div class="result__insight">
           <p id="resultInsight"></p>
         </div>
 
-        <!-- Share + social proof -->
         <div class="result__share">
           <button class="btn btn--share" id="shareBtn" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -238,16 +237,13 @@
           <span class="result__rarity" id="resultRarity"></span>
         </div>
 
-        <!-- Email Capture (folded into result) -->
+        <!-- Email Capture -->
         <div class="capture">
           <div class="capture__divider" aria-hidden="true"></div>
           <p class="capture__text">
-            We're building something for people<br />on your frequency.
+            We're building something for people<br />who operate on your frequency.
           </p>
-          <p class="capture__hook">
-            It's not ready yet.<br />
-            But you'll be the first to know.
-          </p>
+          <p class="capture__hook">It's not ready yet.</p>
           <form class="capture__form" id="captureForm">
             <div class="capture__input-wrap">
               <input
@@ -265,7 +261,7 @@
           </form>
           <div class="capture__success" id="captureSuccess">
             <span class="capture__check">&#10003;</span>
-            <span>You're on the list. Issue 002 is coming.</span>
+            <span>You're on the list.</span>
           </div>
         </div>
 
@@ -275,7 +271,7 @@
           <span class="sponsor__label">Sponsored Content</span>
           <p class="sponsor__hook">
             Every ritual has a centerpiece.<br />
-            We made ours.
+            We built one.
           </p>
           <a href="https://www.korfyr.com" target="_blank" rel="noopener" class="sponsor__cta">
             <span>KORFYR</span>
@@ -292,7 +288,6 @@
 
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     <div class="footer__inner">
       <span class="footer__copy">&copy; 2026 Digital Zen &middot; All rights reserved</span>
