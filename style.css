@@ -1066,7 +1066,14 @@ em, i, cite { font-style: normal; }
   50%       { opacity: 0.9; }
 }
 
-/* ─── Particle canvas ─── */
+/* ─── Ambient + Particle canvases ─── */
+.ambient-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
 .particle-canvas {
   position: fixed;
   top: 0; left: 0;
@@ -1161,108 +1168,57 @@ em, i, cite { font-style: normal; }
 
 /* ============================================
    Per-archetype result themes
-   Each gets unique ambient + text glow
+   Canvas ambient system provides visual signatures.
+   Text glow retained per archetype.
    ============================================ */
 
-/* Architect — structured steel blue, precision */
-[data-archetype="architect"] .screen__ambient--result {
-  background: radial-gradient(ellipse 60% 40% at 50% 0%,
-    rgba(170, 185, 210, 0.06) 0%, transparent 70%);
-}
+/* Ambient backgrounds removed — canvas system replaces them */
+[data-archetype] .screen__ambient--result { background: none; }
+
+/* Architect */
 [data-archetype="architect"] .result__archetype {
   text-shadow: 0 0 60px rgba(170, 185, 210, 0.3),
                0 0 120px rgba(170, 185, 210, 0.08);
 }
-
-/* Ghost — absence is the design */
-[data-archetype="ghost"] .screen__ambient--result {
-  background: none;
-}
+/* Ghost */
 [data-archetype="ghost"] .result__archetype {
   text-shadow: 0 0 80px rgba(255, 255, 255, 0.06);
 }
-
-/* Circuit — warm orange heat from edges */
-[data-archetype="circuit"] .screen__ambient--result {
-  background:
-    radial-gradient(ellipse 40% 55% at 5% 50%, rgba(232, 93, 58, 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 55% at 95% 50%, rgba(232, 93, 58, 0.06) 0%, transparent 70%);
-}
+/* Circuit */
 [data-archetype="circuit"] .result__archetype {
   text-shadow: 0 0 60px rgba(232, 93, 58, 0.3),
                0 0 120px rgba(232, 93, 58, 0.08);
 }
-
-/* 2AM — amber glow rising from below */
-[data-archetype="twam"] .screen__ambient--result {
-  background: radial-gradient(ellipse 70% 40% at 50% 90%,
-    rgba(200, 160, 40, 0.06) 0%, transparent 70%);
-}
+/* 2AM */
 [data-archetype="twam"] .result__archetype {
   text-shadow: 0 0 60px rgba(200, 160, 40, 0.3),
                0 0 120px rgba(200, 160, 40, 0.08);
 }
-
-/* Minimalist — single clean beam, nothing else */
-[data-archetype="minimalist"] .screen__ambient--result {
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.025) 0%, transparent 25%);
-}
+/* Minimalist */
 [data-archetype="minimalist"] .result__archetype {
   text-shadow: 0 0 40px rgba(255, 255, 255, 0.12);
 }
-
-/* Operator — tactical split, blue-red */
-[data-archetype="operator"] .screen__ambient--result {
-  background:
-    radial-gradient(ellipse 35% 50% at 0% 30%, rgba(42, 111, 255, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 35% 50% at 100% 70%, rgba(196, 30, 30, 0.05) 0%, transparent 70%);
-}
+/* Operator */
 [data-archetype="operator"] .result__archetype {
   text-shadow: -2px 0 40px rgba(42, 111, 255, 0.2),
                2px 0 40px rgba(196, 30, 30, 0.2);
 }
-
-/* Night Engineer — deep blueprint blue */
-[data-archetype="engineer"] .screen__ambient--result {
-  background: radial-gradient(ellipse 55% 50% at 50% 50%,
-    rgba(80, 130, 200, 0.05) 0%, transparent 70%);
-}
+/* Night Engineer */
 [data-archetype="engineer"] .result__archetype {
   text-shadow: 0 0 60px rgba(80, 130, 200, 0.3),
                0 0 120px rgba(80, 130, 200, 0.08);
 }
-
-/* Phantom — pulsing contradiction, can't hold still */
-[data-archetype="phantom"] .screen__ambient--result {
-  background: radial-gradient(ellipse 50% 50% at 50% 50%,
-    rgba(150, 100, 190, 0.05) 0%, transparent 70%);
-  animation: phantomPulse 4s ease-in-out infinite;
-}
-@keyframes phantomPulse {
-  0%, 100% { opacity: 0.5; }
-  50%      { opacity: 1; }
-}
+/* Phantom */
 [data-archetype="phantom"] .result__archetype {
   text-shadow: 0 0 60px rgba(150, 100, 190, 0.3),
                0 0 120px rgba(150, 100, 190, 0.08);
 }
-
-/* Quiet Builder — warm earth glow from below */
-[data-archetype="builder"] .screen__ambient--result {
-  background: radial-gradient(ellipse 60% 35% at 50% 100%,
-    rgba(165, 130, 85, 0.06) 0%, transparent 70%);
-}
+/* Quiet Builder */
 [data-archetype="builder"] .result__archetype {
   text-shadow: 0 0 60px rgba(165, 130, 85, 0.3),
                0 0 120px rgba(165, 130, 85, 0.08);
 }
-
-/* Nocturnal — hot red center, most intense */
-[data-archetype="nocturnal"] .screen__ambient--result {
-  background: radial-gradient(ellipse 50% 50% at 50% 40%,
-    rgba(230, 45, 45, 0.07) 0%, transparent 60%);
-}
+/* Nocturnal */
 [data-archetype="nocturnal"] .result__archetype {
   text-shadow: 0 0 60px rgba(230, 45, 45, 0.35),
                0 0 120px rgba(230, 45, 45, 0.1);
@@ -2077,5 +2033,8 @@ em, i, cite { font-style: normal; }
   }
   .az__trait-row.show .az__trait-value::after {
     animation: none !important;
+  }
+  .ambient-canvas {
+    display: none !important;
   }
 }

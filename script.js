@@ -241,6 +241,12 @@
     var nextEl = quiz.querySelector('[data-screen="' + name + '"]');
     if (!nextEl) { transitioning = false; return; }
 
+    // Stop ambient system when leaving result or splash screens
+    var currentName = currentEl ? currentEl.getAttribute('data-screen') : '';
+    if ((currentName === 'result' || currentName === 'splash') && name !== 'result' && window._ambientSystem) {
+      window._ambientSystem.stop();
+    }
+
     // Fade out current
     if (currentEl) {
       currentEl.classList.add('fade-out');
@@ -412,6 +418,9 @@
     // Apply archetype visual theme
     quiz.querySelector('[data-screen="result"]').setAttribute('data-archetype', arch.key);
     particleProfile = particleProfiles[arch.key] || null;
+
+    // Start archetype-specific ambient system
+    if (window._ambientSystem) window._ambientSystem.start(arch.key, false);
 
     resultArchetype.textContent = arch.name;
     resultFreqTag.textContent = arch.freqTag;
@@ -695,6 +704,9 @@
     screens.forEach(function (s) { s.classList.remove('active'); });
     splashEl.classList.add('active');
 
+    // Start archetype-specific ambient system for splash
+    if (window._ambientSystem) window._ambientSystem.start(arch.key, true);
+
     return true;
   }
 
@@ -760,6 +772,7 @@
         quizProgress = 0;
         currentArchKey = null;
         answerHistory = [];
+        if (window._ambientSystem) window._ambientSystem.stop();
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -842,6 +855,611 @@
         }
       }
     });
+
+    // ---- Archetype ambient visual system ----
+    (function () {
+      var canvas = document.getElementById('ambientBg');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var W, H;
+      var isMobile = window.innerWidth < 768;
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var activeArch = null;
+      var fadeOpacity = 0;
+      var fadeTarget = 0;
+      var intensityMult = 1;
+      var intensityTarget = 1;
+      var running = false;
+
+      function resize() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        isMobile = W < 768;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // --- Architect: drifting grid ---
+      var gridState = { lines: [], flashIdx: -1, flashTime: 0, nextFlash: 3000 };
+      function initGrid() {
+        gridState.lines = [];
+        var spacing = isMobile ? 100 : 90;
+        for (var x = spacing / 2; x < W + spacing; x += spacing + (Math.random() - 0.5) * 30) {
+          gridState.lines.push({ x: x, y: 0, vertical: true, drift: (Math.random() - 0.5) * 0.15, bright: 0 });
+        }
+        for (var y = spacing / 2; y < H + spacing; y += spacing + (Math.random() - 0.5) * 30) {
+          gridState.lines.push({ x: 0, y: y, vertical: false, drift: (Math.random() - 0.5) * 0.12, bright: 0 });
+        }
+        gridState.nextFlash = performance.now() + 3000 + Math.random() * 2000;
+      }
+      function drawGrid(now) {
+        var c = archColors.architect;
+        if (now > gridState.nextFlash) {
+          gridState.flashIdx = Math.floor(Math.random() * gridState.lines.length);
+          gridState.flashTime = now;
+          gridState.nextFlash = now + 3000 + Math.random() * 2000;
+        }
+        for (var i = 0; i < gridState.lines.length; i++) {
+          var l = gridState.lines[i];
+          if (!reducedMotion) {
+            if (l.vertical) l.x += l.drift;
+            else l.y += l.drift;
+          }
+          var op = 0.06;
+          if (i === gridState.flashIdx) {
+            var elapsed = now - gridState.flashTime;
+            if (elapsed < 800) op = 0.06 + 0.14 * Math.max(0, 1 - elapsed / 800);
+          }
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (op * fadeOpacity * intensityMult) + ')';
+          ctx.lineWidth = 1;
+          if (l.vertical) { ctx.moveTo(l.x, 0); ctx.lineTo(l.x, H); }
+          else { ctx.moveTo(0, l.y); ctx.lineTo(W, l.y); }
+          ctx.stroke();
+        }
+      }
+
+      // --- Ghost: drifting fog ---
+      var fogState = { blobs: [] };
+      function initFog() {
+        fogState.blobs = [];
+        var count = isMobile ? 2 : 3;
+        for (var i = 0; i < count; i++) {
+          fogState.blobs.push({
+            x: Math.random() * W, y: Math.random() * H,
+            r: 200 + Math.random() * 200,
+            dx: (Math.random() - 0.5) * 0.08, dy: (Math.random() - 0.5) * 0.06,
+            phase: Math.random() * Math.PI * 2, period: 6 + Math.random() * 4
+          });
+        }
+      }
+      function drawFog(now) {
+        var c = archColors.ghost;
+        var t = now / 1000;
+        for (var i = 0; i < fogState.blobs.length; i++) {
+          var b = fogState.blobs[i];
+          if (!reducedMotion) { b.x += b.dx; b.y += b.dy; }
+          if (b.x < -b.r) b.x = W + b.r;
+          if (b.x > W + b.r) b.x = -b.r;
+          if (b.y < -b.r) b.y = H + b.r;
+          if (b.y > H + b.r) b.y = -b.r;
+          var cycleOp = 0.02 + 0.02 * Math.sin(t / b.period * Math.PI * 2 + b.phase);
+          var grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+          grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (cycleOp * fadeOpacity * intensityMult) + ')');
+          grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+        }
+      }
+
+      // --- Circuit: flowing vector streaks ---
+      var streakState = { streaks: [] };
+      function initStreaks() {
+        streakState.streaks = [];
+        var count = isMobile ? 12 : 22;
+        var zones = [
+          { angle: -0.3, weight: 0.4 },
+          { angle: 0.8, weight: 0.35 },
+          { angle: -1.2, weight: 0.25 }
+        ];
+        for (var i = 0; i < count; i++) {
+          var zone = zones[Math.floor(Math.random() * zones.length)];
+          streakState.streaks.push({
+            x: Math.random() * W, y: Math.random() * H,
+            len: 20 + Math.random() * 20,
+            angle: zone.angle + (Math.random() - 0.5) * 0.4,
+            speed: 1 + Math.random() * 2,
+            op: 0.08 + Math.random() * 0.07,
+            flare: 0, flareTime: 0
+          });
+        }
+        streakState.nextFlare = performance.now() + 2000 + Math.random() * 1000;
+      }
+      function drawStreaks(now) {
+        var c = archColors.circuit;
+        if (now > streakState.nextFlare) {
+          var fi = Math.floor(Math.random() * streakState.streaks.length);
+          streakState.streaks[fi].flareTime = now;
+          streakState.nextFlare = now + 2000 + Math.random() * 1000;
+        }
+        for (var i = 0; i < streakState.streaks.length; i++) {
+          var s = streakState.streaks[i];
+          if (!reducedMotion) {
+            s.x += Math.cos(s.angle) * s.speed;
+            s.y += Math.sin(s.angle) * s.speed;
+          }
+          if (s.x < -50 || s.x > W + 50 || s.y < -50 || s.y > H + 50) {
+            var edge = Math.floor(Math.random() * 4);
+            if (edge === 0) { s.x = -10; s.y = Math.random() * H; }
+            else if (edge === 1) { s.x = W + 10; s.y = Math.random() * H; }
+            else if (edge === 2) { s.y = -10; s.x = Math.random() * W; }
+            else { s.y = H + 10; s.x = Math.random() * W; }
+          }
+          var op = s.op;
+          var elapsed = now - s.flareTime;
+          if (elapsed < 500 && elapsed > 0) op = s.op + 0.22 * Math.max(0, 1 - elapsed / 500);
+          var ex = s.x + Math.cos(s.angle) * s.len;
+          var ey = s.y + Math.sin(s.angle) * s.len;
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (op * fadeOpacity * intensityMult) + ')';
+          ctx.lineWidth = 1;
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+        }
+      }
+
+      // --- 2AM: waveform ---
+      var waveState = { phase: 0, ampPhase: 0 };
+      function drawWaveform(now) {
+        var c = archColors.twam;
+        var t = now / 1000;
+        var baseY = H * 0.75;
+        var waveW = W;
+        // Noise floor
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.03 * fadeOpacity * intensityMult) + ')';
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, baseY);
+        ctx.lineTo(waveW, baseY);
+        ctx.stroke();
+        // Waveform
+        var amp = 15 + 20 * (0.5 + 0.5 * Math.sin(t / 5 * Math.PI * 2));
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.10 * fadeOpacity * intensityMult) + ')';
+        for (var x = 0; x < waveW; x += 2) {
+          var nx = x / waveW;
+          var val = Math.sin(nx * 12 + t * 1.5) * 0.5
+                  + Math.sin(nx * 7 + t * 0.8) * 0.3
+                  + Math.sin(nx * 20 + t * 2.5) * 0.2;
+          var y = baseY - val * amp;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // --- Minimalist: single breathing line ---
+      var minState = { y: 0, targetY: 0, phase: 0 };
+      function initMinimalist() {
+        minState.y = H * 0.4;
+        minState.targetY = H * 0.4;
+      }
+      function drawMinimalist(now) {
+        var c = archColors.minimalist;
+        var t = now / 1000;
+        if (!reducedMotion) {
+          minState.y += (minState.targetY + Math.sin(t / 18 * Math.PI * 2) * 20 - minState.y) * 0.005;
+        }
+        var op = 0.04 + 0.06 * (0.5 + 0.5 * Math.sin(t / 6 * Math.PI * 2));
+        var lineW = W * 0.6;
+        var startX = (W - lineW) / 2;
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (op * fadeOpacity * intensityMult) + ')';
+        ctx.lineWidth = 1;
+        ctx.moveTo(startX, minState.y);
+        ctx.lineTo(startX + lineW, minState.y);
+        ctx.stroke();
+      }
+
+      // --- Operator: radar sweep ---
+      var radarState = { angle: 0, blips: [], ringR: 0 };
+      function initRadar() {
+        radarState.angle = 0;
+        radarState.blips = [
+          { angle: 0.8, dist: 0.3, life: 0 },
+          { angle: 2.5, dist: 0.55, life: 0 },
+          { angle: 4.1, dist: 0.4, life: 0 }
+        ];
+        radarState.ringR = Math.min(W, H) * 0.4;
+      }
+      function drawRadar(now) {
+        var cBlue = archColors.operator;
+        var cx = W * 0.5, cy = H * 0.45;
+        var maxR = radarState.ringR;
+        var t = now / 1000;
+        if (!reducedMotion) radarState.angle = (t / 9) * Math.PI * 2;
+        var sweepAngle = radarState.angle % (Math.PI * 2);
+
+        // Distance ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.04 * fadeOpacity * intensityMult) + ')';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Sweep line with gradient
+        var sweepLen = maxR * 1.1;
+        var sx = cx + Math.cos(sweepAngle) * sweepLen;
+        var sy = cy + Math.sin(sweepAngle) * sweepLen;
+        var grad = ctx.createLinearGradient(cx, cy, sx, sy);
+        grad.addColorStop(0, 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.08 * fadeOpacity * intensityMult) + ')');
+        grad.addColorStop(1, 'rgba(196,30,30,' + (0.06 * fadeOpacity * intensityMult) + ')');
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(sx, sy);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Blips
+        for (var i = 0; i < radarState.blips.length; i++) {
+          var blip = radarState.blips[i];
+          var angleDiff = sweepAngle - blip.angle;
+          if (angleDiff < 0) angleDiff += Math.PI * 2;
+          if (angleDiff < 0.15 && blip.life <= 0) blip.life = 1;
+          if (blip.life > 0) {
+            if (!reducedMotion) blip.life -= 0.008;
+            var bx = cx + Math.cos(blip.angle) * maxR * blip.dist;
+            var by = cy + Math.sin(blip.angle) * maxR * blip.dist;
+            ctx.beginPath();
+            ctx.arc(bx, by, 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.12 * blip.life * fadeOpacity * intensityMult) + ')';
+            ctx.fill();
+          }
+        }
+      }
+
+      // --- Engineer: schematic traces ---
+      var traceState = { traces: [], nextSpawn: 0 };
+      function initTraces() {
+        traceState.traces = [];
+        traceState.nextSpawn = performance.now() + 500;
+      }
+      function spawnTrace() {
+        var segments = [];
+        var x = Math.random() * W * 0.8 + W * 0.1;
+        var y = Math.random() * H * 0.8 + H * 0.1;
+        var numSegs = 2 + Math.floor(Math.random() * 2);
+        for (var i = 0; i < numSegs; i++) {
+          var horiz = i % 2 === 0;
+          var len = 40 + Math.random() * 60;
+          var dir = Math.random() > 0.5 ? 1 : -1;
+          var ex = horiz ? x + len * dir : x;
+          var ey = horiz ? y : y + len * dir;
+          segments.push({ sx: x, sy: y, ex: ex, ey: ey });
+          x = ex; y = ey;
+        }
+        return { segments: segments, progress: 0, phase: 'draw', holdStart: 0, fadeOut: 1 };
+      }
+      function drawTraces(now) {
+        var c = archColors.engineer;
+        var maxTraces = isMobile ? 2 : 3;
+        if (now > traceState.nextSpawn && traceState.traces.length < maxTraces) {
+          traceState.traces.push(spawnTrace());
+          traceState.nextSpawn = now + 2000 + Math.random() * 2000;
+        }
+        for (var ti = traceState.traces.length - 1; ti >= 0; ti--) {
+          var tr = traceState.traces[ti];
+          if (tr.phase === 'draw') {
+            if (!reducedMotion) tr.progress += 0.012;
+            if (tr.progress >= 1) { tr.phase = 'hold'; tr.holdStart = now; tr.progress = 1; }
+          } else if (tr.phase === 'hold') {
+            if (now - tr.holdStart > 1500) tr.phase = 'fade';
+          } else if (tr.phase === 'fade') {
+            tr.fadeOut -= 0.015;
+            if (tr.fadeOut <= 0) { traceState.traces.splice(ti, 1); continue; }
+          }
+          var totalLen = 0;
+          for (var si = 0; si < tr.segments.length; si++) {
+            var seg = tr.segments[si];
+            totalLen += Math.hypot(seg.ex - seg.sx, seg.ey - seg.sy);
+          }
+          var drawLen = tr.progress * totalLen;
+          var drawn = 0;
+          var baseOp = 0.10 * tr.fadeOut * fadeOpacity * intensityMult;
+          ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + baseOp + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          var lastX, lastY;
+          for (si = 0; si < tr.segments.length; si++) {
+            seg = tr.segments[si];
+            var segLen = Math.hypot(seg.ex - seg.sx, seg.ey - seg.sy);
+            if (drawn + segLen <= drawLen) {
+              if (si === 0) ctx.moveTo(seg.sx, seg.sy);
+              ctx.lineTo(seg.ex, seg.ey);
+              lastX = seg.ex; lastY = seg.ey;
+              drawn += segLen;
+            } else {
+              var remain = drawLen - drawn;
+              var frac = remain / segLen;
+              var px = seg.sx + (seg.ex - seg.sx) * frac;
+              var py = seg.sy + (seg.ey - seg.sy) * frac;
+              if (si === 0) ctx.moveTo(seg.sx, seg.sy);
+              ctx.lineTo(px, py);
+              lastX = px; lastY = py;
+              break;
+            }
+          }
+          ctx.stroke();
+          // Cursor dot
+          if (lastX !== undefined && tr.phase === 'draw') {
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 2, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.2 * tr.fadeOut * fadeOpacity * intensityMult) + ')';
+            ctx.fill();
+          }
+        }
+      }
+
+      // --- Phantom: glitch/interference ---
+      var glitchState = { active: false, x: 0, y: 0, w: 0, h: 0, shiftX: 0, start: 0, dur: 100, nextEvent: 0 };
+      function initGlitch() {
+        glitchState.nextEvent = performance.now() + 3000 + Math.random() * 3000;
+        glitchState.active = false;
+      }
+      function drawGlitch(now) {
+        var c = archColors.phantom;
+        if (!glitchState.active && now > glitchState.nextEvent) {
+          glitchState.active = true;
+          glitchState.x = Math.random() * (W - 200);
+          glitchState.y = Math.random() * (H - 50);
+          glitchState.w = 100 + Math.random() * 100;
+          glitchState.h = 20 + Math.random() * 30;
+          glitchState.shiftX = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 2);
+          glitchState.start = now;
+          glitchState.dur = 80 + Math.random() * 40;
+        }
+        if (glitchState.active) {
+          var elapsed = now - glitchState.start;
+          if (elapsed > glitchState.dur) {
+            glitchState.active = false;
+            glitchState.nextEvent = now + 3000 + Math.random() * 3000;
+          } else {
+            var op = 0.06 * fadeOpacity * intensityMult;
+            ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + op + ')';
+            ctx.fillRect(glitchState.x + glitchState.shiftX, glitchState.y, glitchState.w, glitchState.h);
+          }
+        }
+      }
+
+      // --- Builder: slow geometric construction ---
+      var buildState = { shape: null, nextSpawn: 0 };
+      function initBuilder() {
+        buildState.shape = null;
+        buildState.nextSpawn = performance.now() + 500;
+      }
+      function spawnShape() {
+        var type = Math.floor(Math.random() * 3); // 0=rect, 1=triangle, 2=arc
+        var cx = W * (0.2 + Math.random() * 0.6);
+        var cy = H * (0.2 + Math.random() * 0.6);
+        var size = 60 + Math.random() * 80;
+        return { type: type, cx: cx, cy: cy, size: size, progress: 0, phase: 'draw', holdStart: 0, fadeOut: 1 };
+      }
+      function drawBuilder(now) {
+        var c = archColors.builder;
+        if (!buildState.shape && now > buildState.nextSpawn) {
+          buildState.shape = spawnShape();
+        }
+        var sh = buildState.shape;
+        if (!sh) return;
+        if (sh.phase === 'draw') {
+          if (!reducedMotion) sh.progress += 0.008;
+          if (sh.progress >= 1) { sh.phase = 'hold'; sh.holdStart = now; sh.progress = 1; }
+        } else if (sh.phase === 'hold') {
+          if (now - sh.holdStart > 3500) sh.phase = 'fade';
+        } else if (sh.phase === 'fade') {
+          sh.fadeOut -= 0.006;
+          if (sh.fadeOut <= 0) {
+            buildState.shape = null;
+            buildState.nextSpawn = now + 1000 + Math.random() * 1000;
+            return;
+          }
+        }
+        var baseOp = 0.08 * sh.fadeOut * fadeOpacity * intensityMult;
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + baseOp + ')';
+        ctx.lineWidth = 1;
+        var p = sh.progress;
+        if (sh.type === 0) {
+          // Rectangle
+          var half = sh.size / 2;
+          var perim = sh.size * 4;
+          var drawLen = p * perim;
+          ctx.beginPath();
+          var corners = [
+            [sh.cx - half, sh.cy - half],
+            [sh.cx + half, sh.cy - half],
+            [sh.cx + half, sh.cy + half],
+            [sh.cx - half, sh.cy + half],
+            [sh.cx - half, sh.cy - half]
+          ];
+          ctx.moveTo(corners[0][0], corners[0][1]);
+          var accumulated = 0;
+          for (var i = 0; i < 4; i++) {
+            var segLen = sh.size;
+            if (accumulated + segLen <= drawLen) {
+              ctx.lineTo(corners[i + 1][0], corners[i + 1][1]);
+              accumulated += segLen;
+            } else {
+              var frac = (drawLen - accumulated) / segLen;
+              ctx.lineTo(
+                corners[i][0] + (corners[i + 1][0] - corners[i][0]) * frac,
+                corners[i][1] + (corners[i + 1][1] - corners[i][1]) * frac
+              );
+              break;
+            }
+          }
+          ctx.stroke();
+        } else if (sh.type === 1) {
+          // Triangle
+          var r = sh.size / 2;
+          var pts = [];
+          for (var j = 0; j < 3; j++) {
+            var a = -Math.PI / 2 + j * (Math.PI * 2 / 3);
+            pts.push([sh.cx + Math.cos(a) * r, sh.cy + Math.sin(a) * r]);
+          }
+          pts.push(pts[0]);
+          var totalPerim = 0;
+          for (j = 0; j < 3; j++) totalPerim += Math.hypot(pts[j + 1][0] - pts[j][0], pts[j + 1][1] - pts[j][1]);
+          var dl = p * totalPerim;
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          var acc = 0;
+          for (j = 0; j < 3; j++) {
+            var sLen = Math.hypot(pts[j + 1][0] - pts[j][0], pts[j + 1][1] - pts[j][1]);
+            if (acc + sLen <= dl) { ctx.lineTo(pts[j + 1][0], pts[j + 1][1]); acc += sLen; }
+            else {
+              var fr = (dl - acc) / sLen;
+              ctx.lineTo(pts[j][0] + (pts[j + 1][0] - pts[j][0]) * fr, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * fr);
+              break;
+            }
+          }
+          ctx.stroke();
+        } else {
+          // Arc
+          ctx.beginPath();
+          ctx.arc(sh.cx, sh.cy, sh.size / 2, 0, Math.PI * 2 * p);
+          ctx.stroke();
+        }
+      }
+
+      // --- Nocturnal: heat signature ---
+      var heatState = { zones: [] };
+      function initHeat() {
+        heatState.zones = [];
+        var count = isMobile ? 3 : 4;
+        for (var i = 0; i < count; i++) {
+          heatState.zones.push({
+            x: Math.random() * W, y: Math.random() * H,
+            r: 100 + Math.random() * 150,
+            dx: (Math.random() - 0.5) * 0.35, dy: (Math.random() - 0.5) * 0.3,
+            phase: Math.random() * Math.PI * 2,
+            period: 2 + Math.random() * 3,
+            flare: 0, flareTime: 0
+          });
+        }
+        heatState.nextFlare = performance.now() + 4000 + Math.random() * 3000;
+      }
+      function drawHeat(now) {
+        var c = archColors.nocturnal;
+        var t = now / 1000;
+        if (now > heatState.nextFlare) {
+          var fi = Math.floor(Math.random() * heatState.zones.length);
+          heatState.zones[fi].flareTime = now;
+          heatState.nextFlare = now + 4000 + Math.random() * 3000;
+        }
+        for (var i = 0; i < heatState.zones.length; i++) {
+          var z = heatState.zones[i];
+          if (!reducedMotion) { z.x += z.dx; z.y += z.dy; }
+          if (z.x < -z.r) z.x = W + z.r;
+          if (z.x > W + z.r) z.x = -z.r;
+          if (z.y < -z.r) z.y = H + z.r;
+          if (z.y > H + z.r) z.y = -z.r;
+          var pulseOp = 0.04 + 0.04 * Math.sin(t / z.period * Math.PI * 2 + z.phase);
+          var flareElapsed = now - z.flareTime;
+          if (flareElapsed < 300 && flareElapsed > 0) pulseOp += 0.07 * Math.max(0, 1 - flareElapsed / 300);
+          var grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.r);
+          grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (pulseOp * fadeOpacity * intensityMult) + ')');
+          grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(z.x - z.r, z.y - z.r, z.r * 2, z.r * 2);
+        }
+      }
+
+      // --- Draw dispatch ---
+      var drawFns = {
+        architect: drawGrid,
+        ghost: drawFog,
+        circuit: drawStreaks,
+        twam: drawWaveform,
+        minimalist: drawMinimalist,
+        operator: drawRadar,
+        engineer: drawTraces,
+        phantom: drawGlitch,
+        builder: drawBuilder,
+        nocturnal: drawHeat
+      };
+      var initFns = {
+        architect: initGrid,
+        ghost: initFog,
+        circuit: initStreaks,
+        minimalist: initMinimalist,
+        operator: initRadar,
+        engineer: initTraces,
+        phantom: initGlitch,
+        builder: initBuilder,
+        nocturnal: initHeat
+      };
+
+      function startAmbient(archKey, splash) {
+        if (reducedMotion) return;
+        activeArch = archKey;
+        fadeTarget = 1;
+        fadeOpacity = 0;
+        intensityMult = 1;
+        intensityTarget = 1;
+        if (initFns[archKey]) initFns[archKey]();
+        if (splash) {
+          // Splash intensify: boost to 1.5x briefly when name appears
+          setTimeout(function () {
+            intensityTarget = 1.5;
+            setTimeout(function () { intensityTarget = 1; }, 200);
+          }, 300);
+        }
+        if (!running) { running = true; ambientLoop(); }
+      }
+
+      function stopAmbient() {
+        fadeTarget = 0;
+      }
+
+      function ambientLoop() {
+        if (!running) return;
+        var now = performance.now();
+        ctx.clearRect(0, 0, W, H);
+
+        // Fade in/out
+        if (fadeOpacity < fadeTarget) fadeOpacity = Math.min(fadeOpacity + 0.015, fadeTarget);
+        else if (fadeOpacity > fadeTarget) fadeOpacity = Math.max(fadeOpacity - 0.02, fadeTarget);
+
+        // Intensity lerp
+        intensityMult += (intensityTarget - intensityMult) * 0.05;
+
+        if (fadeOpacity <= 0 && fadeTarget <= 0) {
+          activeArch = null;
+          running = false;
+          return;
+        }
+
+        if (activeArch && drawFns[activeArch]) {
+          drawFns[activeArch](now);
+        }
+
+        requestAnimationFrame(ambientLoop);
+      }
+
+      // Expose to outer scope
+      window._ambientSystem = {
+        start: startAmbient,
+        stop: stopAmbient
+      };
+    })();
 
     // ---- Particle background ----
     (function () {
