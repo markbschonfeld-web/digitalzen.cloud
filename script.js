@@ -163,6 +163,7 @@
   var quizColor = null;        // choice-reactive color during quiz
   var bursts = [];             // click-point particle bursts
   var answerHistory = [];      // tracks {trait, screenIndex} for back navigation
+  var referredFrom = null;     // friend's archetype key if arrived via ?r= link
   var particleProfiles = {
     architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
     ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
@@ -241,9 +242,9 @@
     var nextEl = quiz.querySelector('[data-screen="' + name + '"]');
     if (!nextEl) { transitioning = false; return; }
 
-    // Stop ambient system when leaving result or splash screens
+    // Stop ambient system when leaving result/splash/analyzing (unless going to result)
     var currentName = currentEl ? currentEl.getAttribute('data-screen') : '';
-    if ((currentName === 'result' || currentName === 'splash') && name !== 'result' && window._ambientSystem) {
+    if ((currentName === 'result' || currentName === 'splash' || currentName === 'analyzing') && name !== 'result' && name !== 'analyzing' && window._ambientSystem) {
       window._ambientSystem.stop();
     }
 
@@ -275,6 +276,12 @@
         var archKey = getResult();
         renderResult(archKey);
         var arch = archetypes[archKey];
+
+        // Start ambient at low intensity during analysis
+        if (window._ambientSystem) {
+          window._ambientSystem.start(archKey, false);
+          window._ambientSystem.setIntensity(0.3);
+        }
 
         var analyzingScreen = quiz.querySelector('[data-screen="analyzing"]');
         var phaseScan = document.getElementById('azPhaseScan');
@@ -375,6 +382,11 @@
           nextScreen();
         }, 4800);
       }
+
+      // Ramp ambient to full intensity when entering result
+      if (name === 'result' && window._ambientSystem) {
+        window._ambientSystem.setIntensity(1);
+      }
     }, 260); // matches CSS fade-out duration
   }
 
@@ -463,8 +475,8 @@
     // Body paragraphs start at 1.4s (set via baseDelay above)
     var afterBody = baseDelay + arch.body.length * 0.2;
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.2) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 0.6) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.2) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
 
     // Rarity slot machine — random numbers tick before settling on real %
     var rarityFinal = arch.rarity;
@@ -509,6 +521,26 @@
         }
       }, pingDelay);
     }
+
+    // Show comparison line if visitor came from a friend's share link
+    var compEl = document.getElementById('resultComparison');
+    if (compEl && referredFrom) {
+      var friendArch = null;
+      Object.keys(archetypes).forEach(function (k) {
+        if (archetypes[k].key === referredFrom) friendArch = archetypes[k];
+      });
+      if (friendArch) {
+        if (referredFrom === arch.key) {
+          compEl.textContent = 'Your friend got ' + friendArch.name + ' too. Same frequency.';
+        } else {
+          compEl.textContent = 'Your friend got ' + friendArch.name + '. You\u2019re different.';
+        }
+      }
+    }
+
+    // Show retake link
+    var retakeEl = document.getElementById('retakeLink');
+    if (retakeEl) retakeEl.style.display = '';
   }
 
   // ---- Ripple effect at click point ----
@@ -590,7 +622,20 @@
     var arch = archetypes[currentArchKey];
     if (!arch) return;
     var shareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
-    var text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+    var text;
+    if (referredFrom) {
+      var friendArch = null;
+      Object.keys(archetypes).forEach(function (k) {
+        if (archetypes[k].key === referredFrom) friendArch = archetypes[k];
+      });
+      if (friendArch && referredFrom !== arch.key) {
+        text = 'My friend got ' + friendArch.name + '. I got ' + arch.name + '. What\u2019s your night mode?';
+      } else {
+        text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+      }
+    } else {
+      text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+    }
 
     // Update meta tags for direct URL sharing
     updateMetaTags(arch, shareUrl);
@@ -686,12 +731,17 @@
     if (!archLookup || !archetypes[archLookup]) return false;
 
     var arch = archetypes[archLookup];
+    referredFrom = arch.key;
     var splashEl = quiz.querySelector('[data-screen="splash"]');
     document.getElementById('splashArchetype').textContent = arch.name;
 
     // Set freq tag
     var freqTag = document.getElementById('splashFreqTag');
     if (freqTag) freqTag.textContent = arch.freqTag;
+
+    // Set rarity on splash
+    var splashRarity = document.getElementById('splashRarity');
+    if (splashRarity) splashRarity.textContent = arch.rarity;
 
     // Apply archetype data attribute for themed styling
     splashEl.setAttribute('data-archetype', arch.key);
@@ -767,6 +817,24 @@
     var navBrand = document.getElementById('navBrand');
     if (navBrand) {
       navBrand.addEventListener('click', function (e) {
+        e.preventDefault();
+        traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
+        quizProgress = 0;
+        currentArchKey = null;
+        answerHistory = [];
+        if (window._ambientSystem) window._ambientSystem.stop();
+        screenOrder[0] = 'intro';
+        transitionTo(0);
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      });
+    }
+
+    // Retake link — reset and restart quiz
+    var retakeLink = document.getElementById('retakeLink');
+    if (retakeLink) {
+      retakeLink.addEventListener('click', function (e) {
         e.preventDefault();
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
@@ -1416,10 +1484,12 @@
         intensityTarget = 1;
         if (initFns[archKey]) initFns[archKey]();
         if (splash) {
-          // Splash intensify: boost to 1.5x briefly when name appears
+          // Splash: elevated baseline intensity
+          intensityTarget = 1.4;
+          // Brief boost when name appears
           setTimeout(function () {
-            intensityTarget = 1.5;
-            setTimeout(function () { intensityTarget = 1; }, 200);
+            intensityTarget = 1.6;
+            setTimeout(function () { intensityTarget = 1.4; }, 200);
           }, 300);
         }
         if (!running) { running = true; ambientLoop(); }
@@ -1457,7 +1527,8 @@
       // Expose to outer scope
       window._ambientSystem = {
         start: startAmbient,
-        stop: stopAmbient
+        stop: stopAmbient,
+        setIntensity: function (val) { intensityTarget = val; }
       };
     })();
 
