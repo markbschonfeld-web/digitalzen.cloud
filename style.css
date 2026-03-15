@@ -74,16 +74,51 @@ em, i, cite { font-style: normal; }
   max-width: 1100px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between;
 }
-.nav__brand { display: flex; flex-direction: column; gap: 1px; }
+.nav__brand {
+  display: flex; flex-direction: column; gap: 2px;
+  text-decoration: none; cursor: pointer;
+  transition: opacity 0.3s var(--ease);
+}
+.nav__brand:hover { opacity: 0.8; }
+.nav__brand:hover .nav__logo { animation: logoGlitch 0.4s ease-out; }
 .nav__logo {
   font-family: var(--font-display);
-  font-size: 0.7rem; font-weight: 700;
-  letter-spacing: 0.15em; color: var(--text);
+  font-size: 0.9rem; font-weight: 700;
+  letter-spacing: 0.18em; color: var(--text);
+  position: relative;
+  animation: logoPulse 4s ease-in-out infinite;
+}
+.nav__logo::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 100%; height: 1.5px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  opacity: 0.5;
+  animation: logoScan 3s ease-in-out infinite;
 }
 .nav__tagline {
-  font-size: 0.55rem; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
+  font-size: 0.6rem; font-weight: 400;
+  letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--text-muted);
+}
+@keyframes logoPulse {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50% { text-shadow: 0 0 8px rgba(196, 30, 30, 0.15); }
+}
+@keyframes logoScan {
+  0%, 100% { transform: scaleX(0); transform-origin: left; }
+  40% { transform: scaleX(1); transform-origin: left; }
+  60% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+@keyframes logoGlitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-1px, 1px); }
+  40% { transform: translate(1px, -1px); }
+  60% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 0); }
+  100% { transform: translate(0); }
 }
 .nav__issue {
   font-family: var(--font-mono);
@@ -124,7 +159,7 @@ em, i, cite { font-style: normal; }
 
 .screen--result {
   justify-content: flex-start;
-  padding-top: 4rem;
+  padding-top: 5.5rem;
 }
 
 .screen__inner {
@@ -171,7 +206,7 @@ em, i, cite { font-style: normal; }
 .screen__label {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.55rem; font-weight: 500;
+  font-size: 0.75rem; font-weight: 500;
   letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--red);
   margin-bottom: 1.5rem;
@@ -203,19 +238,94 @@ em, i, cite { font-style: normal; }
   opacity: 0; animation: clipReveal 0.3s linear 1.2s forwards;
 }
 
-/* Splash */
+/* Splash — themed to friend's archetype */
+.screen--splash {
+  --splash-color: 196, 30, 30;
+}
+.screen--splash .screen__label {
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  margin-bottom: 1rem;
+}
+.screen__ambient--splash {
+  background: radial-gradient(ellipse 70% 60% at 50% 45%,
+    rgba(var(--splash-color), 0.1) 0%,
+    transparent 70%);
+  animation: splashAmbPulse 3s ease-in-out infinite;
+}
+@keyframes splashAmbPulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.95); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+
+/* Concentric rings — centered on content area */
+.splash__rings {
+  position: absolute;
+  top: 45%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0; height: 0;
+  z-index: 1;
+}
+.splash__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--splash-color), 0.1);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.splash__ring--1 {
+  width: 280px; height: 280px;
+  animation: splashRing 6s linear infinite;
+}
+.splash__ring--2 {
+  width: 450px; height: 450px;
+  border-color: rgba(var(--splash-color), 0.06);
+  animation: splashRing 8s linear infinite reverse;
+}
+.splash__ring--3 {
+  width: 650px; height: 650px;
+  border-color: rgba(var(--splash-color), 0.03);
+  animation: splashRing 12s linear infinite;
+}
+@keyframes splashRing {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.splash__ring--1 { border-top-width: 2px; }
+.splash__ring--2 { border-left-width: 2px; }
+.splash__ring--3 { border-bottom-width: 2px; }
+
+.splash__freq-tag {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(var(--splash-color), 0.85);
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: clipReveal 0.3s linear 0.3s forwards;
+}
+
 .splash__archetype {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-size: clamp(3rem, 10vw, 5.5rem);
   font-weight: 700; line-height: 1;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  text-shadow: 0 0 60px rgba(var(--splash-color), 0.35),
+               0 0 120px rgba(var(--splash-color), 0.12);
+  animation: splashNameReveal 0.6s var(--ease) 0.2s both;
 }
+@keyframes splashNameReveal {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .splash__sub {
-  font-size: 1rem; font-weight: 300;
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem); font-weight: 300;
   color: var(--text-secondary);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 .splash__sub em { color: var(--red); font-style: normal; font-weight: 500; }
 
@@ -352,8 +462,8 @@ em, i, cite { font-style: normal; }
 .result__label {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.55rem; font-weight: 500;
-  letter-spacing: 0.25em; text-transform: uppercase;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase;
   color: var(--red);
   margin-bottom: 1.25rem;
   opacity: 0;
@@ -561,7 +671,7 @@ em, i, cite { font-style: normal; }
   display: block; text-align: center;
   font-family: var(--font-mono);
   font-size: 0.68rem; color: var(--text-muted);
-  letter-spacing: 0.06em; margin-top: 0.6rem;
+  letter-spacing: 0.06em; margin-top: 0; margin-bottom: 0.75rem;
 }
 .capture__success {
   display: none; align-items: center; justify-content: center;
@@ -687,11 +797,12 @@ em, i, cite { font-style: normal; }
   .progress__label { font-size: 0.65rem; }
 
   /* ── Intro / splash ── */
-  .screen__label { font-size: 0.65rem; }
-  .screen__proof { font-size: 0.7rem; }
+  .screen__label { font-size: 0.8rem; }
+  .screen__proof { font-size: 0.75rem; }
+  .splash__freq-tag { font-size: 0.75rem; }
 
   /* ── Result screen ── */
-  .result__label { font-size: 0.65rem; }
+  .result__label { font-size: 0.8rem; }
   .result__freq-tag { font-size: 0.75rem; }
   .result__freq-label { font-size: 0.65rem; }
   .result__body p { font-size: 0.95rem; line-height: 1.85; }
@@ -964,7 +1075,7 @@ em, i, cite { font-style: normal; }
   pointer-events: none;
 }
 
-/* ─── Analyzing interstitial ─── */
+/* ─── Analyzing interstitial — cinematic system analysis ─── */
 .screen--analyzing {
   justify-content: center;
 }
@@ -974,62 +1085,11 @@ em, i, cite { font-style: normal; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-}
-.analyzing__scanner {
-  position: absolute;
-  left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--red), transparent);
-  box-shadow: 0 0 20px rgba(196, 30, 30, 0.6),
-              0 0 60px rgba(196, 30, 30, 0.2);
-  animation: scanDown 2s ease-in-out infinite;
-}
-@keyframes scanDown {
-  0%   { top: 30%; opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { top: 70%; opacity: 0; }
-}
-.analyzing__ring {
-  width: 56px; height: 56px;
-  border: 1px solid rgba(196, 30, 30, 0.25);
-  border-top-color: var(--red);
-  border-radius: 50%;
-  animation: ringRotate 1s linear infinite;
-}
-@keyframes ringRotate {
-  to { transform: rotate(360deg); }
-}
-.analyzing__label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--red);
-  animation: analyzePulse 1.2s ease-in-out infinite;
-}
-@keyframes analyzePulse {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 1; }
-}
-.analyzing__dots {
-  display: flex;
-  gap: 6px;
-}
-.analyzing__dots span {
-  display: block;
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--red);
-  animation: dotBounce 1.4s ease-in-out infinite;
-}
-.analyzing__dots span:nth-child(2) { animation-delay: 0.15s; }
-.analyzing__dots span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes dotBounce {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-  40%           { opacity: 1; transform: scale(1.3); }
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
 /* ─── Option number hints (keyboard nav) ─── */
@@ -1068,20 +1128,7 @@ em, i, cite { font-style: normal; }
   animation: microShake 0.12s linear;
 }
 
-/* ─── Analyzing screen flash ─── */
-.screen--analyzing::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.04);
-  animation: analyzeFlash 0.4s ease-out forwards;
-  pointer-events: none;
-  z-index: 1;
-}
-@keyframes analyzeFlash {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
+/* (analyzing flash moved to enhanced section) */
 
 /* ─── Result screen — scan line sweep on reveal ─── */
 .screen--result::before {
@@ -1432,7 +1479,7 @@ em, i, cite { font-style: normal; }
 
 
 /* ============================================
-   PHASE 2 � Feedback Refinements
+   PHASE 2 � Feedback Refinements
    ============================================ */
 
 /* --- Trait-colored selection borders --- */
@@ -1535,172 +1582,214 @@ em, i, cite { font-style: normal; }
 
 
 /* ============================================
-   ENHANCED ANALYZING SCREEN
-   Three concentric rings + data readout + locked state
+   ANALYZING SCREEN — Cinematic System Analysis
+   Clean typographic approach, no spinner rings
    ============================================ */
 
-/* Ambient pulse behind the rings */
+/* Ambient — subtle breathing glow */
 .screen--analyzing .screen__ambient {
-  background: radial-gradient(ellipse 65% 65% at 50% 50%,
-    rgba(196, 30, 30, 0.07) 0%,
-    rgba(196, 30, 30, 0.03) 40%,
-    transparent 70%);
-  animation: analyzingAmb 1s ease-in-out infinite;
-}
-@keyframes analyzingAmb {
-  0%, 100% { opacity: 0.5; transform: scale(0.96); }
-  50%       { opacity: 1;   transform: scale(1.08); }
+  background: radial-gradient(ellipse 50% 40% at 50% 50%,
+    rgba(196, 30, 30, 0.05) 0%, transparent 70%);
+  transition: opacity 0.5s ease;
 }
 
-/* Enhanced scanner � brighter, fills width */
-.analyzing__scanner {
-  left: 0; right: 0;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(196, 30, 30, 0.2) 15%,
-    var(--red) 38%,
-    rgba(255, 255, 255, 0.5) 50%,
-    var(--red) 62%,
-    rgba(196, 30, 30, 0.2) 85%,
-    transparent 100%);
-  box-shadow:
-    0 0 30px rgba(196, 30, 30, 1),
-    0 0 80px rgba(196, 30, 30, 0.45),
-    0 0 140px rgba(196, 30, 30, 0.15);
-}
-
-/* Main ring � bigger, faster */
-.analyzing__ring {
-  position: relative;
-  width: 84px; height: 84px;
-  border-color: rgba(196, 30, 30, 0.18);
-  border-top-color: var(--red);
-  animation: ringRotate 0.82s linear infinite;
-}
-
-/* Center pulse dot */
-.analyzing__ring::before {
-  content: '';
+/* Phase management */
+.az__phase {
   position: absolute;
-  top: 50%; left: 50%;
-  width: 7px; height: 7px;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.az__phase.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Phase 1: Scan — large percentage + progress bar ── */
+.az__pct {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 15vw, 8rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.az__pct::after {
+  content: '%';
+  font-size: 0.4em;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 0.05em;
+  vertical-align: super;
+}
+.az__bar {
+  width: min(280px, 70vw);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+.az__bar-fill {
+  height: 100%;
+  width: 0%;
   background: var(--red);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 14px rgba(196, 30, 30, 1),
-              0 0 30px rgba(196, 30, 30, 0.6);
-  animation: coreDot 0.55s ease-in-out infinite;
+  border-radius: 1px;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 12px rgba(196, 30, 30, 0.6);
 }
-@keyframes coreDot {
-  0%, 100% { transform: translate(-50%, -50%) scale(0.8);  opacity: 0.55; }
-  50%       { transform: translate(-50%, -50%) scale(1.65); opacity: 1; }
-}
-
-/* Second ring (mid) */
-.analyzing__ring::after {
-  content: '';
-  position: absolute;
-  inset: -22px;
-  border: 1px solid transparent;
-  border-top-color: rgba(196, 30, 30, 0.45);
-  border-bottom-color: rgba(196, 30, 30, 0.15);
-  border-radius: 50%;
-  animation: ringRotate 1.95s linear infinite reverse;
-}
-
-/* JS-injected outer rings */
-.analyzing__ring--2 {
-  position: absolute;
-  width: 144px; height: 144px;
-  border: 1px solid transparent;
-  border-top: 1px solid rgba(196, 30, 30, 0.28);
-  border-right: 1px solid rgba(196, 30, 30, 0.08);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: ringRotate 3.2s linear infinite;
-}
-.analyzing__ring--3 {
-  position: absolute;
-  width: 210px; height: 210px;
-  border: 1px solid rgba(196, 30, 30, 0.06);
-  border-left-color: rgba(196, 30, 30, 0.2);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: ringRotate 5.5s linear infinite reverse;
-}
-
-/* Label cursor blink */
-.analyzing__label::after {
-  content: '_';
-  display: inline-block;
-  margin-left: 2px;
+.az__status {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
   color: var(--red);
-  animation: blinker 0.8s step-end infinite;
+  margin-top: 1rem;
+  opacity: 0.7;
 }
-@keyframes blinker {
+.az__status::after {
+  content: '_';
+  margin-left: 2px;
+  animation: azBlink 0.7s step-end infinite;
+}
+@keyframes azBlink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
 
-/* Data readout container (JS-injected) */
-.analyzing__data {
+/* ── Phase 2: Traits — clean grid readout ── */
+.az__trait-grid {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+  width: min(320px, 80vw);
+}
+.az__trait-row {
+  display: flex;
   align-items: center;
-  gap: 5px;
-  min-height: 52px;
-}
-.analyzing__data-line {
-  font-family: var(--font-mono);
-  font-size: 0.48rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(196, 30, 30, 0.75);
+  gap: 0.75rem;
   opacity: 0;
-  transition: opacity 200ms ease;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s var(--ease);
 }
-.analyzing__data-line--locked {
-  color: var(--text);
-  letter-spacing: 0.32em;
-}
-
-/* LOCKED state � rings slow/pulse, label changes */
-.analyzing--locked .analyzing__ring {
-  animation-duration: 3s;
-  border-top-color: var(--text);
-  box-shadow: 0 0 0 4px rgba(196, 30, 30, 0.08),
-              0 0 40px rgba(196, 30, 30, 0.4);
-  animation: lockedRingPulse 0.4s ease-out forwards, ringRotate 3s linear 0.4s infinite;
-}
-@keyframes lockedRingPulse {
-  0%  { box-shadow: 0 0 0 0px rgba(196, 30, 30, 0.6); }
-  50% { box-shadow: 0 0 0 24px rgba(196, 30, 30, 0);  }
-  100%{ box-shadow: 0 0 0 0px rgba(196, 30, 30, 0); }
-}
-.analyzing--locked .analyzing__label {
-  animation: none;
+.az__trait-row.show {
   opacity: 1;
-  color: var(--text);
+  transform: translateY(0);
 }
-.analyzing--locked .analyzing__label::after { display: none; }
+.az__trait-label {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  width: 80px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.az__trait-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.az__trait-value {
+  position: relative;
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 0.8s var(--ease);
+}
+.az__trait-row:nth-child(1) .az__trait-value { background: var(--red); }
+.az__trait-row:nth-child(2) .az__trait-value { background: rgba(255, 255, 255, 0.4); }
+.az__trait-row:nth-child(3) .az__trait-value { background: rgba(232, 93, 58, 0.8); }
+.az__trait-row:nth-child(4) .az__trait-value { background: rgba(200, 160, 40, 0.8); }
+.az__trait-num {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  width: 32px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
 
-/* Screen shake on lock */
-@keyframes screenShake {
-  0%   { transform: translate(0, 0); }
-  15%  { transform: translate(-4px, -2px); }
-  30%  { transform: translate(4px, 2px); }
-  45%  { transform: translate(-3px, 0); }
-  60%  { transform: translate(2px, 1px); }
-  80%  { transform: translate(-1px, -1px); }
-  100% { transform: translate(0, 0); }
+/* ── Phase 3: Lock — archetype name slam ── */
+.az__lock-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 1rem;
 }
-.analyzing--locked {
-  animation: screenShake 0.25s ease-out;
+.az__lock-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+  text-shadow:
+    0 0 60px rgba(196, 30, 30, 0.5),
+    0 0 120px rgba(196, 30, 30, 0.2);
+  transform: scale(0.8);
+  animation: azNameSlam 0.5s var(--ease) forwards;
+}
+@keyframes azNameSlam {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Screen flash on lock */
+.screen--analyzing.az-flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(196, 30, 30, 0.08);
+  animation: azFlash 0.3s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+@keyframes azFlash {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Scan line that sweeps during phase 1 */
+.screen--analyzing.az-scanning::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 30, 30, 0.4), transparent);
+  box-shadow: 0 0 20px rgba(196, 30, 30, 0.3);
+  z-index: 3;
+  pointer-events: none;
+  animation: azScanLine 2s ease-in-out infinite;
+}
+@keyframes azScanLine {
+  0%   { top: 20%; opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { top: 80%; opacity: 0; }
 }
 
 
 /* ============================================
-   SEE WHAT WE BUILT � Game-Like Interactions
+   SEE WHAT WE BUILT � Game-Like Interactions
    ============================================ */
 
 /* Cursor spotlight (set by JS mousemove) */
@@ -1716,7 +1805,7 @@ em, i, cite { font-style: normal; }
               transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hover � stronger charge */
+/* Hover � stronger charge */
 @media (hover: hover) {
   .btn--korfyr:hover {
     transform: scale(1.05) translateY(-1px);
@@ -1762,4 +1851,231 @@ em, i, cite { font-style: normal; }
 @keyframes korfyrPing {
   0%   { transform: scale(1);   opacity: 0.8; }
   100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* ============================================
+   BACK BUTTON — quiz navigation (Q2-Q4)
+   ============================================ */
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 150ms linear;
+  flex-shrink: 0;
+}
+.back-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.back-btn:active {
+  transform: scale(0.92);
+}
+
+/* ============================================
+   2A: ENHANCED ANALYZING INTERSTITIAL
+   ============================================ */
+
+/* Scan line — darker vignette edges during scan */
+.screen--analyzing.az-scanning .screen__ambient {
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(196, 30, 30, 0.08) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.3) 100%);
+}
+
+/* Trait bar tick flash */
+.az__trait-value::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -2px; bottom: -2px;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.az__trait-row.show .az__trait-value::after {
+  animation: traitTick 0.4s ease-out 0.8s forwards;
+}
+@keyframes traitTick {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Radial light expansion on name reveal */
+.screen--analyzing.az-flash .screen__ambient {
+  background: radial-gradient(circle at 50% 50%,
+    rgba(196, 30, 30, 0.15) 0%,
+    rgba(196, 30, 30, 0.05) 30%,
+    transparent 60%);
+  animation: azRadialPulse 0.8s ease-out forwards;
+}
+@keyframes azRadialPulse {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* ============================================
+   2B: ENHANCED RESULT REVEAL
+   ============================================ */
+
+/* Text-shadow pulse after flickerIn */
+.screen--result.active .result__archetype {
+  animation: flickerIn 0.6s linear 0.4s forwards, archShadowPulse 2.5s ease-in-out 1.2s infinite;
+}
+@keyframes archShadowPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.15); }
+}
+
+/* Frequency bar pulse wave */
+.screen--result.active .result__freq-fill {
+  animation: barFill 0.6s linear 1s forwards, freqPulse 2s ease-in-out 1.8s infinite;
+}
+@keyframes freqPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(196, 30, 30, 0.4); }
+  50%      { box-shadow: 0 0 16px rgba(196, 30, 30, 0.7), 0 0 30px rgba(196, 30, 30, 0.2); }
+}
+
+/* Body paragraph slide-up */
+.screen--result.active .result__body p {
+  animation: paraSlideUp 0.4s ease-out var(--delay, 1.4s) forwards;
+}
+@keyframes paraSlideUp {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Rarity number flash */
+.result__rarity {
+  transition: color 0.15s ease;
+}
+
+/* ============================================
+   2C: ENHANCED REFERRAL SPLASH
+   ============================================ */
+
+/* Sequential ring entrance from center outward */
+.screen--splash.active .splash__ring--1 {
+  animation: splashRingEntrance 0.6s ease-out 0.2s both, splashRing 6s linear 0.8s infinite;
+}
+.screen--splash.active .splash__ring--2 {
+  animation: splashRingEntrance 0.8s ease-out 0.4s both, splashRing 8s linear 1.2s infinite reverse;
+}
+.screen--splash.active .splash__ring--3 {
+  animation: splashRingEntrance 1s ease-out 0.6s both, splashRing 12s linear 1.6s infinite;
+}
+@keyframes splashRingEntrance {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* flickerIn on archetype name in splash */
+.screen--splash.active .splash__archetype {
+  animation: flickerIn 0.6s linear 0.3s forwards;
+  opacity: 0;
+}
+
+/* Drifting ambient gradient */
+.screen--splash.active .screen__ambient--splash {
+  animation: splashAmbDrift 8s ease-in-out infinite;
+}
+@keyframes splashAmbDrift {
+  0%, 100% {
+    background-position: 50% 45%;
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  33% {
+    background-position: 45% 50%;
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  66% {
+    background-position: 55% 40%;
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* CTA breathe on FIND OUT button */
+.screen--splash .btn--pulse {
+  animation: clipReveal 0.3s linear 0.9s forwards, ctaBreathe 3s ease-in-out 1.5s infinite;
+}
+@keyframes ctaBreathe {
+  0%, 100% { box-shadow: 0 0 0 rgba(240, 237, 232, 0); }
+  50%      { box-shadow: 0 0 20px rgba(240, 237, 232, 0.1), 0 0 40px rgba(240, 237, 232, 0.05); }
+}
+
+/* ============================================
+   2D: ENHANCED QUIZ TRANSITIONS
+   ============================================ */
+
+/* Option hover — left border glow */
+@media (hover: hover) {
+  .option:hover {
+    box-shadow: inset 3px 0 0 var(--red), 0 0 15px rgba(196, 30, 30, 0.08);
+  }
+}
+
+/* Option selected — enhanced glow */
+.option.selected {
+  box-shadow: inset 3px 0 0 var(--red), 0 0 20px rgba(196, 30, 30, 0.12);
+}
+
+/* Progress bar brightness pulse on new question */
+.screen.active .progress__fill {
+  animation: barPulse 0.8s ease-out, progressGlow 2s ease-in-out 0.8s infinite;
+}
+@keyframes progressGlow {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.3); }
+}
+
+/* ============================================
+   ACCESSIBILITY — prefers-reduced-motion updates
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .back-btn { transition: none; }
+  .splash__ring { animation: none !important; }
+  .screen--splash.active .splash__archetype {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--splash.active .screen__ambient--splash {
+    animation: none !important;
+  }
+  .screen--splash .btn--pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--result.active .result__archetype {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--result.active .result__freq-fill {
+    animation: none !important;
+    width: var(--freq, 85%) !important;
+  }
+  .screen--result.active .result__body p {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .screen.active .progress__fill {
+    animation: none !important;
+  }
+  .screen--analyzing.az-flash .screen__ambient {
+    animation: none !important;
+  }
+  .az__trait-row.show .az__trait-value::after {
+    animation: none !important;
+  }
 }

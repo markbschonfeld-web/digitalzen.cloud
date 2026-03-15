@@ -11,7 +11,7 @@
   <meta property="og:description" content="A 30-second read. You already have a ritual. Let's see what it says about you." />
   <meta property="og:url" content="https://digitalzen.cloud" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://digitalzen.cloud/og-image.svg" />
+  <meta property="og:image" content="https://digitalzen.cloud/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Digital Zen" />
@@ -19,9 +19,9 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="What's Your Night Mode?" />
   <meta name="twitter:description" content="A 30-second read." />
-  <meta name="twitter:image" content="https://digitalzen.cloud/og-image.svg" />
+  <meta name="twitter:image" content="https://digitalzen.cloud/og-image.png" />
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -44,10 +44,10 @@
   <!-- Nav -->
   <nav class="nav" role="banner">
     <div class="nav__inner">
-      <div class="nav__brand">
+      <a class="nav__brand" id="navBrand" href="#" aria-label="Restart quiz">
         <span class="nav__logo">DIGITAL ZEN</span>
         <span class="nav__tagline">After Dark</span>
-      </div>
+      </a>
       <span class="nav__issue">Issue 001</span>
     </div>
   </nav>
@@ -57,9 +57,15 @@
 
     <!-- Friend Splash -->
     <section class="screen screen--splash" data-screen="splash">
-      <div class="screen__ambient" aria-hidden="true"></div>
+      <div class="screen__ambient screen__ambient--splash" aria-hidden="true"></div>
+      <div class="splash__rings" aria-hidden="true">
+        <div class="splash__ring splash__ring--1"></div>
+        <div class="splash__ring splash__ring--2"></div>
+        <div class="splash__ring splash__ring--3"></div>
+      </div>
       <div class="screen__inner">
         <span class="screen__label">Your friend's result</span>
+        <span class="splash__freq-tag" id="splashFreqTag"></span>
         <h2 class="splash__archetype" id="splashArchetype">The Architect</h2>
         <p class="splash__sub">What's <em>your</em> night mode?</p>
         <button class="btn btn--primary btn--pulse" id="splashBtn" type="button">
@@ -122,6 +128,9 @@
       <div class="screen__ambient screen__ambient--q2" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 2 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 50%"></div></div>
           <span class="progress__label">2 / 4</span>
         </div>
@@ -152,6 +161,9 @@
       <div class="screen__ambient screen__ambient--q3" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 3 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 75%"></div></div>
           <span class="progress__label">3 / 4</span>
         </div>
@@ -182,6 +194,9 @@
       <div class="screen__ambient screen__ambient--q4" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 4 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 100%"></div></div>
           <span class="progress__label">4 / 4</span>
         </div>
@@ -210,12 +225,18 @@
     <!-- Analyzing Interstitial -->
     <section class="screen screen--analyzing" data-screen="analyzing">
       <div class="screen__ambient" aria-hidden="true"></div>
-      <div class="analyzing">
-        <div class="analyzing__scanner" aria-hidden="true"></div>
-        <div class="analyzing__ring" aria-hidden="true"></div>
-        <span class="analyzing__label">Reading your frequency</span>
-        <div class="analyzing__dots" aria-hidden="true">
-          <span></span><span></span><span></span>
+      <div class="analyzing" id="analyzingRoot">
+        <div class="az__phase az__phase--scan" id="azPhaseScan">
+          <span class="az__pct" id="azPct">0</span>
+          <div class="az__bar"><div class="az__bar-fill" id="azBarFill"></div></div>
+          <span class="az__status" id="azStatus">Reading frequency</span>
+        </div>
+        <div class="az__phase az__phase--traits" id="azPhaseTraits">
+          <div class="az__trait-grid" id="azTraitGrid"></div>
+        </div>
+        <div class="az__phase az__phase--lock" id="azPhaseLock">
+          <span class="az__lock-label">Match found</span>
+          <span class="az__lock-name" id="azLockName"></span>
         </div>
       </div>
     </section>
@@ -232,6 +253,15 @@
             <span class="result__freq-label">Frequency</span>
             <div class="result__freq-bar"><div class="result__freq-fill" id="resultFreq"></div></div>
           </div>
+        </div>
+
+        <div class="result__share">
+          <button class="btn btn--share" id="shareBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>Share Your Result</span>
+          </button>
+          <span class="result__copied" id="copiedMsg">Copied. Send it.</span>
+          <span class="result__rarity" id="resultRarity"></span>
         </div>
 
         <div class="result__body" id="resultBody"></div>
@@ -252,19 +282,11 @@
           </a>
         </div>
 
-        <div class="result__share">
-          <button class="btn btn--share" id="shareBtn" type="button">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            <span>Share Your Result</span>
-          </button>
-          <span class="result__copied" id="copiedMsg">Copied. Send it.</span>
-          <span class="result__rarity" id="resultRarity"></span>
-        </div>
-
         <!-- Email Capture -->
         <div class="capture">
           <div class="capture__divider" aria-hidden="true"></div>
           <p class="capture__text">Want to know when we drop something new?</p>
+          <span class="capture__note">No spam. Just signal.</span>
           <form class="capture__form" id="captureForm">
             <div class="capture__input-wrap">
               <input
@@ -283,7 +305,6 @@
               <span class="capture__consent-text">I agree to receive emails from <strong>KORFYR</strong>, the sponsor of this experience. You can unsubscribe anytime.</span>
             </label>
             <span class="capture__error" id="captureError"></span>
-            <span class="capture__note">No spam. Just signal.</span>
           </form>
           <div class="capture__success" id="captureSuccess">
             <span class="capture__check">&#10003;</span>
