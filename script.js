@@ -625,6 +625,22 @@
       }
     });
 
+    // Nav logo — reset quiz to intro
+    var navBrand = document.getElementById('navBrand');
+    if (navBrand) {
+      navBrand.addEventListener('click', function (e) {
+        e.preventDefault();
+        traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
+        quizProgress = 0;
+        currentArchKey = null;
+        screenOrder[0] = 'intro';
+        transitionTo(0);
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      });
+    }
+
     quiz.addEventListener('click', function (e) {
       if (e.target.closest('.option')) handleOptionClick(e);
     });
