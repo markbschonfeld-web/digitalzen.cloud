@@ -57,9 +57,15 @@
 
     <!-- Friend Splash -->
     <section class="screen screen--splash" data-screen="splash">
-      <div class="screen__ambient" aria-hidden="true"></div>
+      <div class="screen__ambient screen__ambient--splash" aria-hidden="true"></div>
+      <div class="splash__rings" aria-hidden="true">
+        <div class="splash__ring splash__ring--1"></div>
+        <div class="splash__ring splash__ring--2"></div>
+        <div class="splash__ring splash__ring--3"></div>
+      </div>
       <div class="screen__inner">
         <span class="screen__label">Your friend's result</span>
+        <span class="splash__freq-tag" id="splashFreqTag"></span>
         <h2 class="splash__archetype" id="splashArchetype">The Architect</h2>
         <p class="splash__sub">What's <em>your</em> night mode?</p>
         <button class="btn btn--primary btn--pulse" id="splashBtn" type="button">
@@ -212,11 +218,18 @@
       <div class="screen__ambient" aria-hidden="true"></div>
       <div class="analyzing">
         <div class="analyzing__scanner" aria-hidden="true"></div>
-        <div class="analyzing__ring" aria-hidden="true"></div>
-        <span class="analyzing__label">Reading your frequency</span>
+        <div class="analyzing__rings" aria-hidden="true">
+          <div class="analyzing__ring"></div>
+        </div>
+        <div class="analyzing__hud" aria-hidden="true">
+          <div class="analyzing__traits" id="analyzingTraits"></div>
+        </div>
+        <span class="analyzing__label" id="analyzingLabel">Scanning frequency</span>
         <div class="analyzing__dots" aria-hidden="true">
           <span></span><span></span><span></span>
         </div>
+        <div class="analyzing__data" id="analyzingData"></div>
+        <div class="analyzing__result-preview" id="analyzingPreview" aria-hidden="true"></div>
       </div>
     </section>
 

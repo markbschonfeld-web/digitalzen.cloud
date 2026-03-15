@@ -262,54 +262,95 @@
       currentScreen = index;
       transitioning = false;
 
-      // Enhanced analyzing interstitial with concentric rings + data readout
+      // Enhanced analyzing interstitial — multi-phase dramatic reveal
       if (name === 'analyzing') {
         analyzingActive = true;
-        renderResult(getResult());
+        var archKey = getResult();
+        renderResult(archKey);
+        var arch = archetypes[archKey];
 
         var analyzingEl = document.querySelector('.analyzing');
+        var ringsContainer = analyzingEl.querySelector('.analyzing__rings');
+        var label = document.getElementById('analyzingLabel');
+        var traitsDiv = document.getElementById('analyzingTraits');
+        var dataDiv = document.getElementById('analyzingData');
+        var previewEl = document.getElementById('analyzingPreview');
 
-        // Inject outer concentric rings (positioned around the center ring)
+        // Reset state
+        analyzingEl.classList.remove('analyzing--locked', 'analyzing--reveal');
+        traitsDiv.innerHTML = '';
+        dataDiv.innerHTML = '';
+        previewEl.textContent = '';
+        previewEl.classList.remove('show');
+        label.textContent = 'Scanning frequency';
+
+        // Inject outer rings
         var ring2 = document.createElement('div');
         ring2.className = 'analyzing__ring analyzing__ring--2';
         var ring3 = document.createElement('div');
         ring3.className = 'analyzing__ring analyzing__ring--3';
-        analyzingEl.insertBefore(ring3, analyzingEl.firstChild);
-        analyzingEl.insertBefore(ring2, analyzingEl.firstChild);
+        var ring4 = document.createElement('div');
+        ring4.className = 'analyzing__ring analyzing__ring--4';
+        ringsContainer.appendChild(ring2);
+        ringsContainer.appendChild(ring3);
+        ringsContainer.appendChild(ring4);
 
-        // Inject data readout lines that stagger in
-        var dataDiv = document.createElement('div');
-        dataDiv.className = 'analyzing__data';
-        var dataLines = ['FREQ_SCAN •••', 'TRAIT_MAP •••', 'MATCH_QUERY •••', 'ARCHETYPE_LOCK'];
-        dataLines.forEach(function (text, i) {
-          var line = document.createElement('span');
-          line.className = 'analyzing__data-line';
-          line.textContent = text;
-          dataDiv.appendChild(line);
-          setTimeout(function () { line.style.opacity = '1'; }, 200 + i * 450);
+        // Phase 1 (0-1.2s): Trait bars scan in
+        var traitNames = { precision: 'PRECISION', stillness: 'STILLNESS', kinetic: 'KINETIC', generative: 'GENERATIVE' };
+        var maxTrait = 0;
+        Object.keys(traits).forEach(function (k) { if (traits[k] > maxTrait) maxTrait = traits[k]; });
+        var traitKeys = Object.keys(traitNames);
+        traitKeys.forEach(function (k, i) {
+          var bar = document.createElement('div');
+          bar.className = 'analyzing__trait';
+          var pct = maxTrait > 0 ? Math.round((traits[k] / maxTrait) * 100) : 0;
+          bar.innerHTML = '<span class="analyzing__trait-name">' + traitNames[k] + '</span>' +
+            '<div class="analyzing__trait-bar"><div class="analyzing__trait-fill" style="--target-width:' + pct + '%;animation-delay:' + (i * 0.15) + 's"></div></div>' +
+            '<span class="analyzing__trait-val">' + pct + '%</span>';
+          traitsDiv.appendChild(bar);
+          setTimeout(function () { bar.classList.add('show'); }, 200 + i * 200);
         });
-        analyzingEl.appendChild(dataDiv);
 
-        // LOCKED state at T=2000ms — rings slow, screen shakes, final line lights up
+        // Phase 2 (1.2-2.5s): Data readout lines
         setTimeout(function () {
-          analyzingEl.classList.add('analyzing--locked');
-          var lockLine = dataDiv.querySelectorAll('.analyzing__data-line');
-          if (lockLine[3]) {
-            lockLine[3].classList.add('analyzing__data-line--locked');
-            lockLine[3].style.opacity = '1';
-            lockLine[3].textContent = 'ARCHETYPE_LOCKED ✓';
-          }
-        }, 2000);
+          label.textContent = 'Mapping signature';
+          var dataLines = ['FREQ_SCAN ✓', 'TRAIT_MAP ✓', 'PATTERN_MATCH •••', 'ARCHETYPE_LOCK'];
+          dataLines.forEach(function (text, i) {
+            var line = document.createElement('span');
+            line.className = 'analyzing__data-line';
+            line.textContent = text;
+            dataDiv.appendChild(line);
+            setTimeout(function () { line.classList.add('show'); }, i * 350);
+          });
+        }, 1200);
 
-        // Clean up + advance after 2.5s
+        // Phase 3 (2.8s): LOCKED — shake + archetype name flash
+        setTimeout(function () {
+          label.textContent = 'Archetype locked';
+          analyzingEl.classList.add('analyzing--locked');
+          var lockLines = dataDiv.querySelectorAll('.analyzing__data-line');
+          if (lockLines[3]) {
+            lockLines[3].classList.add('analyzing__data-line--locked');
+            lockLines[3].textContent = 'ARCHETYPE_LOCKED ✓';
+          }
+          // Flash the archetype name
+          previewEl.textContent = arch.name;
+          previewEl.classList.add('show');
+        }, 2800);
+
+        // Clean up + advance after 4s
         setTimeout(function () {
           analyzingActive = false;
-          analyzingEl.classList.remove('analyzing--locked');
-          [ring2, ring3, dataDiv].forEach(function (el) {
+          analyzingEl.classList.remove('analyzing--locked', 'analyzing--reveal');
+          [ring2, ring3, ring4].forEach(function (el) {
             if (el.parentNode) el.parentNode.removeChild(el);
           });
+          traitsDiv.innerHTML = '';
+          dataDiv.innerHTML = '';
+          previewEl.textContent = '';
+          previewEl.classList.remove('show');
           nextScreen();
-        }, 2500);
+        }, 4200);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -508,14 +549,39 @@
     var shareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
     var text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
 
+    // Update meta tags for direct URL sharing
+    updateMetaTags(arch, shareUrl);
+
     if (navigator.share) {
-      navigator.share({ title: 'My Night Mode', text: text, url: shareUrl }).catch(function () {});
+      navigator.share({ title: 'I\u2019m ' + arch.name, text: text, url: shareUrl }).catch(function () {});
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(text + ' \u2192 ' + shareUrl).then(function () {
         copiedMsg.classList.add('show');
         setTimeout(function () { copiedMsg.classList.remove('show'); }, 2500);
       });
     }
+  }
+
+  function updateMetaTags(arch, shareUrl) {
+    var ogImage = 'https://digitalzen.cloud/og/' + arch.key + '.svg';
+    var title = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+    var desc = arch.body[0];
+    var metaUpdates = {
+      'og:title': title,
+      'og:description': desc,
+      'og:image': ogImage,
+      'og:url': shareUrl,
+      'twitter:title': title,
+      'twitter:description': desc,
+      'twitter:image': ogImage
+    };
+    Object.keys(metaUpdates).forEach(function (prop) {
+      var selector = prop.indexOf('twitter:') === 0
+        ? 'meta[name="' + prop + '"]'
+        : 'meta[property="' + prop + '"]';
+      var el = document.querySelector(selector);
+      if (el) el.setAttribute('content', metaUpdates[prop]);
+    });
   }
 
   // ---- Email capture ----
@@ -553,6 +619,20 @@
     });
   }
 
+  // ---- Archetype theme colors for splash ----
+  var archColors = {
+    architect: { r: 170, g: 185, b: 210 },
+    ghost: { r: 200, g: 200, b: 200 },
+    circuit: { r: 232, g: 93, b: 58 },
+    twam: { r: 200, g: 160, b: 40 },
+    minimalist: { r: 220, g: 220, b: 220 },
+    operator: { r: 42, g: 111, b: 255 },
+    engineer: { r: 80, g: 130, b: 200 },
+    phantom: { r: 150, g: 100, b: 190 },
+    builder: { r: 165, g: 130, b: 85 },
+    nocturnal: { r: 230, g: 45, b: 45 }
+  };
+
   // ---- Friend referral splash ----
   function checkReferral() {
     var params = new URLSearchParams(window.location.search);
@@ -563,11 +643,23 @@
     if (!archLookup || !archetypes[archLookup]) return false;
 
     var arch = archetypes[archLookup];
+    var splashEl = quiz.querySelector('[data-screen="splash"]');
     document.getElementById('splashArchetype').textContent = arch.name;
+
+    // Set freq tag
+    var freqTag = document.getElementById('splashFreqTag');
+    if (freqTag) freqTag.textContent = arch.freqTag;
+
+    // Apply archetype data attribute for themed styling
+    splashEl.setAttribute('data-archetype', arch.key);
+
+    // Set archetype color as CSS custom property for rings/glow
+    var c = archColors[arch.key] || { r: 196, g: 30, b: 30 };
+    splashEl.style.setProperty('--splash-color', c.r + ', ' + c.g + ', ' + c.b);
 
     var screens = quiz.querySelectorAll('.screen');
     screens.forEach(function (s) { s.classList.remove('active'); });
-    quiz.querySelector('[data-screen="splash"]').classList.add('active');
+    splashEl.classList.add('active');
 
     return true;
   }

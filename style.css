@@ -238,7 +238,70 @@ em, i, cite { font-style: normal; }
   opacity: 0; animation: clipReveal 0.3s linear 1.2s forwards;
 }
 
-/* Splash */
+/* Splash — themed to friend's archetype */
+.screen--splash {
+  --splash-color: 196, 30, 30;
+}
+.screen__ambient--splash {
+  background: radial-gradient(ellipse 60% 50% at 50% 35%,
+    rgba(var(--splash-color), 0.08) 0%,
+    transparent 70%);
+  animation: splashAmbPulse 3s ease-in-out infinite;
+}
+@keyframes splashAmbPulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.95); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+
+/* Concentric rings behind the content */
+.splash__rings {
+  position: absolute;
+  top: 30%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0; height: 0;
+  z-index: 1;
+}
+.splash__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--splash-color), 0.12);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.splash__ring--1 {
+  width: 180px; height: 180px;
+  animation: splashRing 6s linear infinite;
+}
+.splash__ring--2 {
+  width: 280px; height: 280px;
+  border-color: rgba(var(--splash-color), 0.07);
+  animation: splashRing 8s linear infinite reverse;
+}
+.splash__ring--3 {
+  width: 400px; height: 400px;
+  border-color: rgba(var(--splash-color), 0.04);
+  animation: splashRing 12s linear infinite;
+}
+@keyframes splashRing {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+/* Make rings slightly elliptical via border-width variation */
+.splash__ring--1 { border-top-width: 2px; }
+.splash__ring--2 { border-left-width: 2px; }
+.splash__ring--3 { border-bottom-width: 2px; }
+
+.splash__freq-tag {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(var(--splash-color), 0.8);
+  margin-bottom: 0.75rem;
+  opacity: 0;
+  animation: clipReveal 0.3s linear 0.3s forwards;
+}
+
 .splash__archetype {
   font-family: var(--font-display);
   font-size: clamp(2rem, 7vw, 3.5rem);
@@ -246,7 +309,15 @@ em, i, cite { font-style: normal; }
   text-transform: uppercase;
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
+  text-shadow: 0 0 40px rgba(var(--splash-color), 0.3),
+               0 0 80px rgba(var(--splash-color), 0.1);
+  animation: splashNameReveal 0.6s var(--ease) 0.2s both;
 }
+@keyframes splashNameReveal {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .splash__sub {
   font-size: 1rem; font-weight: 300;
   color: var(--text-secondary);
@@ -387,8 +458,8 @@ em, i, cite { font-style: normal; }
 .result__label {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.55rem; font-weight: 500;
-  letter-spacing: 0.25em; text-transform: uppercase;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase;
   color: var(--red);
   margin-bottom: 1.25rem;
   opacity: 0;
@@ -726,7 +797,7 @@ em, i, cite { font-style: normal; }
   .screen__proof { font-size: 0.7rem; }
 
   /* ── Result screen ── */
-  .result__label { font-size: 0.65rem; }
+  .result__label { font-size: 0.8rem; }
   .result__freq-tag { font-size: 0.75rem; }
   .result__freq-label { font-size: 0.65rem; }
   .result__body p { font-size: 0.95rem; line-height: 1.85; }
@@ -1571,7 +1642,7 @@ em, i, cite { font-style: normal; }
 
 /* ============================================
    ENHANCED ANALYZING SCREEN
-   Three concentric rings + data readout + locked state
+   Multi-phase dramatic reveal with trait bars + HUD
    ============================================ */
 
 /* Ambient pulse behind the rings */
@@ -1580,14 +1651,14 @@ em, i, cite { font-style: normal; }
     rgba(196, 30, 30, 0.07) 0%,
     rgba(196, 30, 30, 0.03) 40%,
     transparent 70%);
-  animation: analyzingAmb 1s ease-in-out infinite;
+  animation: analyzingAmb 1.2s ease-in-out infinite;
 }
 @keyframes analyzingAmb {
   0%, 100% { opacity: 0.5; transform: scale(0.96); }
   50%       { opacity: 1;   transform: scale(1.08); }
 }
 
-/* Enhanced scanner � brighter, fills width */
+/* Scanner line — bright, full-width sweep */
 .analyzing__scanner {
   left: 0; right: 0;
   background: linear-gradient(90deg,
@@ -1604,12 +1675,20 @@ em, i, cite { font-style: normal; }
     0 0 140px rgba(196, 30, 30, 0.15);
 }
 
-/* Main ring � bigger, faster */
-.analyzing__ring {
+/* Rings container — holds all concentric rings */
+.analyzing__rings {
   position: relative;
+  width: 100px; height: 100px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Main ring */
+.analyzing__ring {
+  position: absolute;
   width: 84px; height: 84px;
-  border-color: rgba(196, 30, 30, 0.18);
+  border: 1px solid rgba(196, 30, 30, 0.18);
   border-top-color: var(--red);
+  border-radius: 50%;
   animation: ringRotate 0.82s linear infinite;
 }
 
@@ -1631,7 +1710,7 @@ em, i, cite { font-style: normal; }
   50%       { transform: translate(-50%, -50%) scale(1.65); opacity: 1; }
 }
 
-/* Second ring (mid) */
+/* Inner counter-ring */
 .analyzing__ring::after {
   content: '';
   position: absolute;
@@ -1646,7 +1725,7 @@ em, i, cite { font-style: normal; }
 /* JS-injected outer rings */
 .analyzing__ring--2 {
   position: absolute;
-  width: 144px; height: 144px;
+  width: 160px; height: 160px;
   border: 1px solid transparent;
   border-top: 1px solid rgba(196, 30, 30, 0.28);
   border-right: 1px solid rgba(196, 30, 30, 0.08);
@@ -1656,15 +1735,87 @@ em, i, cite { font-style: normal; }
 }
 .analyzing__ring--3 {
   position: absolute;
-  width: 210px; height: 210px;
+  width: 220px; height: 220px;
   border: 1px solid rgba(196, 30, 30, 0.06);
   border-left-color: rgba(196, 30, 30, 0.2);
   border-radius: 50%;
   pointer-events: none;
   animation: ringRotate 5.5s linear infinite reverse;
 }
+.analyzing__ring--4 {
+  position: absolute;
+  width: 280px; height: 280px;
+  border: 1px solid rgba(196, 30, 30, 0.03);
+  border-top-color: rgba(196, 30, 30, 0.12);
+  border-bottom-color: rgba(196, 30, 30, 0.06);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ringRotate 8s linear infinite;
+}
 
-/* Label cursor blink */
+/* HUD — trait readouts */
+.analyzing__hud {
+  width: 100%;
+  max-width: 260px;
+}
+.analyzing__traits {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.analyzing__trait {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.analyzing__trait.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+.analyzing__trait-name {
+  font-family: var(--font-mono);
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  color: rgba(196, 30, 30, 0.7);
+  width: 72px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.analyzing__trait-bar {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.analyzing__trait-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--red), rgba(196, 30, 30, 0.4));
+  border-radius: 1px;
+  animation: traitFill 0.6s var(--ease) forwards;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes traitFill {
+  from { width: 0; }
+  to { width: var(--target-width, 0%); }
+}
+.analyzing__trait-val {
+  font-family: var(--font-mono);
+  font-size: 0.42rem;
+  letter-spacing: 0.1em;
+  color: rgba(240, 237, 232, 0.5);
+  width: 28px;
+  text-align: left;
+}
+
+/* Label with cursor blink */
+.analyzing__label {
+  transition: color 0.3s ease;
+}
 .analyzing__label::after {
   content: '_';
   display: inline-block;
@@ -1677,7 +1828,7 @@ em, i, cite { font-style: normal; }
   50%       { opacity: 0; }
 }
 
-/* Data readout container (JS-injected) */
+/* Data readout lines */
 .analyzing__data {
   display: flex;
   flex-direction: column;
@@ -1692,14 +1843,38 @@ em, i, cite { font-style: normal; }
   text-transform: uppercase;
   color: rgba(196, 30, 30, 0.75);
   opacity: 0;
-  transition: opacity 200ms ease;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.analyzing__data-line.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 .analyzing__data-line--locked {
   color: var(--text);
   letter-spacing: 0.32em;
 }
 
-/* LOCKED state � rings slow/pulse, label changes */
+/* Archetype name preview flash */
+.analyzing__result-preview {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.8rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease);
+  text-shadow: 0 0 40px rgba(196, 30, 30, 0.5),
+               0 0 80px rgba(196, 30, 30, 0.2);
+}
+.analyzing__result-preview.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* LOCKED state — rings slow/pulse, dramatic flash */
 .analyzing--locked .analyzing__ring {
   animation-duration: 3s;
   border-top-color: var(--text);
@@ -1709,7 +1884,7 @@ em, i, cite { font-style: normal; }
 }
 @keyframes lockedRingPulse {
   0%  { box-shadow: 0 0 0 0px rgba(196, 30, 30, 0.6); }
-  50% { box-shadow: 0 0 0 24px rgba(196, 30, 30, 0);  }
+  50% { box-shadow: 0 0 0 32px rgba(196, 30, 30, 0);  }
   100%{ box-shadow: 0 0 0 0px rgba(196, 30, 30, 0); }
 }
 .analyzing--locked .analyzing__label {
@@ -1718,19 +1893,28 @@ em, i, cite { font-style: normal; }
   color: var(--text);
 }
 .analyzing--locked .analyzing__label::after { display: none; }
+.analyzing--locked .analyzing__ring--2,
+.analyzing--locked .analyzing__ring--3,
+.analyzing--locked .analyzing__ring--4 {
+  animation-duration: 12s;
+  border-color: rgba(196, 30, 30, 0.15);
+}
 
 /* Screen shake on lock */
 @keyframes screenShake {
   0%   { transform: translate(0, 0); }
-  15%  { transform: translate(-4px, -2px); }
-  30%  { transform: translate(4px, 2px); }
-  45%  { transform: translate(-3px, 0); }
-  60%  { transform: translate(2px, 1px); }
-  80%  { transform: translate(-1px, -1px); }
+  10%  { transform: translate(-5px, -3px); }
+  20%  { transform: translate(5px, 3px); }
+  30%  { transform: translate(-4px, 1px); }
+  40%  { transform: translate(3px, -2px); }
+  50%  { transform: translate(-2px, 2px); }
+  60%  { transform: translate(2px, -1px); }
+  70%  { transform: translate(-1px, 1px); }
+  80%  { transform: translate(1px, 0); }
   100% { transform: translate(0, 0); }
 }
 .analyzing--locked {
-  animation: screenShake 0.25s ease-out;
+  animation: screenShake 0.35s ease-out;
 }
 
 
