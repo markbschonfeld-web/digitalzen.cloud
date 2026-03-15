@@ -41,7 +41,7 @@ export default {
     }
 
     const arch = ARCHETYPES[r];
-    const ogImage = `${url.origin}/og/${r}.svg`;
+    const ogImage = `${url.origin}/og/${r}.png`;
     const shareUrl = `${url.origin}/?r=${r}`;
 
     // Fetch the original page

@@ -104,7 +104,7 @@ function generateOgSvg(archKey) {
 export default {
   async fetch(request) {
     const url = new URL(request.url);
-    const match = url.pathname.match(/^\/og\/([a-z]+)\.svg$/);
+    const match = url.pathname.match(/^\/og\/([a-z]+)\.(svg|png)$/);
 
     if (!match) {
       return new Response('Not found', { status: 404 });

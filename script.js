@@ -262,95 +262,111 @@
       currentScreen = index;
       transitioning = false;
 
-      // Enhanced analyzing interstitial — multi-phase dramatic reveal
+      // Cinematic analyzing interstitial — 3 clean phases
       if (name === 'analyzing') {
         analyzingActive = true;
         var archKey = getResult();
         renderResult(archKey);
         var arch = archetypes[archKey];
 
-        var analyzingEl = document.querySelector('.analyzing');
-        var ringsContainer = analyzingEl.querySelector('.analyzing__rings');
-        var label = document.getElementById('analyzingLabel');
-        var traitsDiv = document.getElementById('analyzingTraits');
-        var dataDiv = document.getElementById('analyzingData');
-        var previewEl = document.getElementById('analyzingPreview');
+        var analyzingScreen = quiz.querySelector('[data-screen="analyzing"]');
+        var phaseScan = document.getElementById('azPhaseScan');
+        var phaseTraits = document.getElementById('azPhaseTraits');
+        var phaseLock = document.getElementById('azPhaseLock');
+        var pctEl = document.getElementById('azPct');
+        var barFill = document.getElementById('azBarFill');
+        var statusEl = document.getElementById('azStatus');
+        var traitGrid = document.getElementById('azTraitGrid');
+        var lockName = document.getElementById('azLockName');
 
-        // Reset state
-        analyzingEl.classList.remove('analyzing--locked', 'analyzing--reveal');
-        traitsDiv.innerHTML = '';
-        dataDiv.innerHTML = '';
-        previewEl.textContent = '';
-        previewEl.classList.remove('show');
-        label.textContent = 'Scanning frequency';
+        // Reset all phases
+        [phaseScan, phaseTraits, phaseLock].forEach(function (p) { p.classList.remove('active'); });
+        analyzingScreen.classList.remove('az-flash', 'az-scanning');
+        traitGrid.innerHTML = '';
+        pctEl.textContent = '0';
+        barFill.style.width = '0%';
+        statusEl.textContent = 'Reading frequency';
 
-        // Inject outer rings
-        var ring2 = document.createElement('div');
-        ring2.className = 'analyzing__ring analyzing__ring--2';
-        var ring3 = document.createElement('div');
-        ring3.className = 'analyzing__ring analyzing__ring--3';
-        var ring4 = document.createElement('div');
-        ring4.className = 'analyzing__ring analyzing__ring--4';
-        ringsContainer.appendChild(ring2);
-        ringsContainer.appendChild(ring3);
-        ringsContainer.appendChild(ring4);
+        // ── Phase 1: Percentage counter (0-2s) ──
+        phaseScan.classList.add('active');
+        analyzingScreen.classList.add('az-scanning');
+        var pctTarget = 100;
+        var pctStart = performance.now();
+        var pctDuration = 1800;
+        var statusTexts = ['Reading frequency', 'Mapping traits', 'Matching pattern'];
 
-        // Phase 1 (0-1.2s): Trait bars scan in
-        var traitNames = { precision: 'PRECISION', stillness: 'STILLNESS', kinetic: 'KINETIC', generative: 'GENERATIVE' };
-        var maxTrait = 0;
-        Object.keys(traits).forEach(function (k) { if (traits[k] > maxTrait) maxTrait = traits[k]; });
-        var traitKeys = Object.keys(traitNames);
-        traitKeys.forEach(function (k, i) {
-          var bar = document.createElement('div');
-          bar.className = 'analyzing__trait';
-          var pct = maxTrait > 0 ? Math.round((traits[k] / maxTrait) * 100) : 0;
-          bar.innerHTML = '<span class="analyzing__trait-name">' + traitNames[k] + '</span>' +
-            '<div class="analyzing__trait-bar"><div class="analyzing__trait-fill" style="--target-width:' + pct + '%;animation-delay:' + (i * 0.15) + 's"></div></div>' +
-            '<span class="analyzing__trait-val">' + pct + '%</span>';
-          traitsDiv.appendChild(bar);
-          setTimeout(function () { bar.classList.add('show'); }, 200 + i * 200);
-        });
+        function animatePct(now) {
+          var elapsed = now - pctStart;
+          var progress = Math.min(elapsed / pctDuration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          var val = Math.round(eased * pctTarget);
+          pctEl.textContent = val;
+          barFill.style.width = val + '%';
+          // Update status text at milestones
+          if (val >= 66) statusEl.textContent = statusTexts[2];
+          else if (val >= 33) statusEl.textContent = statusTexts[1];
+          if (progress < 1) requestAnimationFrame(animatePct);
+        }
+        requestAnimationFrame(animatePct);
 
-        // Phase 2 (1.2-2.5s): Data readout lines
+        // ── Phase 2: Trait readout (2s-3.5s) ──
         setTimeout(function () {
-          label.textContent = 'Mapping signature';
-          var dataLines = ['FREQ_SCAN ✓', 'TRAIT_MAP ✓', 'PATTERN_MATCH •••', 'ARCHETYPE_LOCK'];
-          dataLines.forEach(function (text, i) {
-            var line = document.createElement('span');
-            line.className = 'analyzing__data-line';
-            line.textContent = text;
-            dataDiv.appendChild(line);
-            setTimeout(function () { line.classList.add('show'); }, i * 350);
+          phaseScan.classList.remove('active');
+          analyzingScreen.classList.remove('az-scanning');
+          phaseTraits.classList.add('active');
+
+          var traitLabels = ['Precision', 'Stillness', 'Kinetic', 'Generative'];
+          var traitKeys = ['precision', 'stillness', 'kinetic', 'generative'];
+          var maxT = 0;
+          traitKeys.forEach(function (k) { if (traits[k] > maxT) maxT = traits[k]; });
+
+          traitKeys.forEach(function (k, i) {
+            var pct = maxT > 0 ? Math.round((traits[k] / maxT) * 100) : 0;
+            var row = document.createElement('div');
+            row.className = 'az__trait-row';
+            row.innerHTML =
+              '<span class="az__trait-label">' + traitLabels[i] + '</span>' +
+              '<div class="az__trait-track"><div class="az__trait-value"></div></div>' +
+              '<span class="az__trait-num">0</span>';
+            traitGrid.appendChild(row);
+
+            // Stagger entrance
+            setTimeout(function () {
+              row.classList.add('show');
+              // Animate bar fill
+              var fill = row.querySelector('.az__trait-value');
+              var numEl = row.querySelector('.az__trait-num');
+              requestAnimationFrame(function () {
+                fill.style.width = pct + '%';
+              });
+              // Animate number count-up
+              var numStart = performance.now();
+              function countUp(ts) {
+                var p = Math.min((ts - numStart) / 600, 1);
+                numEl.textContent = Math.round(p * pct);
+                if (p < 1) requestAnimationFrame(countUp);
+              }
+              requestAnimationFrame(countUp);
+            }, i * 250);
           });
-        }, 1200);
+        }, 2000);
 
-        // Phase 3 (2.8s): LOCKED — shake + archetype name flash
+        // ── Phase 3: Archetype lock (3.5s-4.8s) ──
         setTimeout(function () {
-          label.textContent = 'Archetype locked';
-          analyzingEl.classList.add('analyzing--locked');
-          var lockLines = dataDiv.querySelectorAll('.analyzing__data-line');
-          if (lockLines[3]) {
-            lockLines[3].classList.add('analyzing__data-line--locked');
-            lockLines[3].textContent = 'ARCHETYPE_LOCKED ✓';
-          }
-          // Flash the archetype name
-          previewEl.textContent = arch.name;
-          previewEl.classList.add('show');
-        }, 2800);
+          phaseTraits.classList.remove('active');
+          phaseLock.classList.add('active');
+          analyzingScreen.classList.add('az-flash');
+          lockName.textContent = arch.name;
+        }, 3500);
 
-        // Clean up + advance after 4s
+        // ── Advance to result ──
         setTimeout(function () {
           analyzingActive = false;
-          analyzingEl.classList.remove('analyzing--locked', 'analyzing--reveal');
-          [ring2, ring3, ring4].forEach(function (el) {
-            if (el.parentNode) el.parentNode.removeChild(el);
-          });
-          traitsDiv.innerHTML = '';
-          dataDiv.innerHTML = '';
-          previewEl.textContent = '';
-          previewEl.classList.remove('show');
+          [phaseScan, phaseTraits, phaseLock].forEach(function (p) { p.classList.remove('active'); });
+          analyzingScreen.classList.remove('az-flash', 'az-scanning');
+          traitGrid.innerHTML = '';
           nextScreen();
-        }, 4200);
+        }, 4800);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -563,7 +579,7 @@
   }
 
   function updateMetaTags(arch, shareUrl) {
-    var ogImage = 'https://digitalzen.cloud/og/' + arch.key + '.svg';
+    var ogImage = 'https://digitalzen.cloud/og/' + arch.key + '.png';
     var title = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
     var desc = arch.body[0];
     var metaUpdates = {

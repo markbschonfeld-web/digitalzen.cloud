@@ -11,7 +11,7 @@
   <meta property="og:description" content="A 30-second read. You already have a ritual. Let's see what it says about you." />
   <meta property="og:url" content="https://digitalzen.cloud" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://digitalzen.cloud/og-image.svg" />
+  <meta property="og:image" content="https://digitalzen.cloud/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="Digital Zen" />
@@ -19,7 +19,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="What's Your Night Mode?" />
   <meta name="twitter:description" content="A 30-second read." />
-  <meta name="twitter:image" content="https://digitalzen.cloud/og-image.svg" />
+  <meta name="twitter:image" content="https://digitalzen.cloud/og-image.png" />
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
@@ -216,20 +216,19 @@
     <!-- Analyzing Interstitial -->
     <section class="screen screen--analyzing" data-screen="analyzing">
       <div class="screen__ambient" aria-hidden="true"></div>
-      <div class="analyzing">
-        <div class="analyzing__scanner" aria-hidden="true"></div>
-        <div class="analyzing__rings" aria-hidden="true">
-          <div class="analyzing__ring"></div>
+      <div class="analyzing" id="analyzingRoot">
+        <div class="az__phase az__phase--scan" id="azPhaseScan">
+          <span class="az__pct" id="azPct">0</span>
+          <div class="az__bar"><div class="az__bar-fill" id="azBarFill"></div></div>
+          <span class="az__status" id="azStatus">Reading frequency</span>
         </div>
-        <div class="analyzing__hud" aria-hidden="true">
-          <div class="analyzing__traits" id="analyzingTraits"></div>
+        <div class="az__phase az__phase--traits" id="azPhaseTraits">
+          <div class="az__trait-grid" id="azTraitGrid"></div>
         </div>
-        <span class="analyzing__label" id="analyzingLabel">Scanning frequency</span>
-        <div class="analyzing__dots" aria-hidden="true">
-          <span></span><span></span><span></span>
+        <div class="az__phase az__phase--lock" id="azPhaseLock">
+          <span class="az__lock-label">Match found</span>
+          <span class="az__lock-name" id="azLockName"></span>
         </div>
-        <div class="analyzing__data" id="analyzingData"></div>
-        <div class="analyzing__result-preview" id="analyzingPreview" aria-hidden="true"></div>
       </div>
     </section>
 
