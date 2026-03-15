@@ -671,7 +671,7 @@ em, i, cite { font-style: normal; }
   display: block; text-align: center;
   font-family: var(--font-mono);
   font-size: 0.68rem; color: var(--text-muted);
-  letter-spacing: 0.06em; margin-top: 0.6rem;
+  letter-spacing: 0.06em; margin-top: 0; margin-bottom: 0.75rem;
 }
 .capture__success {
   display: none; align-items: center; justify-content: center;
@@ -1702,6 +1702,7 @@ em, i, cite { font-style: normal; }
   overflow: hidden;
 }
 .az__trait-value {
+  position: relative;
   height: 100%;
   width: 0%;
   border-radius: 2px;
@@ -1850,4 +1851,231 @@ em, i, cite { font-style: normal; }
 @keyframes korfyrPing {
   0%   { transform: scale(1);   opacity: 0.8; }
   100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* ============================================
+   BACK BUTTON — quiz navigation (Q2-Q4)
+   ============================================ */
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 150ms linear;
+  flex-shrink: 0;
+}
+.back-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.back-btn:active {
+  transform: scale(0.92);
+}
+
+/* ============================================
+   2A: ENHANCED ANALYZING INTERSTITIAL
+   ============================================ */
+
+/* Scan line — darker vignette edges during scan */
+.screen--analyzing.az-scanning .screen__ambient {
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(196, 30, 30, 0.08) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.3) 100%);
+}
+
+/* Trait bar tick flash */
+.az__trait-value::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -2px; bottom: -2px;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.az__trait-row.show .az__trait-value::after {
+  animation: traitTick 0.4s ease-out 0.8s forwards;
+}
+@keyframes traitTick {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Radial light expansion on name reveal */
+.screen--analyzing.az-flash .screen__ambient {
+  background: radial-gradient(circle at 50% 50%,
+    rgba(196, 30, 30, 0.15) 0%,
+    rgba(196, 30, 30, 0.05) 30%,
+    transparent 60%);
+  animation: azRadialPulse 0.8s ease-out forwards;
+}
+@keyframes azRadialPulse {
+  0%   { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* ============================================
+   2B: ENHANCED RESULT REVEAL
+   ============================================ */
+
+/* Text-shadow pulse after flickerIn */
+.screen--result.active .result__archetype {
+  animation: flickerIn 0.6s linear 0.4s forwards, archShadowPulse 2.5s ease-in-out 1.2s infinite;
+}
+@keyframes archShadowPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.15); }
+}
+
+/* Frequency bar pulse wave */
+.screen--result.active .result__freq-fill {
+  animation: barFill 0.6s linear 1s forwards, freqPulse 2s ease-in-out 1.8s infinite;
+}
+@keyframes freqPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(196, 30, 30, 0.4); }
+  50%      { box-shadow: 0 0 16px rgba(196, 30, 30, 0.7), 0 0 30px rgba(196, 30, 30, 0.2); }
+}
+
+/* Body paragraph slide-up */
+.screen--result.active .result__body p {
+  animation: paraSlideUp 0.4s ease-out var(--delay, 1.4s) forwards;
+}
+@keyframes paraSlideUp {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Rarity number flash */
+.result__rarity {
+  transition: color 0.15s ease;
+}
+
+/* ============================================
+   2C: ENHANCED REFERRAL SPLASH
+   ============================================ */
+
+/* Sequential ring entrance from center outward */
+.screen--splash.active .splash__ring--1 {
+  animation: splashRingEntrance 0.6s ease-out 0.2s both, splashRing 6s linear 0.8s infinite;
+}
+.screen--splash.active .splash__ring--2 {
+  animation: splashRingEntrance 0.8s ease-out 0.4s both, splashRing 8s linear 1.2s infinite reverse;
+}
+.screen--splash.active .splash__ring--3 {
+  animation: splashRingEntrance 1s ease-out 0.6s both, splashRing 12s linear 1.6s infinite;
+}
+@keyframes splashRingEntrance {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* flickerIn on archetype name in splash */
+.screen--splash.active .splash__archetype {
+  animation: flickerIn 0.6s linear 0.3s forwards;
+  opacity: 0;
+}
+
+/* Drifting ambient gradient */
+.screen--splash.active .screen__ambient--splash {
+  animation: splashAmbDrift 8s ease-in-out infinite;
+}
+@keyframes splashAmbDrift {
+  0%, 100% {
+    background-position: 50% 45%;
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  33% {
+    background-position: 45% 50%;
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  66% {
+    background-position: 55% 40%;
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* CTA breathe on FIND OUT button */
+.screen--splash .btn--pulse {
+  animation: clipReveal 0.3s linear 0.9s forwards, ctaBreathe 3s ease-in-out 1.5s infinite;
+}
+@keyframes ctaBreathe {
+  0%, 100% { box-shadow: 0 0 0 rgba(240, 237, 232, 0); }
+  50%      { box-shadow: 0 0 20px rgba(240, 237, 232, 0.1), 0 0 40px rgba(240, 237, 232, 0.05); }
+}
+
+/* ============================================
+   2D: ENHANCED QUIZ TRANSITIONS
+   ============================================ */
+
+/* Option hover — left border glow */
+@media (hover: hover) {
+  .option:hover {
+    box-shadow: inset 3px 0 0 var(--red), 0 0 15px rgba(196, 30, 30, 0.08);
+  }
+}
+
+/* Option selected — enhanced glow */
+.option.selected {
+  box-shadow: inset 3px 0 0 var(--red), 0 0 20px rgba(196, 30, 30, 0.12);
+}
+
+/* Progress bar brightness pulse on new question */
+.screen.active .progress__fill {
+  animation: barPulse 0.8s ease-out, progressGlow 2s ease-in-out 0.8s infinite;
+}
+@keyframes progressGlow {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.3); }
+}
+
+/* ============================================
+   ACCESSIBILITY — prefers-reduced-motion updates
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .back-btn { transition: none; }
+  .splash__ring { animation: none !important; }
+  .screen--splash.active .splash__archetype {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--splash.active .screen__ambient--splash {
+    animation: none !important;
+  }
+  .screen--splash .btn--pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--result.active .result__archetype {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  .screen--result.active .result__freq-fill {
+    animation: none !important;
+    width: var(--freq, 85%) !important;
+  }
+  .screen--result.active .result__body p {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .screen.active .progress__fill {
+    animation: none !important;
+  }
+  .screen--analyzing.az-flash .screen__ambient {
+    animation: none !important;
+  }
+  .az__trait-row.show .az__trait-value::after {
+    animation: none !important;
+  }
 }

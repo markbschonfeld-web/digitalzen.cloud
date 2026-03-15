@@ -128,6 +128,9 @@
       <div class="screen__ambient screen__ambient--q2" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 2 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 50%"></div></div>
           <span class="progress__label">2 / 4</span>
         </div>
@@ -158,6 +161,9 @@
       <div class="screen__ambient screen__ambient--q3" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 3 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 75%"></div></div>
           <span class="progress__label">3 / 4</span>
         </div>
@@ -188,6 +194,9 @@
       <div class="screen__ambient screen__ambient--q4" aria-hidden="true"></div>
       <div class="screen__inner">
         <div class="progress" aria-label="Question 4 of 4">
+          <button class="back-btn" type="button" aria-label="Go back">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
           <div class="progress__bar"><div class="progress__fill" style="width: 100%"></div></div>
           <span class="progress__label">4 / 4</span>
         </div>
@@ -246,6 +255,15 @@
           </div>
         </div>
 
+        <div class="result__share">
+          <button class="btn btn--share" id="shareBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>Share Your Result</span>
+          </button>
+          <span class="result__copied" id="copiedMsg">Copied. Send it.</span>
+          <span class="result__rarity" id="resultRarity"></span>
+        </div>
+
         <div class="result__body" id="resultBody"></div>
 
         <div class="result__insight">
@@ -264,19 +282,11 @@
           </a>
         </div>
 
-        <div class="result__share">
-          <button class="btn btn--share" id="shareBtn" type="button">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            <span>Share Your Result</span>
-          </button>
-          <span class="result__copied" id="copiedMsg">Copied. Send it.</span>
-          <span class="result__rarity" id="resultRarity"></span>
-        </div>
-
         <!-- Email Capture -->
         <div class="capture">
           <div class="capture__divider" aria-hidden="true"></div>
           <p class="capture__text">Want to know when we drop something new?</p>
+          <span class="capture__note">No spam. Just signal.</span>
           <form class="capture__form" id="captureForm">
             <div class="capture__input-wrap">
               <input
@@ -295,7 +305,6 @@
               <span class="capture__consent-text">I agree to receive emails from <strong>KORFYR</strong>, the sponsor of this experience. You can unsubscribe anytime.</span>
             </label>
             <span class="capture__error" id="captureError"></span>
-            <span class="capture__note">No spam. Just signal.</span>
           </form>
           <div class="capture__success" id="captureSuccess">
             <span class="capture__check">&#10003;</span>

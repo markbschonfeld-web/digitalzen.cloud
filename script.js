@@ -162,6 +162,7 @@
   var analyzingActive = false;
   var quizColor = null;        // choice-reactive color during quiz
   var bursts = [];             // click-point particle bursts
+  var answerHistory = [];      // tracks {trait, screenIndex} for back navigation
   var particleProfiles = {
     architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
     ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
@@ -377,6 +378,16 @@
     }
   }
 
+  function prevScreen() {
+    if (transitioning || answerHistory.length === 0) return;
+    var last = answerHistory.pop();
+    traits[last.trait]--;
+    quizProgress--;
+    quizColor = getQuizColor();
+    quiz.style.setProperty('--vignette', (quizProgress * 0.07).toFixed(3));
+    transitionTo(last.screenIndex);
+  }
+
   // ---- Scoring ----
   function getResult() {
     var max = 0;
@@ -410,7 +421,7 @@
 
     // Build body paragraphs with staggered delays
     resultBody.innerHTML = '';
-    var baseDelay = 1.2; // seconds
+    var baseDelay = 1.4; // seconds (after share button at 0.8s)
     arch.body.forEach(function (para, i) {
       var p = document.createElement('p');
       p.textContent = para;
@@ -433,17 +444,18 @@
         + '&utm_content=' + arch.key;
     }
 
-    // Set timing for elements after the body paragraphs
-    var afterBody = baseDelay + arch.body.length * 0.2;
+    // Set timing — share button now appears before body copy
+    var shareEl = document.querySelector('.result__share');
     var insightEl = document.querySelector('.result__insight');
     var korfyrEl = document.querySelector('.korfyr');
-    var shareEl = document.querySelector('.result__share');
     var captureEl = document.querySelector('.capture');
 
+    shareEl.style.setProperty('--delay-share', '0.8s');
+    // Body paragraphs start at 1.4s (set via baseDelay above)
+    var afterBody = baseDelay + arch.body.length * 0.2;
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
     korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.2) + 's');
-    shareEl.style.setProperty('--delay-share', (afterBody + 0.8) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 1) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.6) + 's');
 
     // Rarity slot machine — random numbers tick before settling on real %
     var rarityFinal = arch.rarity;
@@ -453,7 +465,7 @@
       var rarityNum = rarityMatch[1];
       var rarityPre = rarityFinal.substring(0, rarityFinal.indexOf(rarityNum));
       var raritySuf = rarityFinal.substring(rarityFinal.indexOf(rarityNum) + rarityNum.length);
-      var totalDelay = Math.round((afterBody + 1) * 1000) + 2800; // ~time result becomes visible
+      var totalDelay = Math.round(0.8 * 1000) + 2800; // ~time share+rarity becomes visible
       setTimeout(function () {
         var ticks = 0;
         var maxTicks = 10;
@@ -528,8 +540,13 @@
       if (o !== btn) o.classList.add('dimmed'); // focus on chosen
     });
     btn.classList.add('selected');
+    // Subtle scale-up on selected option
+    btn.style.transform = 'scale(1.02)';
     traits[trait]++;
     quizProgress++;
+
+    // Track answer for back navigation
+    answerHistory.push({ trait: trait, screenIndex: currentScreen });
 
     // Choice-reactive: update particle color based on accumulated traits
     quizColor = getQuizColor();
@@ -544,7 +561,7 @@
     quiz.classList.add('shake');
     setTimeout(function () { quiz.classList.remove('shake'); }, 150);
 
-    // Wait 420ms (let user see selection + ripple settle), then transition
+    // Wait 550ms (let user see selection + ripple settle), then transition
     setTimeout(function () {
       nextScreen();
 
@@ -553,9 +570,10 @@
         options.querySelectorAll('.option').forEach(function (o) {
           o.style.pointerEvents = '';
           o.classList.remove('selected', 'dimmed');
+          o.style.transform = '';
         });
       }, 300);
-    }, 420);
+    }, 550);
   }
 
   // ---- Share ----
@@ -614,7 +632,7 @@
 
     // Require consent checkbox
     if (!captureConsent.checked) {
-      captureError.textContent = 'This experience is sponsored by KORFYR. To sign up, you must agree to receive emails from KORFYR.';
+      captureError.textContent = 'Just need a quick check on the box above \u2014 it lets KORFYR (our sponsor) send you the good stuff.';
       captureError.classList.add('show');
       return;
     }
@@ -741,6 +759,7 @@
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
         currentArchKey = null;
+        answerHistory = [];
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -751,6 +770,7 @@
 
     quiz.addEventListener('click', function (e) {
       if (e.target.closest('.option')) handleOptionClick(e);
+      if (e.target.closest('.back-btn')) prevScreen();
     });
 
     shareBtn.addEventListener('click', handleShare);
@@ -868,8 +888,8 @@
           tR = quizColor.r; tG = quizColor.g; tB = quizColor.b;
         }
         if (analyzingActive) {
-          tSpeed = 2.5;
-          progress = Math.max(progress, 2.5);
+          tSpeed = 3.5;
+          progress = Math.max(progress, 3);
         }
 
         // Smooth lerp (~2s convergence at 60fps)
