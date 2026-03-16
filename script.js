@@ -184,6 +184,19 @@
     generative: { r: 200, g: 160, b: 40  }
   };
 
+  function clearAmbientCanvas() {
+    var c = document.getElementById('ambientBg');
+    if (c) {
+      var ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, c.width, c.height);
+    }
+    var p = document.getElementById('particleBg');
+    if (p) {
+      var ctx2 = p.getContext('2d');
+      ctx2.clearRect(0, 0, p.width, p.height);
+    }
+  }
+
   function getQuizColor() {
     var total = 0;
     var keys = Object.keys(traits);
@@ -244,8 +257,9 @@
 
     // Stop ambient system when leaving result/splash/analyzing (unless going to result)
     var currentName = currentEl ? currentEl.getAttribute('data-screen') : '';
-    if ((currentName === 'result' || currentName === 'splash' || currentName === 'analyzing') && name !== 'result' && name !== 'analyzing' && window._ambientSystem) {
-      window._ambientSystem.stop();
+    if ((currentName === 'result' || currentName === 'splash' || currentName === 'analyzing') && name !== 'result' && name !== 'analyzing') {
+      if (window._ambientSystem) window._ambientSystem.stop();
+      clearAmbientCanvas();
     }
 
     // Fade out current
@@ -266,6 +280,12 @@
       // Force reflow then animate in
       void nextEl.offsetHeight;
 
+      // Remove fade-in class after transition to clear the transform
+      // (transform: translateY(0) creates a containing block that breaks position:fixed)
+      setTimeout(function () {
+        nextEl.classList.remove('fade-in');
+      }, 200);
+
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
       transitioning = false;
@@ -276,6 +296,9 @@
         var archKey = getResult();
         renderResult(archKey);
         var arch = archetypes[archKey];
+
+        // Clear any old canvas frame before starting new ambient
+        clearAmbientCanvas();
 
         // Start ambient at low intensity during analysis
         if (window._ambientSystem) {
@@ -384,8 +407,18 @@
       }
 
       // Ramp ambient to full intensity when entering result
-      if (name === 'result' && window._ambientSystem) {
-        window._ambientSystem.setIntensity(1);
+      if (name === 'result') {
+        if (window._ambientSystem) window._ambientSystem.setIntensity(1);
+        // Ensure archetype name is visible at top with breathing room on mobile
+        setTimeout(function () {
+          var archTitle = document.getElementById('resultArchetype');
+          if (archTitle && window.innerWidth <= 768) {
+            var rect = archTitle.getBoundingClientRect();
+            if (rect.top < 0 || rect.top > window.innerHeight * 0.3) {
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+          }
+        }, 50);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -449,6 +482,24 @@
       p.style.setProperty('--delay', (baseDelay + i * 0.2) + 's');
       resultBody.appendChild(p);
     });
+
+    // Set micro-justification for email capture
+    var whyEl = document.getElementById('captureWhy');
+    if (whyEl) {
+      var traitWhys = {
+        precision: 'people who set the conditions',
+        stillness: 'people who subtract',
+        kinetic: 'people who move',
+        generative: 'people who make things at 2AM'
+      };
+      // Find dominant trait
+      var domTrait = 'precision';
+      var domVal = 0;
+      Object.keys(traits).forEach(function (k) {
+        if (traits[k] > domVal) { domVal = traits[k]; domTrait = k; }
+      });
+      whyEl.textContent = 'You\u2019ll hear first when something drops for ' + traitWhys[domTrait] + '. That\u2019s it.';
+    }
 
     // Set bridge line for KORFYR block
     var bridgeEl = document.getElementById('korfyrBridge');
@@ -622,6 +673,9 @@
     var arch = archetypes[currentArchKey];
     if (!arch) return;
     var shareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
+    // Extract rarity percentage for share text
+    var rarityMatch = arch.rarity.match(/(\d+)%/);
+    var rarityPct = rarityMatch ? rarityMatch[1] : null;
     var text;
     if (referredFrom) {
       var friendArch = null;
@@ -629,12 +683,18 @@
         if (archetypes[k].key === referredFrom) friendArch = archetypes[k];
       });
       if (friendArch && referredFrom !== arch.key) {
-        text = 'My friend got ' + friendArch.name + '. I got ' + arch.name + '. What\u2019s your night mode?';
+        text = 'My friend got ' + friendArch.name + '. I got ' + arch.name + '.';
+        if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
+        text += ' What\u2019s yours?';
       } else {
-        text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+        text = 'My night mode is ' + arch.name + '.';
+        if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
+        text += ' What\u2019s yours?';
       }
     } else {
-      text = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+      text = 'My night mode is ' + arch.name + '.';
+      if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
+      text += ' What\u2019s yours?';
     }
 
     // Update meta tags for direct URL sharing
@@ -689,10 +749,12 @@
     captureError.textContent = '';
     captureError.classList.remove('show');
 
-    // Require consent checkbox
+    // Require consent checkbox — flash it if unchecked
     if (!captureConsent.checked) {
       captureError.textContent = 'Just need a quick check on the box above \u2014 it lets KORFYR (our sponsor) send you the good stuff.';
       captureError.classList.add('show');
+      captureConsent.parentElement.classList.add('flash');
+      setTimeout(function () { captureConsent.parentElement.classList.remove('flash'); }, 600);
       return;
     }
 
@@ -817,6 +879,7 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        clearAmbientCanvas();
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -835,6 +898,7 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        clearAmbientCanvas();
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -850,6 +914,38 @@
 
     shareBtn.addEventListener('click', handleShare);
     captureForm.addEventListener('submit', handleCapture);
+
+    // Consent checkbox → button visual state
+    var captureBtn = captureForm.querySelector('.btn--capture');
+    if (captureBtn && captureConsent) {
+      captureBtn.classList.add('dimmed');
+      captureConsent.addEventListener('change', function () {
+        if (captureConsent.checked) {
+          captureBtn.classList.remove('dimmed');
+          captureBtn.classList.add('ready');
+        } else {
+          captureBtn.classList.remove('ready');
+          captureBtn.classList.add('dimmed');
+        }
+      });
+    }
+
+    // ---- Mobile email section entrance animation ----
+    (function () {
+      var captureSection = document.querySelector('.capture');
+      if (!captureSection || !('IntersectionObserver' in window)) return;
+      var fired = false;
+      var captureObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && !fired && window.innerWidth <= 768) {
+            fired = true;
+            captureSection.classList.add('capture--reveal');
+            captureObserver.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+      captureObserver.observe(captureSection);
+    })();
 
     // ---- Sticky archetype header (result page) ----
     (function () {

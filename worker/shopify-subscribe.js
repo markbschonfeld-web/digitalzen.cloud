@@ -18,6 +18,14 @@
 
 const ALLOWED_ORIGIN = 'https://digitalzen.cloud';
 
+const VALID_ARCHETYPES = [
+  'architect', 'ghost', 'circuit', 'twam', 'minimalist',
+  'operator', 'engineer', 'phantom', 'builder', 'nocturnal'
+];
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_REQUESTS_PER_HOUR = 5;
+
 async function getAccessToken(env) {
   const res = await fetch(
     `https://${env.SHOPIFY_STORE}.myshopify.com/admin/oauth/access_token`,
@@ -33,6 +41,25 @@ async function getAccessToken(env) {
   );
   const data = await res.json();
   return data.access_token;
+}
+
+async function checkRateLimit(ip) {
+  const cache = caches.default;
+  const cacheKey = new Request(`https://rate-limit.internal/${ip}`, { method: 'GET' });
+  const cached = await cache.match(cacheKey);
+
+  let count = 0;
+  if (cached) {
+    count = parseInt(await cached.text()) || 0;
+    if (count >= MAX_REQUESTS_PER_HOUR) {
+      return false;
+    }
+  }
+
+  await cache.put(cacheKey, new Response(String(count + 1), {
+    headers: { 'Cache-Control': 'max-age=3600' },
+  }));
+  return true;
 }
 
 export default {
@@ -54,11 +81,22 @@ export default {
     }
 
     try {
+      // Rate limiting by IP
+      const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+      const allowed = await checkRateLimit(clientIP);
+      if (!allowed) {
+        return respond(429, { error: 'Rate limited' });
+      }
+
       const { email, archetype } = await request.json();
 
-      if (!email || !email.includes('@')) {
+      // Email validation
+      if (!email || typeof email !== 'string' || email.length > 254 || !EMAIL_REGEX.test(email)) {
         return respond(400, { error: 'Invalid email' });
       }
+
+      // Archetype whitelist
+      const safeArchetype = VALID_ARCHETYPES.includes(archetype) ? archetype : 'unknown';
 
       const token = await getAccessToken(env);
 
@@ -79,7 +117,7 @@ export default {
                 opt_in_level: 'single_opt_in',
                 consent_updated_at: new Date().toISOString(),
               },
-              tags: ['digitalzen', archetype ? 'nightmode-' + archetype : ''].filter(Boolean).join(', '),
+              tags: `digitalzen, nightmode-${safeArchetype}`,
             },
           }),
         }

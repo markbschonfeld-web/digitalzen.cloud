@@ -53,6 +53,14 @@
     </div>
   </nav>
 
+  <!-- Sticky result header (outside quiz to avoid transform containing block) -->
+  <div class="result-sticky" id="resultSticky" aria-hidden="true">
+    <span class="result-sticky__name" id="stickyName"></span>
+    <button class="result-sticky__share" id="stickyShare" type="button" aria-label="Share">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </button>
+  </div>
+
   <!-- Quiz Container -->
   <main class="quiz" id="quiz">
 
@@ -246,12 +254,6 @@
     <!-- Result Screen -->
     <section class="screen screen--result" data-screen="result">
       <div class="screen__ambient screen__ambient--result" aria-hidden="true"></div>
-      <div class="result-sticky" id="resultSticky" aria-hidden="true">
-        <span class="result-sticky__name" id="stickyName"></span>
-        <button class="result-sticky__share" id="stickyShare" type="button" aria-label="Share">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        </button>
-      </div>
       <div class="result">
         <div class="result__reveal">
           <span class="result__label">Your Night Mode</span>
@@ -280,6 +282,8 @@
           <p id="resultInsight"></p>
         </div>
 
+        <p class="capture__primer">Brought to you by someone who gets it.</p>
+
         <!-- Email Capture (above KORFYR for conversion priority) -->
         <div class="capture">
           <div class="capture__divider" aria-hidden="true"></div>
@@ -302,11 +306,12 @@
               <input type="checkbox" id="captureConsent" class="capture__checkbox" />
               <span class="capture__consent-text">I agree to receive emails from <strong>KORFYR</strong>, the sponsor of this experience. You can unsubscribe anytime.</span>
             </label>
+            <p class="capture__why" id="captureWhy"></p>
             <span class="capture__error" id="captureError"></span>
           </form>
           <div class="capture__success" id="captureSuccess">
             <span class="capture__check">&#10003;</span>
-            <span>You're on the list.</span>
+            <span>You're in. Stay tuned.</span>
           </div>
         </div>
 
