@@ -91,7 +91,7 @@
           <span>Begin</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
-        <span class="screen__proof">6,200+ people checked</span>
+        <span class="screen__proof">People are checking.</span>
       </div>
     </section>
 
@@ -246,6 +246,12 @@
     <!-- Result Screen -->
     <section class="screen screen--result" data-screen="result">
       <div class="screen__ambient screen__ambient--result" aria-hidden="true"></div>
+      <div class="result-sticky" id="resultSticky" aria-hidden="true">
+        <span class="result-sticky__name" id="stickyName"></span>
+        <button class="result-sticky__share" id="stickyShare" type="button" aria-label="Share">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </button>
+      </div>
       <div class="result">
         <div class="result__reveal">
           <span class="result__label">Your Night Mode</span>
@@ -263,6 +269,7 @@
             <span>Share Your Result</span>
           </button>
           <span class="result__copied" id="copiedMsg">Copied. Send it.</span>
+          <span class="result__nudge" id="shareNudge">Text it to someone who'd get a different result.</span>
           <span class="result__rarity" id="resultRarity"></span>
           <p class="result__comparison" id="resultComparison"></p>
         </div>

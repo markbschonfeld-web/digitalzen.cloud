@@ -458,6 +458,53 @@ em, i, cite { font-style: normal; }
   padding: 0 0.5rem;
 }
 
+/* ─── Sticky archetype header ─── */
+.result-sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+  padding: 0 1rem;
+  background: rgba(12, 12, 14, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(240, 237, 232, 0.06);
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity 250ms ease, transform 250ms ease;
+  pointer-events: none;
+}
+.result-sticky.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.result-sticky__name {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+}
+.result-sticky__share {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 150ms;
+}
+.result-sticky__share:hover {
+  color: var(--text);
+}
+
 .result__reveal { text-align: center; margin-bottom: 1.5rem; }
 
 .result__label {
@@ -590,6 +637,16 @@ em, i, cite { font-style: normal; }
   opacity: 0; transition: opacity 400ms;
 }
 .result__copied.show { opacity: 1; }
+
+.result__nudge {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0;
+  margin-top: 0.3rem;
+  transition: opacity 600ms ease;
+}
+.result__nudge.show { opacity: 0.55; }
 
 .result__rarity {
   display: block;
@@ -1100,27 +1157,9 @@ em, i, cite { font-style: normal; }
   padding: 0 1.5rem;
 }
 
-/* ─── Option number hints (keyboard nav) ─── */
-.options { counter-reset: option-num; }
-.option { counter-increment: option-num; }
+/* ─── Option number hints (hidden — keyboard nav still works via JS) ─── */
 .option::before {
-  content: counter(option-num);
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  font-weight: 400;
-  color: var(--text-muted);
-  opacity: 0;
-  transition: opacity 200ms;
-  z-index: 1;
-}
-@media (hover: hover) {
-  .option::before { opacity: 0.3; }
-  .option:hover::before { opacity: 0.55; }
-  .option.selected::before { opacity: 0; }
+  display: none;
 }
 
 /* ─── Micro-shake on selection ─── */

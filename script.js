@@ -645,6 +645,11 @@
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(text + ' \u2192 ' + shareUrl).then(function () {
         copiedMsg.classList.add('show');
+        var nudge = document.getElementById('shareNudge');
+        if (nudge) {
+          setTimeout(function () { nudge.classList.add('show'); }, 1000);
+          setTimeout(function () { nudge.classList.remove('show'); }, 6000);
+        }
         setTimeout(function () { copiedMsg.classList.remove('show'); }, 2500);
       });
     }
@@ -783,31 +788,20 @@
     initNav();
     checkReferral();
 
-    // Social proof count-up
-    (function () {
-      var proofEl = document.querySelector('.screen__proof');
-      if (!proofEl) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var target = 6200;
-      var start = 5690;
-      var duration = 1400; // ms
-      var startTime = null;
-      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-      var suffix = proofEl.textContent.replace(/^[\d,]+/, '').trim(); // '+ people checked'
-      function step(ts) {
-        if (!startTime) startTime = ts;
-        var prog = Math.min((ts - startTime) / duration, 1);
-        var val = Math.round(start + (target - start) * easeOut(prog));
-        proofEl.textContent = val.toLocaleString() + suffix;
-        if (prog < 1) requestAnimationFrame(step);
-      }
-      setTimeout(function () { requestAnimationFrame(step); }, 1350);
-    })();
-
     startBtn.addEventListener('click', function () { nextScreen(); });
     splashBtn.addEventListener('click', function () {
-      screenOrder[0] = 'intro';
-      transitionTo(0);
+      if (referredFrom) {
+        // Referral visitor already committed — skip intro, go straight to Q1
+        traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
+        quizProgress = 0;
+        answerHistory = [];
+        if (window._ambientSystem) window._ambientSystem.stop();
+        // Jump directly to q1 (index 1 in screenOrder)
+        transitionTo(1);
+      } else {
+        screenOrder[0] = 'intro';
+        transitionTo(0);
+      }
       if (window.history && window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname);
       }
@@ -856,6 +850,43 @@
 
     shareBtn.addEventListener('click', handleShare);
     captureForm.addEventListener('submit', handleCapture);
+
+    // ---- Sticky archetype header (result page) ----
+    (function () {
+      var sticky = document.getElementById('resultSticky');
+      var stickyName = document.getElementById('stickyName');
+      var stickyShare = document.getElementById('stickyShare');
+      if (!sticky) return;
+
+      // Show/hide via IntersectionObserver on the result title
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          // Show sticky when title scrolls out of view
+          if (!entry.isIntersecting && screenOrder[currentScreen] === 'result') {
+            sticky.classList.add('visible');
+          } else {
+            sticky.classList.remove('visible');
+          }
+        });
+      }, { threshold: 0 });
+
+      // Observe once result is shown
+      var origRender = renderResult;
+      renderResult = function (archKey) {
+        origRender(archKey);
+        var arch = archetypes[archKey];
+        if (arch) stickyName.textContent = arch.name.toUpperCase();
+        observer.observe(resultArchetype);
+      };
+
+      // Tap name → scroll to top
+      stickyName.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // Tap share icon → same as main share button
+      stickyShare.addEventListener('click', handleShare);
+    })();
 
     // ---- KORFYR button — cursor spotlight + click burst ----
     (function () {
@@ -979,10 +1010,10 @@
             if (l.vertical) l.x += l.drift;
             else l.y += l.drift;
           }
-          var op = 0.06;
+          var op = 0.09;
           if (i === gridState.flashIdx) {
             var elapsed = now - gridState.flashTime;
-            if (elapsed < 800) op = 0.06 + 0.14 * Math.max(0, 1 - elapsed / 800);
+            if (elapsed < 800) op = 0.09 + 0.20 * Math.max(0, 1 - elapsed / 800);
           }
           ctx.beginPath();
           ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (op * fadeOpacity * intensityMult) + ')';
@@ -1017,7 +1048,7 @@
           if (b.x > W + b.r) b.x = -b.r;
           if (b.y < -b.r) b.y = H + b.r;
           if (b.y > H + b.r) b.y = -b.r;
-          var cycleOp = 0.02 + 0.02 * Math.sin(t / b.period * Math.PI * 2 + b.phase);
+          var cycleOp = 0.03 + 0.03 * Math.sin(t / b.period * Math.PI * 2 + b.phase);
           var grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
           grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (cycleOp * fadeOpacity * intensityMult) + ')');
           grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
@@ -1043,7 +1074,7 @@
             len: 20 + Math.random() * 20,
             angle: zone.angle + (Math.random() - 0.5) * 0.4,
             speed: 1 + Math.random() * 2,
-            op: 0.08 + Math.random() * 0.07,
+            op: 0.11 + Math.random() * 0.09,
             flare: 0, flareTime: 0
           });
         }
@@ -1071,7 +1102,7 @@
           }
           var op = s.op;
           var elapsed = now - s.flareTime;
-          if (elapsed < 500 && elapsed > 0) op = s.op + 0.22 * Math.max(0, 1 - elapsed / 500);
+          if (elapsed < 500 && elapsed > 0) op = s.op + 0.28 * Math.max(0, 1 - elapsed / 500);
           var ex = s.x + Math.cos(s.angle) * s.len;
           var ey = s.y + Math.sin(s.angle) * s.len;
           ctx.beginPath();
@@ -1092,7 +1123,7 @@
         var waveW = W;
         // Noise floor
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.03 * fadeOpacity * intensityMult) + ')';
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.05 * fadeOpacity * intensityMult) + ')';
         ctx.lineWidth = 1;
         ctx.moveTo(0, baseY);
         ctx.lineTo(waveW, baseY);
@@ -1100,7 +1131,7 @@
         // Waveform
         var amp = 15 + 20 * (0.5 + 0.5 * Math.sin(t / 5 * Math.PI * 2));
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.10 * fadeOpacity * intensityMult) + ')';
+        ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.14 * fadeOpacity * intensityMult) + ')';
         for (var x = 0; x < waveW; x += 2) {
           var nx = x / waveW;
           var val = Math.sin(nx * 12 + t * 1.5) * 0.5
@@ -1125,7 +1156,7 @@
         if (!reducedMotion) {
           minState.y += (minState.targetY + Math.sin(t / 18 * Math.PI * 2) * 20 - minState.y) * 0.005;
         }
-        var op = 0.04 + 0.06 * (0.5 + 0.5 * Math.sin(t / 6 * Math.PI * 2));
+        var op = 0.06 + 0.08 * (0.5 + 0.5 * Math.sin(t / 6 * Math.PI * 2));
         var lineW = W * 0.6;
         var startX = (W - lineW) / 2;
         ctx.beginPath();
@@ -1158,7 +1189,7 @@
         // Distance ring
         ctx.beginPath();
         ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.04 * fadeOpacity * intensityMult) + ')';
+        ctx.strokeStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.06 * fadeOpacity * intensityMult) + ')';
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -1167,8 +1198,8 @@
         var sx = cx + Math.cos(sweepAngle) * sweepLen;
         var sy = cy + Math.sin(sweepAngle) * sweepLen;
         var grad = ctx.createLinearGradient(cx, cy, sx, sy);
-        grad.addColorStop(0, 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.08 * fadeOpacity * intensityMult) + ')');
-        grad.addColorStop(1, 'rgba(196,30,30,' + (0.06 * fadeOpacity * intensityMult) + ')');
+        grad.addColorStop(0, 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.11 * fadeOpacity * intensityMult) + ')');
+        grad.addColorStop(1, 'rgba(196,30,30,' + (0.09 * fadeOpacity * intensityMult) + ')');
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(sx, sy);
@@ -1188,7 +1219,7 @@
             var by = cy + Math.sin(blip.angle) * maxR * blip.dist;
             ctx.beginPath();
             ctx.arc(bx, by, 3, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.12 * blip.life * fadeOpacity * intensityMult) + ')';
+            ctx.fillStyle = 'rgba(' + cBlue.r + ',' + cBlue.g + ',' + cBlue.b + ',' + (0.16 * blip.life * fadeOpacity * intensityMult) + ')';
             ctx.fill();
           }
         }
@@ -1241,7 +1272,7 @@
           }
           var drawLen = tr.progress * totalLen;
           var drawn = 0;
-          var baseOp = 0.10 * tr.fadeOut * fadeOpacity * intensityMult;
+          var baseOp = 0.14 * tr.fadeOut * fadeOpacity * intensityMult;
           ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + baseOp + ')';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -1270,7 +1301,7 @@
           if (lastX !== undefined && tr.phase === 'draw') {
             ctx.beginPath();
             ctx.arc(lastX, lastY, 2, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.2 * tr.fadeOut * fadeOpacity * intensityMult) + ')';
+            ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.28 * tr.fadeOut * fadeOpacity * intensityMult) + ')';
             ctx.fill();
           }
         }
@@ -1300,7 +1331,7 @@
             glitchState.active = false;
             glitchState.nextEvent = now + 3000 + Math.random() * 3000;
           } else {
-            var op = 0.06 * fadeOpacity * intensityMult;
+            var op = 0.09 * fadeOpacity * intensityMult;
             ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + op + ')';
             ctx.fillRect(glitchState.x + glitchState.shiftX, glitchState.y, glitchState.w, glitchState.h);
           }
@@ -1340,7 +1371,7 @@
             return;
           }
         }
-        var baseOp = 0.08 * sh.fadeOut * fadeOpacity * intensityMult;
+        var baseOp = 0.11 * sh.fadeOut * fadeOpacity * intensityMult;
         ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + baseOp + ')';
         ctx.lineWidth = 1;
         var p = sh.progress;
@@ -1439,9 +1470,9 @@
           if (z.x > W + z.r) z.x = -z.r;
           if (z.y < -z.r) z.y = H + z.r;
           if (z.y > H + z.r) z.y = -z.r;
-          var pulseOp = 0.04 + 0.04 * Math.sin(t / z.period * Math.PI * 2 + z.phase);
+          var pulseOp = 0.06 + 0.06 * Math.sin(t / z.period * Math.PI * 2 + z.phase);
           var flareElapsed = now - z.flareTime;
-          if (flareElapsed < 300 && flareElapsed > 0) pulseOp += 0.07 * Math.max(0, 1 - flareElapsed / 300);
+          if (flareElapsed < 300 && flareElapsed > 0) pulseOp += 0.10 * Math.max(0, 1 - flareElapsed / 300);
           var grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.r);
           grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (pulseOp * fadeOpacity * intensityMult) + ')');
           grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
