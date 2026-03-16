@@ -474,7 +474,7 @@ em, i, cite { font-style: normal; }
   position: relative; z-index: 2;
   width: 100%; max-width: 500px;
   margin: 0 auto;
-  padding: 0 0.5rem;
+  padding: 80px 0.5rem 0;
 }
 
 /* ─── Sticky archetype header ─── */
@@ -575,7 +575,7 @@ em, i, cite { font-style: normal; }
 }
 .result__freq-label {
   font-family: var(--font-mono);
-  font-size: 0.55rem; letter-spacing: 0.15em;
+  font-size: 0.72rem; letter-spacing: 0.15em;
   text-transform: uppercase; color: var(--text-muted);
 }
 .result__freq-bar {
@@ -650,7 +650,7 @@ em, i, cite { font-style: normal; }
 }
 .result__copied {
   display: block;
-  font-size: 0.68rem; color: var(--red);
+  font-size: 0.75rem; color: var(--red);
   letter-spacing: 0.06em;
   margin-top: 0.4rem;
   opacity: 0; transition: opacity 400ms;
@@ -741,7 +741,7 @@ em, i, cite { font-style: normal; }
 }
 .btn--capture:hover { background: #fff; }
 .btn--capture.dimmed {
-  opacity: 0.4;
+  opacity: 0.6;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 .btn--capture.ready {
@@ -763,7 +763,7 @@ em, i, cite { font-style: normal; }
   cursor: pointer;
 }
 .capture__consent-text {
-  font-size: 0.72rem; color: var(--text-muted);
+  font-size: 0.78rem; color: var(--text-muted);
   line-height: 1.7; letter-spacing: 0.02em;
 }
 .capture__consent-text strong { color: var(--text-secondary); }
@@ -793,7 +793,7 @@ em, i, cite { font-style: normal; }
 .capture__note {
   display: block; text-align: center;
   font-family: var(--font-mono);
-  font-size: 0.68rem; color: var(--text-muted);
+  font-size: 0.78rem; color: var(--text-muted);
   letter-spacing: 0.06em; margin-top: 0; margin-bottom: 0.75rem;
 }
 .capture__success {
@@ -927,7 +927,7 @@ em, i, cite { font-style: normal; }
   /* ── Result screen ── */
   .result__label { font-size: 0.8rem; }
   .result__freq-tag { font-size: 0.75rem; }
-  .result__freq-label { font-size: 0.65rem; }
+  .result__freq-label { font-size: 0.72rem; }
   .result__body p { font-size: 0.95rem; line-height: 1.85; }
   .result__insight p { font-size: 0.92rem; }
   .result__rarity { font-size: 0.75rem; }
@@ -948,9 +948,9 @@ em, i, cite { font-style: normal; }
   .capture__input { font-size: 0.92rem; padding: 0.9rem 1rem; }
   .capture__input-wrap { flex-direction: column; }
   .btn--capture { border-left: none; border-top: 1px solid var(--border); }
-  .capture__consent-text { font-size: 0.75rem; line-height: 1.7; }
+  .capture__consent-text { font-size: 0.78rem; line-height: 1.7; }
   .capture__error { font-size: 0.82rem; }
-  .capture__note { font-size: 0.72rem; }
+  .capture__note { font-size: 0.78rem; }
 
   /* ── Nav ── */
   .nav__tagline { font-size: 0.6rem; }

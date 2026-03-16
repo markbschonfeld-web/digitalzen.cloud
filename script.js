@@ -677,6 +677,16 @@
   // ---- Share ----
   function handleShare() {
     var arch = archetypes[currentArchKey];
+    // Fallback: read from DOM data-archetype if direct lookup fails
+    if (!arch) {
+      var resultScreen = document.querySelector('[data-screen="result"]');
+      var domKey = resultScreen ? resultScreen.getAttribute('data-archetype') : null;
+      if (domKey) {
+        Object.keys(archetypes).forEach(function (k) {
+          if (archetypes[k].key === domKey) arch = archetypes[k];
+        });
+      }
+    }
     if (!arch) return;
     var shareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
     // Extract rarity percentage for share text
@@ -885,7 +895,9 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        particleProfile = null;
         clearAmbientCanvas();
+        requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -904,7 +916,9 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        particleProfile = null;
         clearAmbientCanvas();
+        requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
