@@ -67,7 +67,7 @@
       ],
       insight: 'You don\u2019t add. You subtract until it\u2019s perfect.'
     },
-    'precision+kinetic': {
+    'kinetic+precision': {
       key: 'operator',
       name: 'The Operator',
       freqTag: 'Your night mode: Calculated',
@@ -78,7 +78,7 @@
       ],
       insight: 'You planned not to plan. And it worked.'
     },
-    'precision+generative': {
+    'generative+precision': {
       key: 'engineer',
       name: 'The Night Engineer',
       freqTag: 'Your night mode: Exacting',
@@ -89,7 +89,7 @@
       ],
       insight: 'It\u2019s not done until it\u2019s right. And \u201Cright\u201D has nothing to do with morning.'
     },
-    'stillness+kinetic': {
+    'kinetic+stillness': {
       key: 'phantom',
       name: 'The Phantom',
       freqTag: 'Your night mode: Contradictory',
@@ -100,7 +100,7 @@
       ],
       insight: 'You don\u2019t sit with silence. You chase it until it stops running.'
     },
-    'stillness+generative': {
+    'generative+stillness': {
       key: 'builder',
       name: 'The Quiet Builder',
       freqTag: 'Your night mode: Meditative',
@@ -111,7 +111,7 @@
       ],
       insight: 'The quiet isn\u2019t the absence of noise. It\u2019s the presence of focus.'
     },
-    'kinetic+generative': {
+    'generative+kinetic': {
       key: 'nocturnal',
       name: 'The Nocturnal',
       freqTag: 'Your night mode: Untamed',
@@ -399,7 +399,7 @@
           phaseTraits.classList.remove('active');
           phaseLock.classList.add('active');
           analyzingScreen.classList.add('az-flash');
-          lockName.textContent = arch.name;
+          lockName.textContent = arch ? arch.name : '';
         }, 3500);
 
         // ── Advance to result ──
@@ -676,48 +676,67 @@
 
   // ---- Share ----
   function handleShare() {
-    var arch = archetypes[currentArchKey];
-    if (!arch) return;
-    var shareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
-    // Extract rarity percentage for share text
-    var rarityMatch = arch.rarity.match(/(\d+)%/);
-    var rarityPct = rarityMatch ? rarityMatch[1] : null;
+    // DOM-only approach — reads from rendered result, no closure variable dependency
+    var resultEl = document.querySelector('[data-screen="result"]');
+    var displayKey = resultEl ? resultEl.getAttribute('data-archetype') : null;
+    if (!displayKey) return;
+
+    var nameEl = document.querySelector('.result__archetype');
+    var archName = nameEl ? nameEl.textContent.trim() : displayKey;
+    var rarityEl = document.querySelector('.result__rarity');
+    var rarityText = rarityEl ? rarityEl.textContent.trim() : '';
+    var rarityMatch = rarityText.match(/(\d+)%/);
+    var pct = rarityMatch ? rarityMatch[1] : null;
+    var shareUrl = 'https://digitalzen.cloud/?r=' + displayKey;
+
+    // Build share text
+    var urlParams = new URLSearchParams(window.location.search);
+    var referredKey = urlParams.get('r');
     var text;
-    if (referredFrom) {
-      var friendArch = null;
-      Object.keys(archetypes).forEach(function (k) {
-        if (archetypes[k].key === referredFrom) friendArch = archetypes[k];
-      });
-      if (friendArch && referredFrom !== arch.key) {
-        text = 'My friend got ' + friendArch.name + '. I got ' + arch.name + '.';
-        if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
-        text += ' What\u2019s yours?';
-      } else {
-        text = 'My night mode is ' + arch.name + '.';
-        if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
-        text += ' What\u2019s yours?';
-      }
+    if (referredKey && referredKey !== displayKey) {
+      text = 'My friend got a different result. I got ' + archName + '.';
+      if (pct) text += ' Only ' + pct + '% of people get this.';
+      text += ' What\u2019s yours?';
     } else {
-      text = 'My night mode is ' + arch.name + '.';
-      if (rarityPct) text += ' Only ' + rarityPct + '% of people get this.';
+      text = 'My night mode is ' + archName + '.';
+      if (pct) text += ' Only ' + pct + '% of people get this.';
       text += ' What\u2019s yours?';
     }
-
-    // Update meta tags for direct URL sharing
-    updateMetaTags(arch, shareUrl);
+    text += '\n' + shareUrl;
 
     if (navigator.share) {
-      navigator.share({ title: 'I\u2019m ' + arch.name, text: text, url: shareUrl }).catch(function () {});
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(text + ' \u2192 ' + shareUrl).then(function () {
-        copiedMsg.classList.add('show');
-        var nudge = document.getElementById('shareNudge');
-        if (nudge) {
-          setTimeout(function () { nudge.classList.add('show'); }, 1000);
-          setTimeout(function () { nudge.classList.remove('show'); }, 6000);
-        }
-        setTimeout(function () { copiedMsg.classList.remove('show'); }, 2500);
+      navigator.share({ title: 'I\u2019m ' + archName, text: text, url: shareUrl }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(function () {
+        fallbackCopy(text);
       });
+    } else {
+      fallbackCopy(text);
+    }
+
+    function showCopied() {
+      var copied = document.querySelector('.result__copied');
+      if (copied) {
+        copied.classList.add('show');
+        setTimeout(function () { copied.classList.remove('show'); }, 2500);
+      }
+      var nudge = document.getElementById('shareNudge');
+      if (nudge) {
+        setTimeout(function () { nudge.classList.add('show'); }, 1000);
+        setTimeout(function () { nudge.classList.remove('show'); }, 6000);
+      }
+    }
+
+    function fallbackCopy(str) {
+      var ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showCopied(); }
+      catch (e) { /* silent fail */ }
+      document.body.removeChild(ta);
     }
   }
 
@@ -885,7 +904,9 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        particleProfile = null;
         clearAmbientCanvas();
+        requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -904,7 +925,9 @@
         currentArchKey = null;
         answerHistory = [];
         if (window._ambientSystem) window._ambientSystem.stop();
+        particleProfile = null;
         clearAmbientCanvas();
+        requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
