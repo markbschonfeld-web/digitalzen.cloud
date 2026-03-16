@@ -125,7 +125,7 @@ em, i, cite { font-style: normal; }
 }
 .nav__issue {
   font-family: var(--font-mono);
-  font-size: 0.55rem; font-weight: 500;
+  font-size: 0.625rem; font-weight: 500;
   letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--red); opacity: 0.6;
 }
@@ -529,7 +529,7 @@ em, i, cite { font-style: normal; }
 .result__label {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 0.75rem; font-weight: 500;
+  font-size: 0.875rem; font-weight: 500;
   letter-spacing: 0.3em; text-transform: uppercase;
   color: var(--red);
   margin-bottom: 1.25rem;
@@ -554,7 +554,7 @@ em, i, cite { font-style: normal; }
 
 .result__freq-tag {
   font-family: var(--font-mono);
-  font-size: 0.72rem; font-weight: 500;
+  font-size: 0.82rem; font-weight: 500;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 1.25rem;
@@ -640,7 +640,7 @@ em, i, cite { font-style: normal; }
   padding: 0.7rem 1.3rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 0.82rem; font-weight: 500;
+  font-size: 0.92rem; font-weight: 500;
   letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-secondary);
   transition: all 150ms linear;
@@ -670,7 +670,7 @@ em, i, cite { font-style: normal; }
 .result__rarity {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.82rem; font-weight: 400;
+  font-size: 0.875rem; font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   margin-top: 0.75rem;
@@ -678,7 +678,7 @@ em, i, cite { font-style: normal; }
 
 /* ─── Capture primer ─── */
 .capture__primer {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   opacity: 0;
   text-align: center;
@@ -741,7 +741,7 @@ em, i, cite { font-style: normal; }
 }
 .btn--capture:hover { background: #fff; }
 .btn--capture.dimmed {
-  opacity: 0.6;
+  opacity: 0.5;
   transition: opacity 200ms ease, transform 200ms ease;
 }
 .btn--capture.ready {
@@ -776,9 +776,9 @@ em, i, cite { font-style: normal; }
   60%      { background: transparent; }
 }
 .capture__why {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  opacity: 0.55;
+  opacity: 0.7;
   text-align: center;
   margin-top: 0.5rem;
   line-height: 1.6;
@@ -849,7 +849,7 @@ em, i, cite { font-style: normal; }
   background: var(--text); color: var(--bg);
   border-radius: var(--radius);
   font-family: var(--font-display);
-  font-size: 0.75rem; font-weight: 600;
+  font-size: 1rem; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
   transition: all 150ms linear;
   min-height: 48px; min-width: 48px;
@@ -917,7 +917,7 @@ em, i, cite { font-style: normal; }
   .option__text { font-size: 1rem; }
   .option__sub { font-size: 0.78rem; line-height: 1.5; }
   .progress { margin-bottom: 1.25rem; }
-  .progress__label { font-size: 0.65rem; }
+  .progress__label { font-size: 0.75rem; }
 
   /* ── Intro / splash ── */
   .screen__label { font-size: 0.8rem; }
@@ -926,18 +926,18 @@ em, i, cite { font-style: normal; }
 
   /* ── Result screen ── */
   .result__label { font-size: 0.8rem; }
-  .result__freq-tag { font-size: 0.75rem; }
+  .result__freq-tag { font-size: 0.82rem; }
   .result__freq-label { font-size: 0.72rem; }
   .result__body p { font-size: 0.95rem; line-height: 1.85; }
   .result__insight p { font-size: 0.92rem; }
-  .result__rarity { font-size: 0.75rem; }
+  .result__rarity { font-size: 0.82rem; }
   .result__copied { font-size: 0.75rem; }
 
   /* ── Buttons — bigger tap targets + readable text ── */
   .btn--primary { font-size: 0.82rem; padding: 1rem 2.4rem; }
-  .btn--korfyr { font-size: 0.82rem; padding: 1rem 2.2rem; }
-  .btn--share { font-size: 0.75rem; padding: 0.75rem 1.4rem; }
-  .btn--capture { font-size: 0.78rem; padding: 1rem 1.4rem; }
+  .btn--korfyr { font-size: 0.92rem; padding: 1rem 2.2rem; }
+  .btn--share { font-size: 0.82rem; padding: 0.75rem 1.4rem; }
+  .btn--capture { font-size: 0.88rem; padding: 1rem 1.4rem; }
 
   /* ── KORFYR block ── */
   .korfyr__intrigue { font-size: 0.88rem; }
@@ -954,7 +954,7 @@ em, i, cite { font-style: normal; }
 
   /* ── Nav ── */
   .nav__tagline { font-size: 0.6rem; }
-  .nav__issue { font-size: 0.6rem; }
+  .nav__issue { font-size: 0.625rem; }
 
   /* ── Analyzing ── */
   .analyzing__label { font-size: 0.7rem; }
@@ -2153,11 +2153,11 @@ em, i, cite { font-style: normal; }
 /* Result comparison line */
 .result__comparison {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   letter-spacing: 0.04em;
   color: var(--text-secondary);
   margin-top: 0.6rem;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 .result__comparison:empty { display: none; }
 
