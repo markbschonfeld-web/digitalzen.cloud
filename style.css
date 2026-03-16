@@ -657,12 +657,29 @@ em, i, cite { font-style: normal; }
   margin-top: 0.75rem;
 }
 
+/* ─── Capture primer ─── */
+.capture__primer {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.02em;
+}
+.screen--result.active .capture__primer {
+  animation: clipReveal 0.3s linear var(--delay-capture, 2.6s) forwards;
+}
+
 /* ============================================
    Email Capture — delayed entrance
    ============================================ */
 .capture {
-  padding: 1.5rem 0;
+  padding: 1.5rem 1.25rem;
   opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+  margin-top: 0.5rem;
 }
 .screen--result.active .capture {
   animation: clipReveal 0.3s linear var(--delay-capture, 2.6s) forwards;
@@ -704,6 +721,19 @@ em, i, cite { font-style: normal; }
   white-space: nowrap; transition: all 150ms linear;
 }
 .btn--capture:hover { background: #fff; }
+.btn--capture.dimmed {
+  opacity: 0.4;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.btn--capture.ready {
+  opacity: 1;
+  animation: captureReady 200ms ease forwards;
+}
+@keyframes captureReady {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
 .capture__consent {
   display: flex; align-items: flex-start; gap: 0.6rem;
   margin-top: 0.75rem; cursor: pointer;
@@ -718,6 +748,22 @@ em, i, cite { font-style: normal; }
   line-height: 1.7; letter-spacing: 0.02em;
 }
 .capture__consent-text strong { color: var(--text-secondary); }
+.capture__consent.flash {
+  animation: consentFlash 600ms ease;
+}
+@keyframes consentFlash {
+  0%, 100% { background: transparent; }
+  30%      { background: rgba(196, 30, 30, 0.12); }
+  60%      { background: transparent; }
+}
+.capture__why {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+  text-align: center;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
 .capture__error {
   display: none; text-align: center;
   font-size: 0.75rem; color: var(--red);
@@ -1363,6 +1409,18 @@ em, i, cite { font-style: normal; }
   50%      { box-shadow: 0 0 15px rgba(196, 30, 30, 0.08);
              border-color: rgba(196, 30, 30, 0.25); }
 }
+/* Mobile capture entrance animation */
+@media (max-width: 768px) {
+  .capture--reveal .capture__input-wrap {
+    animation: captureGlow 1s ease-out forwards;
+  }
+}
+@keyframes captureGlow {
+  0%   { box-shadow: 0 0 0 transparent; }
+  50%  { box-shadow: 0 0 20px rgba(196, 30, 30, 0.15); }
+  100% { box-shadow: 0 0 0 transparent; }
+}
+
 /* Kill breathing when user is typing */
 .capture__input-wrap:focus-within {
   animation: none;
