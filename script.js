@@ -190,6 +190,11 @@
       var ctx = c.getContext('2d');
       ctx.clearRect(0, 0, c.width, c.height);
     }
+    var p = document.getElementById('particleBg');
+    if (p) {
+      var ctx2 = p.getContext('2d');
+      ctx2.clearRect(0, 0, p.width, p.height);
+    }
   }
 
   function getQuizColor() {
@@ -493,7 +498,7 @@
       Object.keys(traits).forEach(function (k) {
         if (traits[k] > domVal) { domVal = traits[k]; domTrait = k; }
       });
-      whyEl.textContent = 'We\u2019ll let you know first when something drops for ' + traitWhys[domTrait] + '. That\u2019s it.';
+      whyEl.textContent = 'You\u2019ll hear first when something drops for ' + traitWhys[domTrait] + '. That\u2019s it.';
     }
 
     // Set bridge line for KORFYR block

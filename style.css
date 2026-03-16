@@ -32,10 +32,13 @@
 
 /* ---- Reset ---- */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { -webkit-font-smoothing: antialiased; }
+html {
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+}
 body {
   font-family: var(--font-body);
-  background-color: var(--bg);
+  background-color: transparent;
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
@@ -160,6 +163,15 @@ em, i, cite { font-style: normal; }
 .screen--result {
   justify-content: flex-start;
   padding-top: 5.5rem;
+}
+.screen--splash {
+  padding-top: 5.5rem;
+}
+@media (max-width: 768px) {
+  .screen--result,
+  .screen--splash {
+    padding-top: 80px; /* extra room for fixed nav + Safari toolbar */
+  }
 }
 
 .screen__inner {
@@ -1175,14 +1187,14 @@ em, i, cite { font-style: normal; }
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  z-index: 0;
+  z-index: -2;
   pointer-events: none;
 }
 .particle-canvas {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  z-index: 1;
+  z-index: -1;
   pointer-events: none;
 }
 
