@@ -165,16 +165,16 @@
   var answerHistory = [];      // tracks {trait, screenIndex} for back navigation
   var referredFrom = null;     // friend's archetype key if arrived via ?r= link
   var particleProfiles = {
-    architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.15 },
-    ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.04 },
-    circuit:   { speed: 1.5, r: 232, g: 93,  b: 58,  o: 0.18 },
-    twam:      { speed: 0.5, r: 200, g: 160, b: 40,  o: 0.14 },
-    minimalist:{ speed: 0.3, r: 210, g: 210, b: 210, o: 0.06 },
-    operator:  { speed: 1.1, r: 100, g: 130, b: 220, o: 0.14 },
-    engineer:  { speed: 0.6, r: 80,  g: 130, b: 200, o: 0.12 },
-    phantom:   { speed: 0.9, r: 150, g: 100, b: 190, o: 0.13 },
-    builder:   { speed: 0.35,r: 165, g: 130, b: 85,  o: 0.10 },
-    nocturnal: { speed: 1.4, r: 230, g: 45,  b: 45,  o: 0.22 }
+    architect: { speed: 0.7, r: 170, g: 185, b: 210, o: 0.25 },
+    ghost:     { speed: 0.2, r: 200, g: 200, b: 200, o: 0.10 },
+    circuit:   { speed: 1.5, r: 232, g: 93,  b: 58,  o: 0.28 },
+    twam:      { speed: 0.5, r: 200, g: 160, b: 40,  o: 0.22 },
+    minimalist:{ speed: 0.3, r: 210, g: 210, b: 210, o: 0.12 },
+    operator:  { speed: 1.1, r: 100, g: 130, b: 220, o: 0.22 },
+    engineer:  { speed: 0.6, r: 80,  g: 130, b: 200, o: 0.20 },
+    phantom:   { speed: 0.9, r: 150, g: 100, b: 190, o: 0.20 },
+    builder:   { speed: 0.35,r: 165, g: 130, b: 85,  o: 0.18 },
+    nocturnal: { speed: 1.4, r: 230, g: 45,  b: 45,  o: 0.30 }
   };
   // Trait → color mapping for choice-reactive particles
   var traitColors = {
@@ -262,6 +262,12 @@
       clearAmbientCanvas();
     }
 
+    // Hide sticky header when leaving result screen
+    if (name !== 'result') {
+      var sticky = document.getElementById('resultSticky');
+      if (sticky) sticky.classList.remove('visible');
+    }
+
     // Fade out current
     if (currentEl) {
       currentEl.classList.add('fade-out');
@@ -300,10 +306,10 @@
         // Clear any old canvas frame before starting new ambient
         clearAmbientCanvas();
 
-        // Start ambient at low intensity during analysis
+        // Start ambient at elevated intensity during analysis (most visible here)
         if (window._ambientSystem) {
           window._ambientSystem.start(archKey, false);
-          window._ambientSystem.setIntensity(0.3);
+          window._ambientSystem.setIntensity(0.6);
         }
 
         var analyzingScreen = quiz.querySelector('[data-screen="analyzing"]');
@@ -1051,6 +1057,28 @@
       }
     });
 
+    // ---- Parallax drift on ambient canvases (desktop mouse, mobile scroll) ----
+    (function () {
+      var canvases = document.querySelectorAll('#ambientBg, #particleBg');
+      if (!canvases.length) return;
+      var tx = 0, ty = 0, cx = 0, cy = 0;
+      document.addEventListener('mousemove', function (e) {
+        tx = (e.clientX / window.innerWidth - 0.5) * -10;
+        ty = (e.clientY / window.innerHeight - 0.5) * -10;
+      });
+      // Smooth lerp loop
+      (function drift() {
+        cx += (tx - cx) * 0.06;
+        cy += (ty - cy) * 0.06;
+        if (Math.abs(cx) > 0.05 || Math.abs(cy) > 0.05) {
+          canvases.forEach(function (c) {
+            c.style.transform = 'translate(' + cx.toFixed(2) + 'px,' + cy.toFixed(2) + 'px)';
+          });
+        }
+        requestAnimationFrame(drift);
+      })();
+    })();
+
     // ---- Archetype ambient visual system ----
     (function () {
       var canvas = document.getElementById('ambientBg');
@@ -1106,10 +1134,10 @@
             if (l.vertical) l.x += l.drift;
             else l.y += l.drift;
           }
-          var op = 0.09;
+          var op = 0.16;
           if (i === gridState.flashIdx) {
             var elapsed = now - gridState.flashTime;
-            if (elapsed < 800) op = 0.09 + 0.20 * Math.max(0, 1 - elapsed / 800);
+            if (elapsed < 800) op = 0.16 + 0.24 * Math.max(0, 1 - elapsed / 800);
           }
           ctx.beginPath();
           ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (op * fadeOpacity * intensityMult) + ')';
@@ -1144,7 +1172,7 @@
           if (b.x > W + b.r) b.x = -b.r;
           if (b.y < -b.r) b.y = H + b.r;
           if (b.y > H + b.r) b.y = -b.r;
-          var cycleOp = 0.03 + 0.03 * Math.sin(t / b.period * Math.PI * 2 + b.phase);
+          var cycleOp = 0.05 + 0.05 * Math.sin(t / b.period * Math.PI * 2 + b.phase);
           var grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
           grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (cycleOp * fadeOpacity * intensityMult) + ')');
           grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
@@ -1679,7 +1707,7 @@
           r: Math.random() * 1.5 + 0.5,
           dx: (Math.random() - 0.5) * 0.25,
           dy: -(Math.random() * 0.3 + 0.08),
-          o: Math.random() * 0.12 + 0.04
+          o: Math.random() * 0.18 + 0.08
         };
       }
 

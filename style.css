@@ -170,7 +170,7 @@ em, i, cite { font-style: normal; }
 @media (max-width: 768px) {
   .screen--result,
   .screen--splash {
-    padding-top: 80px; /* extra room for fixed nav + Safari toolbar */
+    padding-top: 85px !important; /* 65px nav + 20px breathing room */
   }
 }
 
@@ -226,7 +226,7 @@ em, i, cite { font-style: normal; }
 }
 .screen__title {
   font-family: var(--font-display);
-  font-size: clamp(2.6rem, 8.5vw, 4.5rem);
+  font-size: clamp(2.8rem, 9vw, 5rem);
   font-weight: 700; line-height: 0.95;
   letter-spacing: -0.03em;
   text-transform: uppercase;
@@ -243,7 +243,7 @@ em, i, cite { font-style: normal; }
 .screen__proof {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.6rem; font-weight: 400;
+  font-size: 0.75rem; font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   margin-top: 1.5rem;
@@ -350,7 +350,7 @@ em, i, cite { font-style: normal; }
   color: var(--bg);
   border-radius: var(--radius);
   font-family: var(--font-display);
-  font-size: 0.75rem; font-weight: 600;
+  font-size: 0.875rem; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
   transition: all 150ms linear;
   border: 1px solid transparent;
@@ -395,14 +395,14 @@ em, i, cite { font-style: normal; }
 }
 .progress__label {
   font-family: var(--font-mono);
-  font-size: 0.55rem; letter-spacing: 0.15em;
+  font-size: 0.75rem; letter-spacing: 0.15em;
   color: var(--text-muted);
 }
 
 /* ---- Question ---- */
 .question {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 5.5vw, 2.2rem);
+  font-size: clamp(1.6rem, 5.5vw, 2.4rem);
   font-weight: 700; line-height: 1.15;
   margin-bottom: 1.5rem;
 }
@@ -437,6 +437,13 @@ em, i, cite { font-style: normal; }
   .option:hover {
     background: var(--bg-elevated);
     box-shadow: inset 3px 0 0 var(--red);
+  }
+}
+/* Prevent stuck hover on touch devices (first option red border bias) */
+@media (hover: none) {
+  .option:hover {
+    background: var(--bg-card);
+    box-shadow: inset 3px 0 0 transparent;
   }
 }
 .option:active { transform: scale(0.98); }
@@ -497,8 +504,8 @@ em, i, cite { font-style: normal; }
   pointer-events: auto;
 }
 .result-sticky__name {
-  font-family: var(--font-heading);
-  font-size: 0.72rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -592,7 +599,7 @@ em, i, cite { font-style: normal; }
   padding: 1.25rem 0;
 }
 .result__body p {
-  font-size: 0.92rem; font-weight: 300;
+  font-size: 1rem; font-weight: 300;
   line-height: 1.8; color: var(--text-secondary);
   max-width: 420px;
   opacity: 0;
@@ -614,7 +621,7 @@ em, i, cite { font-style: normal; }
 }
 .result__insight p {
   font-family: var(--font-display);
-  font-size: 0.88rem; font-weight: 500;
+  font-size: 1rem; font-weight: 500;
   line-height: 1.8; color: var(--text-muted);
   max-width: 360px; margin: 0 auto;
 }
@@ -633,7 +640,7 @@ em, i, cite { font-style: normal; }
   padding: 0.7rem 1.3rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  font-size: 0.72rem; font-weight: 500;
+  font-size: 0.82rem; font-weight: 500;
   letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-secondary);
   transition: all 150ms linear;
@@ -652,7 +659,7 @@ em, i, cite { font-style: normal; }
 
 .result__nudge {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   opacity: 0;
   margin-top: 0.3rem;
@@ -663,7 +670,7 @@ em, i, cite { font-style: normal; }
 .result__rarity {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.68rem; font-weight: 400;
+  font-size: 0.82rem; font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   margin-top: 0.75rem;
@@ -671,7 +678,7 @@ em, i, cite { font-style: normal; }
 
 /* ─── Capture primer ─── */
 .capture__primer {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   opacity: 0;
   text-align: center;
@@ -702,7 +709,7 @@ em, i, cite { font-style: normal; }
   margin: 0 auto 1.5rem;
 }
 .capture__text {
-  font-size: 0.85rem; color: var(--text-secondary);
+  font-size: 0.95rem; color: var(--text-secondary);
   line-height: 1.8; text-align: center;
   font-weight: 300; margin-bottom: 1.25rem;
 }
@@ -728,7 +735,7 @@ em, i, cite { font-style: normal; }
   background: var(--text); color: var(--bg);
   border: none; border-left: 1px solid var(--border);
   font-family: var(--font-display);
-  font-size: 0.7rem; font-weight: 600;
+  font-size: 0.875rem; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
   white-space: nowrap; transition: all 150ms linear;
 }
@@ -769,9 +776,9 @@ em, i, cite { font-style: normal; }
   60%      { background: transparent; }
 }
 .capture__why {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  opacity: 0.5;
+  opacity: 0.55;
   text-align: center;
   margin-top: 0.5rem;
   line-height: 1.6;
@@ -2176,6 +2183,71 @@ em, i, cite { font-style: normal; }
 }
 
 /* ============================================
+   V9: CANVAS VISIBILITY + VISUAL ENERGY
+   ============================================ */
+
+/* #5: Let canvas show through — semi-transparent body overlay */
+body {
+  background-color: rgba(12, 12, 14, 0.82);
+}
+.screen {
+  background: transparent;
+}
+
+/* #7: Breathing glow on option cards (staggered) */
+@keyframes optionBreathe {
+  0%, 100% { box-shadow: inset 3px 0 0 transparent, 0 0 0 rgba(196, 30, 30, 0); }
+  50% { box-shadow: inset 3px 0 0 transparent, 0 0 8px 1px rgba(196, 30, 30, 0.08); }
+}
+.screen.active .options .option {
+  animation: optionEntry 0.32s cubic-bezier(0.16, 1, 0.3, 1) var(--stagger-ms, 110ms) both,
+             optionBreathe 4s ease-in-out var(--stagger-ms, 110ms) infinite;
+}
+/* Stagger breathing so cards don't all pulse at once */
+.options .option:nth-child(1) { --breathe-delay: 0s; }
+.options .option:nth-child(2) { --breathe-delay: 1s; }
+.options .option:nth-child(3) { --breathe-delay: 2s; }
+.options .option:nth-child(4) { --breathe-delay: 3s; }
+
+/* #8: Progress bar — glow trail on leading edge */
+.progress__fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -2px; bottom: -2px;
+  width: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196, 30, 30, 0.5), transparent);
+  animation: barEdgePulse 1.5s ease-in-out infinite;
+}
+
+/* #9: Analyzing screen — radial vignette spotlight */
+.screen--analyzing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 25%, rgba(12, 12, 14, 0.5) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* #9: Trait rows fade-up animation */
+.az__trait-row {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease);
+}
+.az__trait-row.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* #12: KORFYR CTA — slightly larger, more visual weight */
+.btn--korfyr {
+  font-size: 0.85rem;
+  padding: 1rem 2.8rem;
+}
+
+/* ============================================
    ACCESSIBILITY — prefers-reduced-motion updates
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
@@ -2223,5 +2295,11 @@ em, i, cite { font-style: normal; }
   }
   .progress__fill::after {
     animation: none !important;
+  }
+  .screen.active .options .option {
+    animation: none !important;
+  }
+  .particle-canvas {
+    display: none !important;
   }
 }
