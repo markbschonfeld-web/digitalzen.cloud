@@ -523,7 +523,7 @@
     }
 
     // Set platform share pill URLs
-    var resultShareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
+    var resultShareUrl = 'https://digitalzen.cloud/r/' + arch.key;
     var resultShareText = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
     var xPillEl = document.getElementById('shareX');
     if (xPillEl) {
@@ -705,7 +705,7 @@
     var rarityText = rarityEl ? rarityEl.textContent.trim() : '';
     var rarityMatch = rarityText.match(/(\d+)%/);
     var pct = rarityMatch ? rarityMatch[1] : null;
-    var shareUrl = 'https://digitalzen.cloud/?r=' + displayKey;
+    var shareUrl = 'https://digitalzen.cloud/r/' + displayKey;
 
     // Build share text
     var urlParams = new URLSearchParams(window.location.search);
@@ -977,7 +977,7 @@
         var resultEl = document.querySelector('[data-screen="result"]');
         var displayKey = resultEl ? resultEl.getAttribute('data-archetype') : null;
         if (!displayKey) return;
-        var url = 'https://digitalzen.cloud/?r=' + displayKey;
+        var url = 'https://digitalzen.cloud/r/' + displayKey;
         var span = shareCopyPill.querySelector('span');
         function onCopied() {
           shareCopyPill.classList.add('copied');
