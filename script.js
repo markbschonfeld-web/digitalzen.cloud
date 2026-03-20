@@ -522,6 +522,24 @@
         + '&utm_content=' + arch.key;
     }
 
+    // Set platform share pill URLs
+    var resultShareUrl = 'https://digitalzen.cloud/?r=' + arch.key;
+    var resultShareText = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+    var xPillEl = document.getElementById('shareX');
+    if (xPillEl) {
+      xPillEl.href = 'https://twitter.com/intent/tweet?text='
+        + encodeURIComponent(resultShareText)
+        + '&url=' + encodeURIComponent(resultShareUrl);
+    }
+    var fbPillEl = document.getElementById('shareFb');
+    if (fbPillEl) {
+      fbPillEl.href = 'https://www.facebook.com/sharer/sharer.php?u='
+        + encodeURIComponent(resultShareUrl);
+    }
+
+    // Reset share button state on each render (handles retake)
+    if (shareBtn) shareBtn.classList.remove('shared');
+
     // Set timing — share button now appears before body copy
     var shareEl = document.querySelector('.result__share');
     var insightEl = document.querySelector('.result__insight');
@@ -705,13 +723,22 @@
     text += '\n' + shareUrl;
 
     if (navigator.share) {
-      navigator.share({ title: 'I\u2019m ' + archName, text: text, url: shareUrl }).catch(function () {});
+      navigator.share({ title: 'I\u2019m ' + archName, text: text, url: shareUrl })
+        .then(function () { markShared(); })
+        .catch(function () {});
     } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(showCopied).catch(function () {
+      navigator.clipboard.writeText(text).then(function () {
+        showCopied(); markShared();
+      }).catch(function () {
         fallbackCopy(text);
       });
     } else {
       fallbackCopy(text);
+    }
+
+    function markShared() {
+      var btn = document.getElementById('shareBtn');
+      if (btn) btn.classList.add('shared');
     }
 
     function showCopied() {
@@ -942,6 +969,52 @@
     });
 
     shareBtn.addEventListener('click', handleShare);
+
+    // Copy Link pill — copies bare URL, shows inline feedback
+    var shareCopyPill = document.getElementById('shareCopyPill');
+    if (shareCopyPill) {
+      shareCopyPill.addEventListener('click', function () {
+        var resultEl = document.querySelector('[data-screen="result"]');
+        var displayKey = resultEl ? resultEl.getAttribute('data-archetype') : null;
+        if (!displayKey) return;
+        var url = 'https://digitalzen.cloud/?r=' + displayKey;
+        var span = shareCopyPill.querySelector('span');
+        function onCopied() {
+          shareCopyPill.classList.add('copied');
+          if (span) span.textContent = 'Copied!';
+          setTimeout(function () {
+            shareCopyPill.classList.remove('copied');
+            if (span) span.textContent = 'Copy Link';
+          }, 2500);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(onCopied).catch(function () {
+            var ta = document.createElement('textarea');
+            ta.value = url; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); onCopied(); } catch (e) {}
+            document.body.removeChild(ta);
+          });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = url; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); onCopied(); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+      });
+    }
+
+    // X and Facebook pills — mark main button as shared when user taps out
+    ['shareX', 'shareFb'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', function () {
+          if (shareBtn) shareBtn.classList.add('shared');
+        });
+      }
+    });
+
     captureForm.addEventListener('submit', handleCapture);
 
     // Consent checkbox → button visual state
