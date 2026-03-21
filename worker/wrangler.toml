@@ -74,5 +74,5 @@ compatibility_date = "2024-01-01"
 
 [[dz-og-rewrite.kv_namespaces]]
 binding = "DZ_STATS"
-id = "<namespace-id>"
-preview_id = "<preview-namespace-id>"
+id = "2edbb5a77cf6433db46a5b2dee4e5674"
+# preview_id: create with `wrangler kv:namespace create DZ_STATS --preview` if needed for local dev
