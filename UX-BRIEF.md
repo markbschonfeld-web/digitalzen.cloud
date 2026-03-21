@@ -276,3 +276,338 @@ The slot-machine effect on the rarity percentage is clever and is currently the 
 ---
 
 *Brief compiled from full static analysis of index.html, script.js, style.css, worker/og-rewrite.js, worker/shopify-subscribe.js, and r/ redirect pages.*
+
+---
+
+## Implementation Notes
+
+File-level specifics for each recommendation, in priority order.
+
+---
+
+### Priority 1 — Move email form below KORFYR block
+
+**Files:** `index.html`, `script.js`
+
+**index.html (~line 327–361):** The DOM order is currently:
+```
+<p class="capture__primer">...</p>     ← intro line above email
+<div class="capture">...</div>          ← email form
+<div class="korfyr">...</div>           ← KORFYR block
+```
+Swap so it becomes:
+```
+<div class="korfyr">...</div>
+<p class="capture__primer">...</p>
+<div class="capture">...</div>
+```
+
+**script.js (~line 562–563):** The animation delay values need to swap to match the new order:
+```js
+// Before
+captureEl.style.setProperty('--delay-capture', (afterBody + 0.2) + 's');
+korfyrEl.style.setProperty('--delay-korfyr',   (afterBody + 0.6) + 's');
+
+// After
+korfyrEl.style.setProperty('--delay-korfyr',   (afterBody + 0.2) + 's');
+captureEl.style.setProperty('--delay-capture', (afterBody + 0.6) + 's');
+```
+
+The KORFYR ping delay calculation at ~line 666 (`2760 + Math.round((afterBody + 0.3) * 1000)`) references `afterBody + 0.3` — since KORFYR now appears at `afterBody + 0.2`, update the `+ 0.3` to `+ 0.2` to keep the ping timed correctly relative to the block entrance.
+
+---
+
+### Priority 2 — Archetype visual differentiation
+
+**Files:** `script.js`, `style.css`
+
+**script.js (~line 467):** Where `currentArchKey = archKey` is set inside `showResult()`, add one line after it:
+```js
+document.querySelector('.screen--result').setAttribute('data-arch', archKey);
+```
+
+**style.css:** Add per-archetype rules targeting `.screen--result[data-arch="X"] .result__archetype`. The archetype name element is `<h2 class="result__archetype" id="resultArchetype">`. Target it with data-arch selectors for typography overrides. Examples:
+
+```css
+/* Ghost — ethereal, drifting entrance */
+[data-arch="ghost"] .result__archetype {
+  font-weight: 200;
+  letter-spacing: 0.25em;
+  animation: ghostReveal 1.8s ease forwards;
+}
+
+/* Circuit — glitch lock */
+[data-arch="circuit"] .result__archetype {
+  letter-spacing: -0.02em;
+  animation: circuitGlitch 0.6s steps(1) forwards;
+}
+
+/* Architect — structured, precise */
+[data-arch="architect"] .result__archetype {
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.1em;
+}
+```
+
+Each needs a corresponding `@keyframes` block. The canvas background (`screen__ambient--result`) already handles the animated backdrop per archetype — the typography layer adds identity to the name itself.
+
+For color theming per archetype, the archetype objects in `script.js` already define `color` arrays — these can be surfaced as CSS custom properties on the result section at the same point where `data-arch` is set, e.g. `document.querySelector('.screen--result').style.setProperty('--arch-color', arch.colors[0])`.
+
+---
+
+### Priority 3 — BEGIN / FIND OUT transition
+
+**Files:** `index.html`, `script.js`, `style.css`
+
+**index.html:** Add a scan-line element to the body (inside `<div id="quiz">`):
+```html
+<div class="scan-line" id="scanLine" aria-hidden="true"></div>
+```
+
+**script.js:** The `transitionTo()` function at ~line 249 handles all screen transitions. Both BEGIN and FIND OUT call it to move to screen index 1 (Q1). Find the click handlers for both:
+- BEGIN: somewhere around the intro screen event listeners (~line 1040–1050)
+- FIND OUT: ~line 1048
+
+Before each `transitionTo(1)` call from intro/splash, set a flag:
+```js
+window._bootTransition = true;
+transitionTo(1);
+```
+
+Inside `transitionTo()`, at the start, check for this flag:
+```js
+if (window._bootTransition) {
+  window._bootTransition = false;
+  // Accelerate particles briefly
+  window._particleBoost = true;
+  setTimeout(function() { window._particleBoost = false; }, 500);
+  // Trigger scan line
+  var sl = document.getElementById('scanLine');
+  if (sl) { sl.classList.add('active'); setTimeout(function() { sl.classList.remove('active'); }, 180); }
+}
+```
+
+The particle loop already checks various state flags — `_particleBoost` can increase particle speed for one cycle by checking it in the particle update loop.
+
+**style.css:**
+```css
+.scan-line {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  transform: translateY(-2px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: none;
+}
+.scan-line.active {
+  animation: scanSweep 180ms linear forwards;
+}
+@keyframes scanSweep {
+  0%   { opacity: 0; transform: translateY(0); }
+  15%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(100vh); }
+}
+```
+
+---
+
+### Priority 4 — Question copy corrections
+
+**File:** `index.html`
+
+**Q1, line ~130:** `"When it hits"` is too vague as primary text. Sub-text ("No schedule. Just instinct.") helps but doesn't fully rescue it. Suggested replacement:
+```html
+<span class="option__text">When something shifts</span>
+```
+
+**Q4, line ~221:** `"The three seconds before you went back in."` — the "went back in" does provide context (returning inside) and the sub-text ("That was the whole point.") reinforces the meaning. Lower priority than Q1. If editing, consider:
+```html
+<span class="option__text">The moment before you went back in.</span>
+```
+Removing the specific "three seconds" makes it feel less oddly precise while preserving the image.
+
+**Q2 note:** The actual code reads `"Outside. Just the air."` / `"Nothing between you and it."` — this is clean and does not need the edit described in the copy review section of this brief. That analysis was based on an earlier draft version. Leave Q2 as-is.
+
+---
+
+### Priority 5 — Share button one-shot attention pulse
+
+**Files:** `script.js`, `style.css`
+
+**script.js:** In `showResult()`, near where the share section is shown (~line 553), after the existing 0.8s delay logic, add:
+```js
+setTimeout(function () {
+  var shareEl = document.querySelector('.result__share');
+  if (shareEl) {
+    shareEl.classList.add('share--pulse');
+    setTimeout(function () { shareEl.classList.remove('share--pulse'); }, 800);
+  }
+}, 1500);
+```
+
+**style.css:**
+```css
+.result__share.share--pulse::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 1px solid rgba(255,255,255,0.25);
+  animation: sharePulseRing 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes sharePulseRing {
+  0%   { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+```
+
+`.result__share` needs `position: relative` if not already set.
+
+---
+
+### Priority 6 — KORFYR shutdown animation
+
+**Files:** `index.html`, `script.js`, `style.css`
+
+**index.html:** Add shutdown overlay inside `<div id="quiz">`:
+```html
+<div class="korfyr-shutdown" id="korfyrShutdown" aria-hidden="true"></div>
+```
+
+**script.js (~line 1227):** The `.btn--korfyr` click handler currently does cursor effects and burst ring. Add shutdown logic before navigation fires:
+```js
+kBtn.addEventListener('click', function (e) {
+  e.preventDefault();
+  var dest = kBtn.href;
+  var overlay = document.getElementById('korfyrShutdown');
+  if (overlay) { overlay.classList.add('active'); }
+  // Fade ambient canvas
+  if (window._ambientIntensityTarget !== undefined) {
+    window._ambientIntensityTarget = 0;
+  }
+  setTimeout(function () {
+    window.open(dest, '_blank');
+    // Reset overlay after navigation
+    setTimeout(function () {
+      if (overlay) overlay.classList.remove('active');
+    }, 300);
+  }, 900);
+});
+```
+
+The ambient canvas system tracks intensity via a target value — the exact variable name will need to be confirmed in the canvas rendering loop, but the pattern for fading it out is already used during the analyzing/result transitions.
+
+**style.css:**
+```css
+.korfyr-shutdown {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 1, 1);
+}
+.korfyr-shutdown.active {
+  opacity: 1;
+  pointer-events: all;
+}
+```
+
+The transition from opacity 0 → 1 over 700ms gives a slow fade to black. Navigation fires at 900ms, so the screen is dark before the redirect. No text, no flash, no sound — just the site going quiet.
+
+---
+
+### Priority 7 — Text contrast audit
+
+**File:** `style.css`
+
+Four specific areas to check and adjust:
+
+1. **`.result__body p`** — the two archetype description paragraphs. Should be at minimum `rgba(255,255,255,0.85)` against the dark background.
+2. **`.capture__consent-text`** — the GDPR consent label. This is legally material text. Must be fully opaque or very close to it. Check current opacity/color value and confirm it passes 4.5:1 against its background.
+3. **`.result__insight`** — the insight quote. Often styled with reduced opacity for aesthetic hierarchy. Confirm it still passes 4.5:1 — if it currently uses something like `opacity: 0.6` or a muted color, it may be failing.
+4. **Option selected state** — during the selection scan animation, the `.option.selected` element has a brief flash/scan overlay. Confirm the text underneath remains legible (above 4.5:1) during the 0.38s animation.
+
+---
+
+### Priority 8 — Email form contrast + "I'm In" activation animation
+
+**Files:** `script.js`, `style.css`
+
+**style.css — form container surface:**
+Add a subtle background to `.capture` to lift it off the result background:
+```css
+.capture {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 1.5rem;  /* adjust to match existing spacing */
+}
+```
+
+**script.js — "I'm In" activation sequence:**
+Find the event listeners for the email input (`~line 1157`) and the consent checkbox (`captureConsent`). After each change event, run a shared check function:
+```js
+function checkCaptureReady() {
+  var email = captureForm.querySelector('.capture__input').value;
+  var consent = document.getElementById('captureConsent').checked;
+  var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (validEmail && consent) {
+    captureBtn.classList.add('capture-ready');
+  } else {
+    captureBtn.classList.remove('capture-ready');
+  }
+}
+```
+
+**style.css — activation animation (fires only when both conditions met):**
+```css
+.btn--capture.capture-ready {
+  animation: captureActivate 0.3s ease forwards;
+}
+@keyframes captureActivate {
+  0%   { transform: scale(0.97); box-shadow: none; }
+  60%  { transform: scale(1.02); }
+  100% { transform: scale(1.0); box-shadow: 0 0 12px rgba(255,255,255,0.15); }
+}
+```
+
+The button's disabled/dimmed state (before consent) remains unchanged — the animation only fires when transitioning from not-ready to ready, which requires both a valid email AND consent checked. This satisfies the compliance constraint: the animation is the reward for completing consent, not a prompt toward it.
+
+---
+
+### Priority 9 — Social proof line below share button
+
+**Files:** `index.html`, `script.js`
+
+**index.html:** Add a span after the share button inside `.result__share`:
+```html
+<span class="result__share-social" id="shareSocialProof"></span>
+```
+
+**script.js:** In the stats callback (where `shareCount` is already populated), also populate `shareSocialProof` if the share count is above a threshold (e.g., 200):
+```js
+if (data.shareCount > 200) {
+  var sp = document.getElementById('shareSocialProof');
+  if (sp) sp.textContent = data.shareCount.toLocaleString() + ' people sharing this week';
+}
+```
+
+Low lift, scale-dependent value — only shows when there's real volume to show.
+
+---
+
+### What Doesn't Need Code
+
+- **KORFYR bridge copy** — all 10 archetype-specific bridge lines are in `script.js` and are working well. No changes.
+- **Analyzing sequence** — leave `script.js` timing constants and the three-phase structure entirely alone.
+- **Consent checkbox** — the required/disabled logic is correctly implemented. No changes.
+- **Cloudflare Workers** (`worker/og-rewrite.js`, `worker/shopify-subscribe.js`) — none of the above recommendations require worker changes. The OG image PNGs in `og/` are also unchanged.
+- **The `r/` redirect files** — purely redirect shims, untouched by all of the above.
