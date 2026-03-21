@@ -34,18 +34,45 @@ name = "dz-subscribe"
 main = "shopify-subscribe.js"
 compatibility_date = "2024-01-01"
 
-# ─── OG meta tag rewriter ──────────────────────────────────────────────────
-# NOTE: Not currently needed — /r/<archetype>.html static pages handle
-# per-archetype OG previews without requiring this worker.
+# ─── OG meta tag rewriter + Stats API ─────────────────────────────────────
+# Deployed at: dz-og-rewrite.helixirin.workers.dev
+# Route:       digitalzen.cloud/* → dz-og-rewrite
 #
-# If you want to deploy it anyway (e.g. for /?r=<key> URL support):
+# This worker handles two responsibilities:
+#   1. OG meta tag rewriting for social crawlers (GET /?r=<archetype>)
+#   2. Stats API for live share counting and archetype frequency tracking
+#      POST /api/share            → increment share counter
+#      POST /api/result?archetype → increment completion count
+#      GET  /api/stats            → return JSON with all stats + blended percentages
+#
+# ── KV Setup (one-time, run before deploying) ──────────────────────────────
+# Step 1: Create the KV namespaces
+#   wrangler kv:namespace create DZ_STATS
+#   wrangler kv:namespace create DZ_STATS --preview
+#
+# Step 2: Copy the namespace IDs from the output above into this file:
+#   Replace <namespace-id> and <preview-namespace-id> below.
+#
+# Step 3: Deploy
 #   wrangler deploy og-rewrite.js --name dz-og-rewrite --compatibility-date 2024-01-01
-#   Then add a route in Cloudflare Dashboard:
-#   Workers Routes → digitalzen.cloud/* → dz-og-rewrite
 #
-# (Requires digitalzen.cloud DNS to be proxied through Cloudflare orange cloud)
+# Step 4: Add route in Cloudflare Dashboard:
+#   Workers Routes → digitalzen.cloud/* → dz-og-rewrite
+#   (Requires DNS proxied through Cloudflare orange cloud)
+#
+# To verify KV is working:
+#   curl -X POST https://dz-og-rewrite.helixirin.workers.dev/api/result?archetype=architect
+#   curl https://dz-og-rewrite.helixirin.workers.dev/api/stats
+#
+# To watch logs:
+#   wrangler tail --name dz-og-rewrite
 
 [dz-og-rewrite]
 name = "dz-og-rewrite"
 main = "og-rewrite.js"
 compatibility_date = "2024-01-01"
+
+[[dz-og-rewrite.kv_namespaces]]
+binding = "DZ_STATS"
+id = "<namespace-id>"
+preview_id = "<preview-namespace-id>"
