@@ -270,7 +270,7 @@ Compliance-critical — do not modify without owner sign-off:
 - Quiz question copy, answer options, archetype text, bridge lines
 - KORFYR disclosure structure and sponsor attribution
 - Consent checkbox (legally required, cannot be removed/reworded)
-- Rarity percentages in the archetype data (calibrated)
+- Rarity percentages **in `script.js` archetype data** — these are seeded baselines used as the cold-start fallback, not the live display values. The stats system is intentionally designed to drift away from them as real completions accumulate (`displayPct = (realPct * realWeight) + (seededPct * (1 - realWeight))`, where `realWeight` reaches 1.0 at 500 completions). Do not change the seeded values without owner sign-off — they were calibrated for credibility at launch.
 - Email capture endpoint URL (tied to Shopify app credentials)
 
 ---
