@@ -537,6 +537,15 @@
         + encodeURIComponent(resultShareUrl);
     }
 
+    // Enhancement 7: WhatsApp pill — mobile only, fresh URL on each render
+    var waPillEl = document.getElementById('shareWa');
+    if (waPillEl) {
+      var waText = encodeURIComponent('My night mode is ' + arch.name + '. What\u2019s yours? ' + resultShareUrl);
+      waPillEl.href = 'https://wa.me/?text=' + waText;
+      var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+      waPillEl.style.display = isMobile ? '' : 'none';
+    }
+
     // Reset share button state on each render (handles retake)
     if (shareBtn) shareBtn.classList.remove('shared');
 
@@ -553,15 +562,46 @@
     captureEl.style.setProperty('--delay-capture', (afterBody + 0.2) + 's');
     korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
 
-    // Rarity slot machine — random numbers tick before settling on real %
+    // Enhancement 1: populate and animate share preview mockup
+    var previewEl = document.getElementById('sharePreview');
+    var previewImg = document.getElementById('sharePreviewImg');
+    var previewTitle = document.getElementById('sharePreviewTitle');
+    if (previewEl && previewImg && previewTitle) {
+      previewImg.style.backgroundImage = 'url(og/' + arch.key + '.png)';
+      previewTitle.textContent = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
+      previewEl.classList.remove('share-preview--played');
+      // Reset animation by removing and re-adding the active class
+      previewEl.classList.remove('share-preview--active');
+      void previewEl.offsetWidth; // force reflow
+      previewEl.classList.add('share-preview--active');
+      // Fade out after 2.2s, then mark as played
+      setTimeout(function () {
+        previewEl.classList.add('share-preview--played');
+      }, 2200);
+    }
+
+    // Enhancement 6: smooth scroll to share section after archetype name animates in
+    setTimeout(function () {
+      var shareEl2 = document.querySelector('.result__share');
+      if (shareEl2 && shareEl2.getBoundingClientRect().bottom > window.innerHeight) {
+        shareEl2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 1200);
+
+    // Fire /api/result to record completion; also fetch stats for live rarity display
+    var currentArchKey = arch.key;
+    fetch(STATS_ENDPOINT + '/api/result?archetype=' + currentArchKey, { method: 'POST' }).catch(function () {});
+    // Invalidate cache so fresh stats are fetched for this result
+    _statsCache = null;
+
+    // Rarity slot machine — ticks then settles on blended live % (or seeded fallback)
     var rarityFinal = arch.rarity;
     var rarityMatch = rarityFinal.match(/(\d+)%/);
     resultRarity.textContent = rarityFinal;
     if (rarityMatch && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      var rarityNum = rarityMatch[1];
-      var rarityPre = rarityFinal.substring(0, rarityFinal.indexOf(rarityNum));
-      var raritySuf = rarityFinal.substring(rarityFinal.indexOf(rarityNum) + rarityNum.length);
-      var totalDelay = Math.round(0.8 * 1000) + 2800; // ~time share+rarity becomes visible
+      var rarityPre = rarityFinal.substring(0, rarityFinal.indexOf(rarityMatch[1]));
+      var raritySuf = rarityFinal.substring(rarityFinal.indexOf(rarityMatch[1]) + rarityMatch[1].length);
+      var totalDelay = Math.round(0.8 * 1000) + 2800;
       setTimeout(function () {
         var ticks = 0;
         var maxTicks = 10;
@@ -569,12 +609,52 @@
           ticks++;
           if (ticks >= maxTicks) {
             clearInterval(interval);
-            resultRarity.textContent = rarityFinal;
+            // Settle on live blended percentage
+            fetchStats(function (data) {
+              var livePct = getDisplayPct(currentArchKey, data);
+              var rounded = Math.round(livePct);
+              resultRarity.textContent = rarityPre + rounded + raritySuf;
+              // "Based on X results" badge
+              if (data && data.total > 100) {
+                var badge = document.getElementById('rarityBasis');
+                if (badge) {
+                  badge.textContent = 'Based on ' + data.total.toLocaleString() + ' results';
+                  badge.classList.add('show');
+                }
+              }
+              // Update share count display
+              if (data && data.shareCount >= 500) {
+                var scEl = document.getElementById('shareCount');
+                if (scEl) {
+                  var floored = Math.floor(data.shareCount / 1000) * 1000;
+                  scEl.textContent = floored.toLocaleString() + '+ people have shared their result.';
+                  scEl.classList.add('show');
+                }
+              }
+            });
           } else {
             resultRarity.textContent = rarityPre + (Math.floor(Math.random() * 28) + 4) + raritySuf;
           }
         }, 75);
       }, totalDelay);
+    } else {
+      // No animation — just fetch and update
+      fetchStats(function (data) {
+        var livePct = getDisplayPct(currentArchKey, data);
+        resultRarity.textContent = rarityFinal.replace(/\d+%/, Math.round(livePct) + '%');
+        if (data && data.total > 100) {
+          var badge = document.getElementById('rarityBasis');
+          if (badge) { badge.textContent = 'Based on ' + data.total.toLocaleString() + ' results'; badge.classList.add('show'); }
+        }
+        if (data && data.shareCount >= 500) {
+          var scEl = document.getElementById('shareCount');
+          if (scEl) {
+            var floored = Math.floor(data.shareCount / 1000) * 1000;
+            scEl.textContent = floored.toLocaleString() + '+ people have shared their result.';
+            scEl.classList.add('show');
+          }
+        }
+      });
     }
 
     if (window.history && window.history.replaceState) {
@@ -704,23 +784,37 @@
     var rarityEl = document.querySelector('.result__rarity');
     var rarityText = rarityEl ? rarityEl.textContent.trim() : '';
     var rarityMatch = rarityText.match(/(\d+)%/);
-    var pct = rarityMatch ? rarityMatch[1] : null;
+    var pct = rarityMatch ? parseInt(rarityMatch[1], 10) : null;
     var shareUrl = 'https://digitalzen.cloud/r/' + displayKey;
 
-    // Build share text
+    // Build share text — Enhancement 3: contextual copy based on rarity tier
     var urlParams = new URLSearchParams(window.location.search);
     var referredKey = urlParams.get('r');
     var text;
     if (referredKey && referredKey !== displayKey) {
-      text = 'My friend got a different result. I got ' + archName + '.';
-      if (pct) text += ' Only ' + pct + '% of people get this.';
-      text += ' What\u2019s yours?';
+      // Referred result differs from friend
+      var friendArchObj = null;
+      Object.keys(archetypes).forEach(function (k) {
+        if (archetypes[k].key === referredKey) friendArchObj = archetypes[k];
+      });
+      var friendName = friendArchObj ? friendArchObj.name : 'my friend';
+      text = friendName + ' sent me this. I got a different result \u2014 ' + archName + '. Find out which one you are.';
+    } else if (pct !== null && pct <= 8) {
+      // Rare result
+      text = 'I got one of the rarer results \u2014 ' + archName + '. Only ' + pct + '% of people get this. Find yours.';
+    } else if (pct !== null && pct > 20) {
+      // Common result
+      text = 'My night mode is ' + archName + '. ' + pct + '% of people get this. What\u2019s yours?';
     } else {
+      // Default
       text = 'My night mode is ' + archName + '.';
       if (pct) text += ' Only ' + pct + '% of people get this.';
       text += ' What\u2019s yours?';
     }
     text += '\n' + shareUrl;
+
+    // Increment share counter (fire-and-forget)
+    fetch(STATS_ENDPOINT + '/api/share', { method: 'POST' }).catch(function () {});
 
     if (navigator.share) {
       navigator.share({ title: 'I\u2019m ' + archName, text: text, url: shareUrl })
@@ -747,10 +841,12 @@
         copied.classList.add('show');
         setTimeout(function () { copied.classList.remove('show'); }, 2500);
       }
+      // Enhancement 5: post-share comparison invite
       var nudge = document.getElementById('shareNudge');
       if (nudge) {
+        nudge.textContent = 'Now send it to someone you think would get a different result.';
         setTimeout(function () { nudge.classList.add('show'); }, 1000);
-        setTimeout(function () { nudge.classList.remove('show'); }, 6000);
+        setTimeout(function () { nudge.classList.remove('show'); }, 7000);
       }
     }
 
@@ -787,6 +883,44 @@
       var el = document.querySelector(selector);
       if (el) el.setAttribute('content', metaUpdates[prop]);
     });
+  }
+
+  // ---- Stats API ----
+  var STATS_ENDPOINT = 'https://dz-og-rewrite.helixirin.workers.dev';
+  var SEEDED_PCT = {
+    architect: 14, ghost: 11, circuit: 10, twam: 12, minimalist: 11,
+    operator: 10,  engineer: 10, phantom: 9,  builder: 8,  nocturnal: 5
+  };
+  // Cached stats response — one fetch per page load, shared by stats + share count
+  var _statsCache = null;
+  var _statsFetching = false;
+  var _statsCallbacks = [];
+
+  function fetchStats(cb) {
+    if (_statsCache) { cb(_statsCache); return; }
+    _statsCallbacks.push(cb);
+    if (_statsFetching) return;
+    _statsFetching = true;
+    fetch(STATS_ENDPOINT + '/api/stats')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        _statsCache = data;
+        _statsFetching = false;
+        _statsCallbacks.forEach(function (fn) { fn(data); });
+        _statsCallbacks = [];
+      })
+      .catch(function () {
+        _statsFetching = false;
+        _statsCallbacks.forEach(function (fn) { fn(null); });
+        _statsCallbacks = [];
+      });
+  }
+
+  function getDisplayPct(archKey, statsData) {
+    if (statsData && statsData.archetypes && statsData.archetypes[archKey]) {
+      return statsData.archetypes[archKey].pct;
+    }
+    return SEEDED_PCT[archKey] || 10;
   }
 
   // ---- Email capture ----
@@ -1005,12 +1139,14 @@
       });
     }
 
-    // X and Facebook pills — mark main button as shared when user taps out
-    ['shareX', 'shareFb'].forEach(function (id) {
+    // X, Facebook, WhatsApp pills — mark main button as shared when user taps out
+    ['shareX', 'shareFb', 'shareWa'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', function () {
           if (shareBtn) shareBtn.classList.add('shared');
+          // Increment share counter
+          fetch(STATS_ENDPOINT + '/api/share', { method: 'POST' }).catch(function () {});
         });
       }
     });
