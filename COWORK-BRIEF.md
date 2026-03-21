@@ -24,9 +24,9 @@
 
 ---
 
-## What's Been Done in This Session (You Missed These)
+## What's Been Done (Two Sessions — You Missed Both)
 
-This session addressed a share mechanic overhaul requested by the project owner. Here's exactly what changed:
+### Session 1 — Share mechanic overhaul:
 
 ### 1. Share Button UX Overhaul
 - **Rarity stat moved above the share button** in `index.html` — "Only X% get this result" now appears before the CTA so it primes the share impulse at peak emotional investment
@@ -59,6 +59,15 @@ Without this, Vercel returned 404 for `/r/circuit` (without `.html`). This fixes
 
 ### 5. `worker/wrangler.toml` Added
 Documents deploy commands for both workers. See below re: the unresolved worker situation.
+
+### Session 2 — Share enhancements (Enhancements 1–9 from Cowork brief):
+
+- **`og-rewrite.js`** — KV stats API added (POST /api/share, POST /api/result, POST /api/stats) alongside the existing HTMLRewriter OG rewrite. Worker also upgraded from regex-replace to HTMLRewriter streaming API, with VERCEL_ORIGIN bypass to prevent infinite fetch loops.
+- **`wrangler.toml`** — KV namespace setup steps documented (see Priority 3 below — **must be run before stats work**)
+- **`index.html`** — animated share preview mockup card, rarity basis badge ("Based on X results"), live share count element, WhatsApp pill
+- **`style.css`** — share preview animation, mobile layout tightening (share CTA visible without scroll on ≤600px), share count + rarity basis styles, WhatsApp hover accent
+- **`script.js`** — `fetchStats()` with single-fetch cache; fires `/api/result` on result render; contextual share copy variants (rare/common/referred); smooth scroll to share at 1.2s; WhatsApp pill URL set per render; post-share nudge updated; share counter fires on all pill clicks
+- **`docs/cowork-browser-tasks.md`** — 13-step browser QA checklist for all enhancements
 
 ---
 
@@ -97,7 +106,37 @@ If the preview still shows the generic `og-image.png`, check:
 **If secrets are correct but emails still don't arrive:**
 The worker uses Shopify OAuth `client_credentials` grant type. If the Dev Dashboard app's access has expired or been revoked, re-auth at `dev.shopify.com/dashboard/153727070/apps/334473822209`.
 
-### Priority 3: Deployment Branch vs Production
+### Priority 3 (NEW — Must Do Before Stats Work): KV Namespace Setup
+
+A second session added a live stats API to `og-rewrite.js` (share counting, archetype frequency tracking, live rarity percentages). The worker code is ready but **the KV namespace doesn't exist yet**. Without this step, all `/api/stats` and `/api/share` calls return 503 and the frontend silently falls back to seeded values — nothing breaks, but nothing is tracked either.
+
+**Steps:**
+```bash
+cd worker
+
+# 1. Create the KV namespaces (run both)
+wrangler kv:namespace create DZ_STATS
+wrangler kv:namespace create DZ_STATS --preview
+
+# 2. Copy the two namespace IDs from the output above into wrangler.toml
+#    Replace <namespace-id> and <preview-namespace-id> in the [dz-og-rewrite.kv_namespaces] block
+
+# 3. Redeploy the worker with the KV binding
+wrangler deploy og-rewrite.js --name dz-og-rewrite --compatibility-date 2024-01-01
+```
+
+**Verify it worked:**
+```bash
+curl -X POST https://dz-og-rewrite.helixirin.workers.dev/api/result?archetype=architect
+# Expected: {"ok":true}
+
+curl https://dz-og-rewrite.helixirin.workers.dev/api/stats
+# Expected: JSON with shareCount, total, archetypes{}
+```
+
+If you get `{"error":"KV not configured"}`, the namespace IDs weren't saved in wrangler.toml or the deploy didn't pick them up — re-check wrangler.toml and redeploy.
+
+### Priority 4: Deployment Branch vs Production
 
 Confirm whether the `claude/review-digital-zen-PqA3X` branch auto-deploys to `digitalzen.cloud` (production) or only to a Vercel preview URL. If it's preview-only, the owner needs to merge the branch to the production branch before any of the recent fixes go live.
 
