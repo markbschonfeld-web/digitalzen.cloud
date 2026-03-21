@@ -1,0 +1,51 @@
+# Cloudflare Workers — Digital Zen
+# Deploy with: wrangler deploy <worker-file>
+# Docs: https://developers.cloudflare.com/workers/wrangler/
+
+# ─── Email capture → Shopify ───────────────────────────────────────────────
+# Deployed at: https://dz-subscribe.helixirin.workers.dev
+#
+# Deploy:
+#   cd worker
+#   wrangler deploy shopify-subscribe.js --name dz-subscribe --compatibility-date 2024-01-01
+#
+# Required secrets (set once via Cloudflare dashboard or wrangler secret put):
+#   wrangler secret put SHOPIFY_CLIENT_ID   --name dz-subscribe
+#   wrangler secret put SHOPIFY_CLIENT_SECRET --name dz-subscribe
+#   wrangler secret put SHOPIFY_STORE       --name dz-subscribe
+#     → SHOPIFY_STORE value = "helixirin" (just the store handle, no .myshopify.com)
+#
+# To verify secrets are set:
+#   Go to Cloudflare Dashboard → Workers & Pages → dz-subscribe
+#   → Settings → Variables and Secrets
+#   All three should appear (values are encrypted, not visible)
+#
+# To check logs (live):
+#   wrangler tail --name dz-subscribe
+#
+# To test locally:
+#   wrangler dev shopify-subscribe.js --name dz-subscribe
+#   curl -X POST http://localhost:8787 \
+#     -H "Content-Type: application/json" \
+#     -d '{"email":"test@example.com","archetype":"architect"}'
+
+[dz-subscribe]
+name = "dz-subscribe"
+main = "shopify-subscribe.js"
+compatibility_date = "2024-01-01"
+
+# ─── OG meta tag rewriter ──────────────────────────────────────────────────
+# NOTE: Not currently needed — /r/<archetype>.html static pages handle
+# per-archetype OG previews without requiring this worker.
+#
+# If you want to deploy it anyway (e.g. for /?r=<key> URL support):
+#   wrangler deploy og-rewrite.js --name dz-og-rewrite --compatibility-date 2024-01-01
+#   Then add a route in Cloudflare Dashboard:
+#   Workers Routes → digitalzen.cloud/* → dz-og-rewrite
+#
+# (Requires digitalzen.cloud DNS to be proxied through Cloudflare orange cloud)
+
+[dz-og-rewrite]
+name = "dz-og-rewrite"
+main = "og-rewrite.js"
+compatibility_date = "2024-01-01"
