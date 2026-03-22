@@ -1062,8 +1062,9 @@
     initNav();
     checkReferral();
 
-    startBtn.addEventListener('click', function () { nextScreen(); });
+    startBtn.addEventListener('click', function () { startBtn.classList.add('btn--launching'); nextScreen(); });
     splashBtn.addEventListener('click', function () {
+      splashBtn.classList.add('btn--launching');
       if (referredFrom) {
         // Referral visitor already committed — skip intro, go straight to Q1
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
