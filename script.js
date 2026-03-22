@@ -439,6 +439,15 @@
             }
           }
         }, 50);
+        // Share button attention animations — start fresh once the CTA is visible.
+        // Must fire from here (result screen activation), NOT from renderResult,
+        // because renderResult runs during the 4.8s analyzing phase and the animation
+        // would arrive at an arbitrary cycle phase by the time the screen appears.
+        // 800ms = 450ms share-section entry delay + 350ms animation duration.
+        setTimeout(function () {
+          var btn = document.getElementById('shareBtn');
+          if (btn && !btn.classList.contains('shared')) btn.classList.add('share-alive');
+        }, 800);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -596,6 +605,8 @@
     if (captureForm) captureForm.classList.remove('hidden');
     if (captureSuccess) captureSuccess.classList.remove('show');
     if (captureEmail) captureEmail.value = '';
+    var captureBtn = document.querySelector('.btn--capture');
+    if (captureBtn) captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
 
     // Set timing — share button now appears before body copy
     var shareEl = document.querySelector('.result__share');
@@ -611,11 +622,8 @@
     korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.3) + 's');
     captureEl.style.setProperty('--delay-capture', (afterBody + 0.7) + 's');
 
-    // Start share button animations fresh once visible (0.45s delay + 0.35s buffer)
-    var shareAnimDelay = 800;
-    setTimeout(function () {
-      if (shareBtn) shareBtn.classList.add('share-alive');
-    }, shareAnimDelay);
+    // share-alive is added from the result screen activation handler (not here),
+    // so the ping/shimmer start fresh relative to when the user actually sees the CTA.
 
     // Enhancement 1: populate and animate share preview mockup
     var previewEl = document.getElementById('sharePreview');
@@ -1343,11 +1351,24 @@
     if (captureBtn && captureConsent) {
       captureBtn.classList.add('dimmed');
       var _captureWasReady = false;
+      var _emailWasValid = false;
       function checkCaptureReady() {
         var emailVal = document.getElementById('captureEmail') ? document.getElementById('captureEmail').value : '';
         var checked = captureConsent.checked;
         var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
         var isReady = validEmail && checked;
+
+        // Stage 1 — valid email alone: wake the button up with shimmer/glow
+        // so the user's eye is drawn to it even before they tick consent.
+        if (validEmail && !_emailWasValid) {
+          captureBtn.classList.remove('dimmed');
+          captureBtn.classList.add('capture-alive');
+        } else if (!validEmail) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+
+        // Stage 2 — email + consent: full ready state with unlock pop
         if (isReady) {
           captureBtn.classList.remove('dimmed');
           captureBtn.classList.add('ready');
@@ -1356,10 +1377,11 @@
             void captureBtn.offsetWidth; // reflow to restart animation
             captureBtn.classList.add('capture-ready');
           }
-        } else {
+        } else if (validEmail) {
           captureBtn.classList.remove('ready', 'capture-ready');
-          captureBtn.classList.add('dimmed');
         }
+
+        _emailWasValid = validEmail;
         _captureWasReady = isReady;
       }
       captureConsent.addEventListener('change', checkCaptureReady);
