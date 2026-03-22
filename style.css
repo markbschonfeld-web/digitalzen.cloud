@@ -847,7 +847,7 @@ em, i, cite { font-style: normal; }
   padding: 0.85rem 1rem;
   background: transparent; border: none; outline: none;
   color: var(--text);
-  font-size: 0.85rem; font-weight: 300;
+  font-size: 16px; font-weight: 300; /* 16px = iOS Safari auto-zoom threshold */
   min-width: 0;
 }
 .capture__input::placeholder { color: var(--text-muted); }
@@ -1066,7 +1066,7 @@ em, i, cite { font-style: normal; }
 
   /* ── Capture — compliance text must be readable ── */
   .capture__text { font-size: 0.92rem; }
-  .capture__input { font-size: 0.92rem; padding: 0.9rem 1rem; }
+  .capture__input { font-size: 16px; padding: 0.9rem 1rem; }
   .capture__input-wrap { flex-direction: column; }
   .btn--capture { border-left: none; border-top: 1px solid var(--border); }
   .capture__consent-text { font-size: 0.78rem; line-height: 1.7; }
@@ -1655,6 +1655,12 @@ em, i, cite { font-style: normal; }
 /* ─── Start/Splash button — breathing after reveal ─── */
 .btn--pulse {
   position: relative;
+  background-image: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.09) 0%,
+    transparent 65%
+  );
+  background-color: var(--text);
   animation: clipReveal 0.3s linear 0.9s forwards,
              startBtnBreathe 3s ease-in-out 2s infinite;
 }
@@ -2054,6 +2060,24 @@ em, i, cite { font-style: normal; }
   }
 }
 .btn--korfyr:active {
+  transform: scale(0.95) !important;
+  transition: transform 80ms linear !important;
+  box-shadow: none !important;
+}
+
+/* ─── BEGIN / FIND OUT hover — game-like lift + ring acceleration ─── */
+@media (hover: hover) {
+  .btn--pulse:hover {
+    transform: scale(1.05) translateY(-1px);
+    box-shadow: 0 4px 36px rgba(240, 237, 232, 0.22),
+                0 0 60px rgba(240, 237, 232, 0.07);
+  }
+  .btn--pulse:hover::before {
+    animation: ctaRingPulse 1.0s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
+    border-color: rgba(240, 237, 232, 0.55) !important;
+  }
+}
+.btn--pulse:active {
   transform: scale(0.95) !important;
   transition: transform 80ms linear !important;
   box-shadow: none !important;

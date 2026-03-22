@@ -1250,6 +1250,21 @@
       setTimeout(function () { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
     }
 
+    // Cursor spotlight — radial highlight follows mouse inside button (desktop only)
+    [startBtn, splashBtn].forEach(function (btn) {
+      btn.addEventListener('mousemove', function (e) {
+        var rect = this.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        this.style.setProperty('--mx', x + '%');
+        this.style.setProperty('--my', y + '%');
+      });
+      btn.addEventListener('mouseleave', function () {
+        this.style.removeProperty('--mx');
+        this.style.removeProperty('--my');
+      });
+    });
+
     startBtn.addEventListener('click', function () { fireBeginLaunch(startBtn); nextScreen(); });
     splashBtn.addEventListener('click', function () {
       fireBeginLaunch(splashBtn);
@@ -1275,15 +1290,25 @@
     if (navBrand) {
       navBrand.addEventListener('click', function (e) {
         e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'instant' });
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
         currentArchKey = null;
         answerHistory = [];
+        analyzingActive = false;
         if (window._ambientSystem) window._ambientSystem.stop();
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         startBtn.classList.remove('btn--launching');
+        splashBtn.classList.remove('btn--launching');
+        window._korfyrPinged = false;
+        if (captureBtn) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+        if (typeof _captureWasReady !== 'undefined') _captureWasReady = false;
+        if (typeof _emailWasValid  !== 'undefined') _emailWasValid  = false;
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -1297,15 +1322,25 @@
     if (retakeLink) {
       retakeLink.addEventListener('click', function (e) {
         e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'instant' });
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
         currentArchKey = null;
         answerHistory = [];
+        analyzingActive = false;
         if (window._ambientSystem) window._ambientSystem.stop();
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         startBtn.classList.remove('btn--launching');
+        splashBtn.classList.remove('btn--launching');
+        window._korfyrPinged = false;
+        if (captureBtn) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+        if (typeof _captureWasReady !== 'undefined') _captureWasReady = false;
+        if (typeof _emailWasValid  !== 'undefined') _emailWasValid  = false;
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
