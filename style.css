@@ -799,9 +799,9 @@ em, i, cite { font-style: normal; }
 .capture {
   padding: 1.5rem 1.25rem;
   opacity: 0;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   margin-top: 0.5rem;
 }
 .screen--result.active .capture {
@@ -2524,4 +2524,200 @@ body {
   .particle-canvas {
     display: none !important;
   }
+}
+
+/* ============================================
+   UX ENHANCEMENT BATCH — March 2026
+   ============================================ */
+
+/* ── Boot scan-line (BEGIN / FIND OUT transition) ── */
+.scan-line {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+.scan-line.active {
+  animation: scanSweep 220ms linear forwards;
+}
+@keyframes scanSweep {
+  0%   { opacity: 0; transform: translateY(0); }
+  12%  { opacity: 0.65; }
+  100% { opacity: 0; transform: translateY(100vh); }
+}
+
+/* ── KORFYR shutdown overlay ── */
+.korfyr-shutdown {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 500;
+  transition: opacity 0.65s cubic-bezier(0.4, 0, 1, 1);
+}
+.korfyr-shutdown.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Share button one-shot attention pulse ── */
+.result__share { position: relative; }
+.result__share.share--pulse::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: inherit;
+  animation: sharePulse 0.9s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes sharePulse {
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); }
+}
+
+/* ── Social proof line ── */
+.result__share-social {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+/* ── "I'm In" activation animation ── */
+.btn--capture.capture-ready {
+  animation: captureUnlock 0.28s ease forwards;
+}
+@keyframes captureUnlock {
+  0%   { transform: scale(0.97); }
+  55%  { transform: scale(1.015); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.12); }
+}
+
+/* ── Contrast fixes ── */
+/* Consent label: legally material, must be above 4.5:1 at all times */
+.capture__consent-text { color: var(--text-secondary); }
+/* Archetype hint: subtle, not legally critical — raise from 0.7 to 0.9 opacity */
+.capture__why { opacity: 0.9; }
+/* Insight quote: raise to ensure legibility on result screen */
+.result__insight p { color: var(--text-secondary); }
+
+/* ── Archetype-specific typography ── */
+
+/* Ghost — wide, light, slow drift in */
+[data-archetype="ghost"] .result__archetype {
+  font-weight: 200;
+  letter-spacing: 0.3em;
+}
+[data-archetype="ghost"].screen--result.active .result__archetype {
+  animation: ghostReveal 1.4s ease-out 0.4s forwards;
+}
+@keyframes ghostReveal {
+  0%   { opacity: 0; transform: translateY(5px); }
+  35%  { opacity: 0.25; }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Circuit — rapid step-glitch before locking */
+[data-archetype="circuit"] .result__archetype {
+  letter-spacing: -0.03em;
+}
+[data-archetype="circuit"].screen--result.active .result__archetype {
+  animation: circuitGlitch 0.55s steps(1) 0.4s forwards;
+}
+@keyframes circuitGlitch {
+  0%   { opacity: 0; transform: translateX(0); }
+  18%  { opacity: 0.9; transform: translateX(-3px); }
+  36%  { opacity: 0.3; transform: translateX(3px); }
+  54%  { opacity: 1; transform: translateX(-1px); }
+  72%  { opacity: 0.7; transform: translateX(0); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Architect — structured, precise, fine underline */
+[data-archetype="architect"] .result__archetype {
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(170, 185, 210, 0.18);
+  padding-bottom: 0.06em;
+}
+
+/* Minimalist — extreme tracking, pure opacity reveal (no glitch) */
+[data-archetype="minimalist"] .result__archetype {
+  font-weight: 200;
+  letter-spacing: 0.45em;
+}
+[data-archetype="minimalist"].screen--result.active .result__archetype {
+  animation: minimalReveal 1.2s ease 0.4s forwards;
+}
+@keyframes minimalReveal {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Operator — heavy weight, military-technical bearing */
+[data-archetype="operator"] .result__archetype {
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+/* Night Engineer — slightly wider tracking, technical feel */
+[data-archetype="engineer"] .result__archetype {
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* Phantom — normal reveal, then low-level persistent jitter */
+[data-archetype="phantom"].screen--result.active .result__archetype {
+  animation: flickerIn 0.6s linear 0.4s forwards, phantomJitter 3s steps(1) 1.2s infinite;
+}
+@keyframes phantomJitter {
+  0%  { transform: translateX(0); }
+  4%  { transform: translateX(-1px); }
+  8%  { transform: translateX(1px); }
+  12% { transform: translateX(0); }
+  88% { transform: translateX(0); }
+  92% { transform: translateX(-1px); }
+  96% { transform: translateX(1px); }
+  100%{ transform: translateX(0); }
+}
+
+/* Quiet Builder — structural, slightly wider tracking */
+[data-archetype="builder"] .result__archetype {
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* Nocturnal — wide, warm glow already in text-shadow; looser feel */
+[data-archetype="nocturnal"] .result__archetype {
+  letter-spacing: 0.02em;
+  font-weight: 800;
+}
+
+/* 2AM — looser, slower reveal */
+[data-archetype="twam"] .result__archetype {
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+[data-archetype="twam"].screen--result.active .result__archetype {
+  animation: flickerIn 1.0s linear 0.4s forwards;
+}
+
+/* ── Reduced-motion overrides for new animations ── */
+@media (prefers-reduced-motion: reduce) {
+  .scan-line.active { animation: none !important; }
+  .result__share.share--pulse::after { animation: none !important; }
+  .btn--capture.capture-ready { animation: none !important; }
+  [data-archetype="ghost"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; transform: none !important; }
+  [data-archetype="circuit"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; }
+  [data-archetype="minimalist"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; }
+  [data-archetype="phantom"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; }
+  [data-archetype="twam"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; }
 }

@@ -65,6 +65,12 @@
   <!-- Quiz Container -->
   <main class="quiz" id="quiz">
 
+    <!-- Boot scan-line (fires on BEGIN / FIND OUT transition) -->
+    <div class="scan-line" id="scanLine" aria-hidden="true"></div>
+
+    <!-- KORFYR shutdown overlay (fades to black on outbound click) -->
+    <div class="korfyr-shutdown" id="korfyrShutdown" aria-hidden="true"></div>
+
     <!-- Friend Splash -->
     <section class="screen screen--splash" data-screen="splash">
       <div class="screen__ambient screen__ambient--splash" aria-hidden="true"></div>
@@ -127,7 +133,7 @@
             <span class="option__sub">When everyone else is done.</span>
           </button>
           <button class="option" data-trait="generative" type="button">
-            <span class="option__text">When it hits</span>
+            <span class="option__text">When something shifts</span>
             <span class="option__sub">No schedule. Just instinct.</span>
           </button>
         </div>
@@ -218,7 +224,7 @@
             <span class="option__sub">Not a single skip.</span>
           </button>
           <button class="option" data-trait="stillness" type="button">
-            <span class="option__text">The three seconds before you went back in.</span>
+            <span class="option__text">The moment before you went back in.</span>
             <span class="option__sub">That was the whole point.</span>
           </button>
           <button class="option" data-trait="kinetic" type="button">
@@ -285,6 +291,7 @@
 
           <!-- Live share count — Enhancement 4, shown once > 500 shares -->
           <span class="result__share-count" id="shareCount"></span>
+          <span class="result__share-social" id="shareSocialProof"></span>
 
           <!-- Primary share CTA -->
           <button class="btn btn--share" id="shareBtn" type="button">
@@ -324,9 +331,21 @@
           <p id="resultInsight"></p>
         </div>
 
+        <!-- KORFYR Curiosity Block -->
+        <div class="korfyr">
+          <div class="korfyr__divider" aria-hidden="true"></div>
+          <p class="korfyr__bridge" id="korfyrBridge"></p>
+          <p class="korfyr__wordmark">KORFYR</p>
+          <p class="korfyr__intrigue">We made something for people on your frequency. It's not what you'd expect.</p>
+          <a href="https://www.korfyr.com?utm_source=digitalzen&utm_medium=quiz&utm_campaign=nightmode" target="_blank" rel="noopener" class="btn btn--korfyr">
+            <span>See What We Built</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
         <p class="capture__primer">Brought to you by someone who gets it.</p>
 
-        <!-- Email Capture (above KORFYR for conversion priority) -->
+        <!-- Email Capture (below KORFYR — captures engaged users after primary conversion) -->
         <div class="capture">
           <div class="capture__divider" aria-hidden="true"></div>
           <p class="capture__text">Want to know when something drops for your frequency?</p>
@@ -355,18 +374,6 @@
             <span class="capture__check">&#10003;</span>
             <span>You're in. Stay tuned.</span>
           </div>
-        </div>
-
-        <!-- KORFYR Curiosity Block -->
-        <div class="korfyr">
-          <div class="korfyr__divider" aria-hidden="true"></div>
-          <p class="korfyr__bridge" id="korfyrBridge"></p>
-          <p class="korfyr__wordmark">KORFYR</p>
-          <p class="korfyr__intrigue">We made something for people on your frequency. It's not what you'd expect.</p>
-          <a href="https://www.korfyr.com?utm_source=digitalzen&utm_medium=quiz&utm_campaign=nightmode" target="_blank" rel="noopener" class="btn btn--korfyr">
-            <span>See What We Built</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
         </div>
 
         <p class="retake-link" id="retakeLink" style="display:none"><a href="#">Take it again &rarr;</a></p>
