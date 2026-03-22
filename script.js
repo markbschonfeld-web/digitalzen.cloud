@@ -257,7 +257,8 @@
     transitioning = true;
 
     // Boot transition: BEGIN / FIND OUT (screen 0 → screen 1)
-    if (currentScreen === 0 && index === 1) {
+    var isBootTransition = (currentScreen === 0 && index === 1);
+    if (isBootTransition) {
       var sl = document.getElementById('scanLine');
       if (sl) { sl.classList.add('active'); setTimeout(function () { sl.classList.remove('active'); }, 220); }
       window._particleBoost = true;
@@ -294,17 +295,23 @@
       }
 
       // Prepare next
-      nextEl.classList.add('fade-in');
-      nextEl.classList.add('active');
-
-      // Force reflow then animate in
-      void nextEl.offsetHeight;
-
-      // Remove fade-in class after transition to clear the transform
-      // (transform: translateY(0) creates a containing block that breaks position:fixed)
-      setTimeout(function () {
-        nextEl.classList.remove('fade-in');
-      }, 200);
+      if (isBootTransition) {
+        // Boot: skip translateY fade-in and use scale-in launch animation instead
+        nextEl.classList.add('screen--launch-in');
+        nextEl.classList.add('active');
+        void nextEl.offsetHeight;
+        setTimeout(function () { nextEl.classList.remove('screen--launch-in'); }, 350);
+      } else {
+        nextEl.classList.add('fade-in');
+        nextEl.classList.add('active');
+        // Force reflow then animate in
+        void nextEl.offsetHeight;
+        // Remove fade-in class after transition to clear the transform
+        // (transform: translateY(0) creates a containing block that breaks position:fixed)
+        setTimeout(function () {
+          nextEl.classList.remove('fade-in');
+        }, 200);
+      }
 
       window.scrollTo({ top: 0, behavior: 'instant' });
       currentScreen = index;
@@ -1220,9 +1227,32 @@
     initNav();
     checkReferral();
 
-    startBtn.addEventListener('click', function () { startBtn.classList.add('btn--launching'); nextScreen(); });
+    function fireBeginLaunch(btn) {
+      btn.classList.add('btn--launching');
+      var rect = btn.getBoundingClientRect();
+      var bx = rect.left + rect.width / 2;
+      var by = rect.top + rect.height / 2;
+      spawnBurst(bx, by);
+      // Expanding ring from button center
+      var size = Math.max(rect.width, rect.height);
+      var burst = document.createElement('div');
+      burst.className = 'begin-burst';
+      burst.style.cssText = 'width:' + size + 'px;height:' + size + 'px;'
+        + 'left:' + (bx - size / 2) + 'px;top:' + (by - size / 2) + 'px;';
+      document.body.appendChild(burst);
+      setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 700);
+      // Flash bloom centered on button
+      var flash = document.createElement('div');
+      flash.className = 'begin-flash';
+      flash.style.setProperty('--bx', bx + 'px');
+      flash.style.setProperty('--by', by + 'px');
+      document.body.appendChild(flash);
+      setTimeout(function () { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
+    }
+
+    startBtn.addEventListener('click', function () { fireBeginLaunch(startBtn); nextScreen(); });
     splashBtn.addEventListener('click', function () {
-      splashBtn.classList.add('btn--launching');
+      fireBeginLaunch(splashBtn);
       if (referredFrom) {
         // Referral visitor already committed — skip intro, go straight to Q1
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
