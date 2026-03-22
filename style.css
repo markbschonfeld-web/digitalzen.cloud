@@ -2401,9 +2401,9 @@ em, i, cite { font-style: normal; }
    V9: CANVAS VISIBILITY + VISUAL ENERGY
    ============================================ */
 
-/* #5: Let canvas show through — semi-transparent body overlay */
+/* #5: Transparent body so canvas layers (z-index:-1/-2) are fully visible */
 body {
-  background-color: rgba(12, 12, 14, 0.82);
+  background-color: transparent;
 }
 .screen {
   background: transparent;

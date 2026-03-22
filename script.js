@@ -797,8 +797,11 @@
     // Vignette deepening
     quiz.style.setProperty('--vignette', (quizProgress * 0.07).toFixed(3));
 
-    // Particle burst from click point
-    spawnBurst(e.clientX, e.clientY);
+    // Particle burst from click point (fallback to viewport center if coords absent on mobile)
+    spawnBurst(
+      e.clientX != null ? e.clientX : window.innerWidth / 2,
+      e.clientY != null ? e.clientY : window.innerHeight / 2
+    );
 
     // Micro-shake feedback
     quiz.classList.add('shake');
