@@ -551,6 +551,17 @@
       fbPillEl.href = 'https://www.facebook.com/sharer/sharer.php?u='
         + encodeURIComponent(resultShareUrl);
     }
+    var threadsPillEl = document.getElementById('shareThreads');
+    if (threadsPillEl) {
+      threadsPillEl.href = 'https://www.threads.net/intent/post?text='
+        + encodeURIComponent(resultShareText + ' ' + resultShareUrl);
+    }
+    var redditPillEl = document.getElementById('shareReddit');
+    if (redditPillEl) {
+      redditPillEl.href = 'https://www.reddit.com/submit?url='
+        + encodeURIComponent(resultShareUrl)
+        + '&title=' + encodeURIComponent(resultShareText);
+    }
 
     // Enhancement 7: WhatsApp pill — mobile only, fresh URL on each render
     var waPillEl = document.getElementById('shareWa');
@@ -571,6 +582,12 @@
       smsPillEl.style.display = (/Android|iPhone|iPad/i.test(navigator.userAgent)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) ? '' : 'none';
     }
+    var tgPillEl = document.getElementById('shareTelegram');
+    if (tgPillEl) {
+      tgPillEl.href = 'https://t.me/share/url?url='
+        + encodeURIComponent(resultShareUrl)
+        + '&text=' + encodeURIComponent(resultShareText);
+    }
 
     // Reset share button state on each render (handles retake)
     if (shareBtn) shareBtn.classList.remove('shared', 'share-alive');
@@ -586,16 +603,16 @@
     var korfyrEl = document.querySelector('.korfyr');
     var captureEl = document.querySelector('.capture');
 
-    // Timing: body text first (builds resonance), then share CTA at emotional peak
-    // Body paragraphs start at baseDelay (0.6s), each staggered by 0.2s
+    // Timing: share CTA appears right after the reveal for peak-dopamine capture.
+    // Body text and insight follow below to validate identity and deepen engagement.
     var afterBody = baseDelay + arch.body.length * 0.2;
+    shareEl.style.setProperty('--delay-share', '0.45s');
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    shareEl.style.setProperty('--delay-share', (afterBody + 0.3) + 's');
-    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 1.0) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.3) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.7) + 's');
 
-    // Start share button animations fresh once the button becomes visible
-    var shareAnimDelay = (afterBody + 0.3 + 0.35) * 1000; // 350ms after share section animates in
+    // Start share button animations fresh once visible (0.45s delay + 0.35s buffer)
+    var shareAnimDelay = 800;
     setTimeout(function () {
       if (shareBtn) shareBtn.classList.add('share-alive');
     }, shareAnimDelay);
@@ -617,14 +634,6 @@
         previewEl.classList.add('share-preview--played');
       }, 2200);
     }
-
-    // Smooth scroll share section into view once it appears (only if below fold)
-    setTimeout(function () {
-      var shareEl2 = document.querySelector('.result__share');
-      if (shareEl2 && shareEl2.getBoundingClientRect().top > window.innerHeight) {
-        shareEl2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, (afterBody + 0.5) * 1000);
 
     // Fire /api/result to record completion; also fetch stats for live rarity display
     var resultArchKey = arch.key;
@@ -1315,8 +1324,8 @@
       });
     }
 
-    // X, Facebook, WhatsApp pills — mark main button as shared when user taps out
-    ['shareX', 'shareFb', 'shareWa', 'shareSms'].forEach(function (id) {
+    // Platform pills — mark main button as shared when user taps out
+    ['shareX', 'shareFb', 'shareThreads', 'shareReddit', 'shareWa', 'shareSms', 'shareTelegram'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', function () {

@@ -2239,10 +2239,22 @@ em, i, cite { font-style: normal; }
   .share__pills { flex-wrap: wrap; gap: 0.4rem; }
 }
 
-/* ─── WhatsApp pill colour accent ─── */
+/* ─── Platform pill colour accents ─── */
 .share__pill--wa:hover {
   color: #25d366;
   border-color: rgba(37, 211, 102, 0.35);
+}
+.share__pill--threads:hover {
+  color: #e8e8e8;
+  border-color: rgba(232, 232, 232, 0.3);
+}
+.share__pill--reddit:hover {
+  color: #ff4500;
+  border-color: rgba(255, 69, 0, 0.35);
+}
+.share__pill--tg:hover {
+  color: #2aabee;
+  border-color: rgba(42, 171, 238, 0.35);
 }
 
 /* ============================================
