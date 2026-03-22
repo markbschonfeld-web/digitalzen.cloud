@@ -1275,15 +1275,25 @@
     if (navBrand) {
       navBrand.addEventListener('click', function (e) {
         e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'instant' });
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
         currentArchKey = null;
         answerHistory = [];
+        analyzingActive = false;
         if (window._ambientSystem) window._ambientSystem.stop();
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         startBtn.classList.remove('btn--launching');
+        splashBtn.classList.remove('btn--launching');
+        window._korfyrPinged = false;
+        if (captureBtn) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+        if (typeof _captureWasReady !== 'undefined') _captureWasReady = false;
+        if (typeof _emailWasValid  !== 'undefined') _emailWasValid  = false;
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -1297,15 +1307,25 @@
     if (retakeLink) {
       retakeLink.addEventListener('click', function (e) {
         e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'instant' });
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
         quizProgress = 0;
         currentArchKey = null;
         answerHistory = [];
+        analyzingActive = false;
         if (window._ambientSystem) window._ambientSystem.stop();
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
         startBtn.classList.remove('btn--launching');
+        splashBtn.classList.remove('btn--launching');
+        window._korfyrPinged = false;
+        if (captureBtn) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+        if (typeof _captureWasReady !== 'undefined') _captureWasReady = false;
+        if (typeof _emailWasValid  !== 'undefined') _emailWasValid  = false;
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
