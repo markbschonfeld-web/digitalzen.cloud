@@ -1062,8 +1062,9 @@
     initNav();
     checkReferral();
 
-    startBtn.addEventListener('click', function () { nextScreen(); });
+    startBtn.addEventListener('click', function () { startBtn.classList.add('btn--launching'); nextScreen(); });
     splashBtn.addEventListener('click', function () {
+      splashBtn.classList.add('btn--launching');
       if (referredFrom) {
         // Referral visitor already committed — skip intro, go straight to Q1
         traits = { precision: 0, stillness: 0, kinetic: 0, generative: 0 };
@@ -1297,13 +1298,17 @@
         document.body.appendChild(burst);
         setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
 
+        // Pre-open tab synchronously — stays in trusted gesture context, not blocked by popup blockers
+        // Note: no 'noopener' here — noopener causes window.open to return null, breaking the reference
+        var w = window.open('', '_blank');
+
         // Shutdown sequence — fade ambient + overlay to black, then navigate
         var overlay = document.getElementById('korfyrShutdown');
         if (overlay) overlay.classList.add('active');
         if (window._ambientSystem) window._ambientSystem.setIntensity(0);
 
         setTimeout(function () {
-          window.open(dest, '_blank', 'noopener');
+          if (w) w.location.href = dest;
           // Restore ambient after redirect
           setTimeout(function () {
             if (overlay) overlay.classList.remove('active');
