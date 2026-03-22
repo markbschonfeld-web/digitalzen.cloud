@@ -150,11 +150,11 @@
     circuit: 'kinetic',
     twam: 'generative',
     minimalist: 'precision+stillness',
-    operator: 'precision+kinetic',
-    engineer: 'precision+generative',
-    phantom: 'stillness+kinetic',
-    builder: 'stillness+generative',
-    nocturnal: 'kinetic+generative'
+    operator: 'kinetic+precision',
+    engineer: 'generative+precision',
+    phantom: 'kinetic+stillness',
+    builder: 'generative+stillness',
+    nocturnal: 'generative+kinetic'
   };
 
   // ---- State ----
@@ -478,7 +478,8 @@
   function renderResult(archKey) {
     var arch = archetypes[archKey];
     if (!arch) arch = archetypes.precision;
-    currentArchKey = archKey;
+    currentArchKey = arch.key;
+    updateMetaTags(arch, 'https://digitalzen.cloud/r/' + arch.key);
 
     // Apply archetype visual theme
     quiz.querySelector('[data-screen="result"]').setAttribute('data-archetype', arch.key);
@@ -556,7 +557,8 @@
     if (waPillEl) {
       var waText = encodeURIComponent('My night mode is ' + arch.name + '. What\u2019s yours? ' + resultShareUrl);
       waPillEl.href = 'https://wa.me/?text=' + waText;
-      var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+      var isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       waPillEl.style.display = isMobile ? '' : 'none';
     }
 
@@ -566,11 +568,17 @@
       var smsBody = encodeURIComponent('My night mode is ' + arch.name + '. What\u2019s yours? ' + resultShareUrl);
       var smsSep = /iPhone|iPad/i.test(navigator.userAgent) ? '&' : '?';
       smsPillEl.href = 'sms:' + smsSep + 'body=' + smsBody;
-      smsPillEl.style.display = /Android|iPhone|iPad/i.test(navigator.userAgent) ? '' : 'none';
+      smsPillEl.style.display = (/Android|iPhone|iPad/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) ? '' : 'none';
     }
 
     // Reset share button state on each render (handles retake)
     if (shareBtn) shareBtn.classList.remove('shared', 'share-alive');
+
+    // Reset email capture state on retake
+    if (captureForm) captureForm.classList.remove('hidden');
+    if (captureSuccess) captureSuccess.classList.remove('show');
+    if (captureEmail) captureEmail.value = '';
 
     // Set timing — share button now appears before body copy
     var shareEl = document.querySelector('.result__share');
@@ -619,8 +627,8 @@
     }, (afterBody + 0.5) * 1000);
 
     // Fire /api/result to record completion; also fetch stats for live rarity display
-    var currentArchKey = arch.key;
-    fetch(STATS_ENDPOINT + '/api/result?archetype=' + currentArchKey, { method: 'POST' }).catch(function () {});
+    var resultArchKey = arch.key;
+    fetch(STATS_ENDPOINT + '/api/result?archetype=' + resultArchKey, { method: 'POST' }).catch(function () {});
     // Invalidate cache so fresh stats are fetched for this result
     _statsCache = null;
 
@@ -631,7 +639,7 @@
     if (rarityMatch && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       var rarityPre = rarityFinal.substring(0, rarityFinal.indexOf(rarityMatch[1]));
       var raritySuf = rarityFinal.substring(rarityFinal.indexOf(rarityMatch[1]) + rarityMatch[1].length);
-      var totalDelay = Math.round(0.8 * 1000) + 2800;
+      var totalDelay = 4800 + Math.round(0.8 * 1000);
       setTimeout(function () {
         var ticks = 0;
         var maxTicks = 10;
@@ -656,7 +664,7 @@
               if (data && data.shareCount >= 500) {
                 var scEl = document.getElementById('shareCount');
                 if (scEl) {
-                  var floored = Math.floor(data.shareCount / 1000) * 1000;
+                  var floored = Math.floor(data.shareCount / 500) * 500;
                   scEl.textContent = floored.toLocaleString() + '+ people have shared their result.';
                   scEl.classList.add('show');
                 }
@@ -684,7 +692,7 @@
         if (data && data.shareCount >= 500) {
           var scEl = document.getElementById('shareCount');
           if (scEl) {
-            var floored = Math.floor(data.shareCount / 1000) * 1000;
+            var floored = Math.floor(data.shareCount / 500) * 500;
             scEl.textContent = floored.toLocaleString() + '+ people have shared their result.';
             scEl.classList.add('show');
           }
@@ -1305,7 +1313,7 @@
     }
 
     // X, Facebook, WhatsApp pills — mark main button as shared when user taps out
-    ['shareX', 'shareFb', 'shareWa'].forEach(function (id) {
+    ['shareX', 'shareFb', 'shareWa', 'shareSms'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', function () {
@@ -1492,6 +1500,11 @@
         tx = (e.clientX / window.innerWidth - 0.5) * -10;
         ty = (e.clientY / window.innerHeight - 0.5) * -10;
       });
+      document.addEventListener('touchmove', function (e) {
+        var touch = e.touches[0];
+        tx = (touch.clientX / window.innerWidth - 0.5) * -10;
+        ty = (touch.clientY / window.innerHeight - 0.5) * -10;
+      }, { passive: true });
       // Smooth lerp loop
       (function drift() {
         cx += (tx - cx) * 0.06;
