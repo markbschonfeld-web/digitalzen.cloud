@@ -602,6 +602,7 @@ em, i, cite { font-style: normal; }
   font-size: 1rem; font-weight: 300;
   line-height: 1.8; color: var(--text-secondary);
   max-width: 420px;
+  margin-left: auto; margin-right: auto;
   opacity: 0;
 }
 .result__body p + p { margin-top: 0.75rem; }
@@ -691,7 +692,6 @@ em, i, cite { font-style: normal; }
   background-position: 100% 0;
   pointer-events: none;
   opacity: 0;
-  animation: shareShimmer 3.5s ease-in-out 1.8s infinite;
 }
 @keyframes shareShimmer {
   /* Bright spot sweeps left-to-right through the button */
@@ -709,12 +709,19 @@ em, i, cite { font-style: normal; }
   border: 1px solid rgba(255, 255, 255, 0.18);
   pointer-events: none;
   opacity: 0;
-  animation: sharePingRing 2.8s cubic-bezier(0.16, 1, 0.3, 1) 1s infinite;
 }
 @keyframes sharePingRing {
   0%   { transform: scale(1);    opacity: 0; }
   12%  { opacity: 0.5; }
   100% { transform: scale(1.07); opacity: 0; }
+}
+
+/* Animations start fresh when share button becomes visible */
+.btn--share.share-alive::after {
+  animation: shareShimmer 3.5s ease-in-out 0.3s infinite;
+}
+.btn--share.share-alive::before {
+  animation: sharePingRing 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0s infinite;
 }
 
 /* Shared state — animations settle after user acts */
@@ -779,6 +786,7 @@ em, i, cite { font-style: normal; }
   color: var(--red);
   border-color: rgba(196, 30, 30, 0.35);
 }
+
 
 /* ─── Capture primer ─── */
 .capture__primer {
@@ -2585,21 +2593,6 @@ body {
   100% { opacity: 0;    transform: scaleX(1); }
 }
 
-/* ── Share button one-shot attention pulse ── */
-.result__share { position: relative; }
-.result__share.share--pulse::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: inherit;
-  animation: sharePulse 0.9s ease-out forwards;
-  pointer-events: none;
-}
-@keyframes sharePulse {
-  0%   { opacity: 0.8; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.05); }
-}
 
 /* ── Social proof line ── */
 .result__share-social {
@@ -2772,7 +2765,6 @@ body {
 /* ── Reduced-motion overrides for new animations ── */
 @media (prefers-reduced-motion: reduce) {
   .scan-line.active { animation: none !important; }
-  .result__share.share--pulse::after { animation: none !important; }
   .btn--capture.capture-ready { animation: none !important; }
   .korfyr-shutdown.active::after { animation: none !important; }
   [data-archetype="ghost"].screen--result.active .result__archetype { animation: none !important; opacity: 1 !important; transform: none !important; }
