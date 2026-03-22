@@ -562,6 +562,11 @@
         + encodeURIComponent(resultShareText)
         + '&url=' + encodeURIComponent(resultShareUrl);
     }
+    var fbPillEl = document.getElementById('shareFb');
+    if (fbPillEl) {
+      fbPillEl.href = 'https://www.facebook.com/sharer/sharer.php?u='
+        + encodeURIComponent(resultShareUrl);
+    }
     var threadsPillEl = document.getElementById('shareThreads');
     if (threadsPillEl) {
       threadsPillEl.href = 'https://www.threads.net/intent/post?text='
@@ -1398,7 +1403,7 @@
     }
 
     // Platform pills — mark main button as shared when user taps out
-    ['shareX', 'shareThreads', 'shareReddit', 'shareWa', 'shareSms', 'shareTelegram'].forEach(function (id) {
+    ['shareX', 'shareFb', 'shareThreads', 'shareReddit', 'shareWa', 'shareSms', 'shareTelegram'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', function () {
