@@ -1250,6 +1250,21 @@
       setTimeout(function () { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
     }
 
+    // Cursor spotlight — radial highlight follows mouse inside button (desktop only)
+    [startBtn, splashBtn].forEach(function (btn) {
+      btn.addEventListener('mousemove', function (e) {
+        var rect = this.getBoundingClientRect();
+        var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        this.style.setProperty('--mx', x + '%');
+        this.style.setProperty('--my', y + '%');
+      });
+      btn.addEventListener('mouseleave', function () {
+        this.style.removeProperty('--mx');
+        this.style.removeProperty('--my');
+      });
+    });
+
     startBtn.addEventListener('click', function () { fireBeginLaunch(startBtn); nextScreen(); });
     splashBtn.addEventListener('click', function () {
       fireBeginLaunch(splashBtn);
