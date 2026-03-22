@@ -1551,7 +1551,7 @@
       var gridState = { lines: [], flashIdx: -1, flashTime: 0, nextFlash: 3000 };
       function initGrid() {
         gridState.lines = [];
-        var spacing = isMobile ? 100 : 90;
+        var spacing = 90;
         for (var x = spacing / 2; x < W + spacing; x += spacing + (Math.random() - 0.5) * 30) {
           gridState.lines.push({ x: x, y: 0, vertical: true, drift: (Math.random() - 0.5) * 0.15, bright: 0 });
         }
@@ -1591,7 +1591,7 @@
       var fogState = { blobs: [] };
       function initFog() {
         fogState.blobs = [];
-        var count = isMobile ? 2 : 3;
+        var count = 3;
         for (var i = 0; i < count; i++) {
           fogState.blobs.push({
             x: Math.random() * W, y: Math.random() * H,
@@ -1624,7 +1624,7 @@
       var streakState = { streaks: [] };
       function initStreaks() {
         streakState.streaks = [];
-        var count = isMobile ? 12 : 22;
+        var count = 22;
         var zones = [
           { angle: -0.3, weight: 0.4 },
           { angle: 0.8, weight: 0.35 },
@@ -1812,7 +1812,7 @@
       }
       function drawTraces(now) {
         var c = archColors.engineer;
-        var maxTraces = isMobile ? 2 : 3;
+        var maxTraces = 3;
         if (now > traceState.nextSpawn && traceState.traces.length < maxTraces) {
           traceState.traces.push(spawnTrace());
           traceState.nextSpawn = now + 2000 + Math.random() * 2000;
@@ -2005,7 +2005,7 @@
       var heatState = { zones: [] };
       function initHeat() {
         heatState.zones = [];
-        var count = isMobile ? 3 : 4;
+        var count = 4;
         for (var i = 0; i < count; i++) {
           heatState.zones.push({
             x: Math.random() * W, y: Math.random() * H,

@@ -423,7 +423,7 @@ em, i, cite { font-style: normal; }
   box-shadow: inset 3px 0 0 transparent;
   min-height: 56px;
   position: relative;
-  overflow: hidden;
+  overflow: clip; /* clip visually without restricting touch hit-testing (overflow:hidden blocks taps on iOS WebKit) */
 }
 .option::after {
   content: '';
@@ -1586,21 +1586,6 @@ em, i, cite { font-style: normal; }
 
 /* ─── Option hover — edge light trace (desktop) ─── */
 @media (hover: hover) {
-  .option {
-    position: relative;
-    overflow: hidden;
-  }
-  .option::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%; right: 100%; bottom: 0;
-    background: linear-gradient(90deg,
-      transparent,
-      rgba(196, 30, 30, 0.08),
-      transparent);
-    transition: none;
-    pointer-events: none;
-  }
   .option:hover::after {
     animation: optionSweep 0.5s ease-out forwards;
   }
