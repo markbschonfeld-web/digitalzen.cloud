@@ -1095,6 +1095,7 @@
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
+        startBtn.classList.remove('btn--launching');
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
@@ -1116,6 +1117,7 @@
         particleProfile = null;
         clearAmbientCanvas();
         requestAnimationFrame(clearAmbientCanvas); // defense against rAF race
+        startBtn.classList.remove('btn--launching');
         screenOrder[0] = 'intro';
         transitionTo(0);
         if (window.history && window.history.replaceState) {
