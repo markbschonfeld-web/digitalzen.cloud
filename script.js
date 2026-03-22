@@ -250,6 +250,14 @@
     if (transitioning) return;
     transitioning = true;
 
+    // Boot transition: BEGIN / FIND OUT (screen 0 → screen 1)
+    if (currentScreen === 0 && index === 1) {
+      var sl = document.getElementById('scanLine');
+      if (sl) { sl.classList.add('active'); setTimeout(function () { sl.classList.remove('active'); }, 220); }
+      window._particleBoost = true;
+      setTimeout(function () { window._particleBoost = false; }, 600);
+    }
+
     var currentEl = quiz.querySelector('.screen.active');
     var name = screenOrder[index];
     var nextEl = quiz.querySelector('[data-screen="' + name + '"]');
@@ -559,8 +567,17 @@
     // Body paragraphs start at 1.4s (set via baseDelay above)
     var afterBody = baseDelay + arch.body.length * 0.2;
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 0.2) + 's');
-    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.2) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.6) + 's');
+
+    // One-shot share button attention pulse (fires after name has been read)
+    setTimeout(function () {
+      var se = document.querySelector('.result__share');
+      if (se) {
+        se.classList.add('share--pulse');
+        setTimeout(function () { se.classList.remove('share--pulse'); }, 900);
+      }
+    }, 1600);
 
     // Enhancement 1: populate and animate share preview mockup
     var previewEl = document.getElementById('sharePreview');
@@ -631,6 +648,11 @@
                   scEl.classList.add('show');
                 }
               }
+              // Social proof below share button (lower threshold)
+              if (data && data.shareCount >= 200) {
+                var spEl = document.getElementById('shareSocialProof');
+                if (spEl) spEl.textContent = data.shareCount.toLocaleString() + '\u00a0sharing this week';
+              }
             });
           } else {
             resultRarity.textContent = rarityPre + (Math.floor(Math.random() * 28) + 4) + raritySuf;
@@ -654,6 +676,10 @@
             scEl.classList.add('show');
           }
         }
+        if (data && data.shareCount >= 200) {
+          var spEl = document.getElementById('shareSocialProof');
+          if (spEl) spEl.textContent = data.shareCount.toLocaleString() + '\u00a0sharing this week';
+        }
       });
     }
 
@@ -663,7 +689,7 @@
 
     // One-time attention ping on the KORFYR button when block first appears
     if (!window._korfyrPinged) {
-      var pingDelay = 2760 + Math.round((afterBody + 0.3) * 1000);
+      var pingDelay = 2760 + Math.round((afterBody + 0.1) * 1000);
       setTimeout(function () {
         var kBtn = document.querySelector('.btn--korfyr');
         if (kBtn) {
@@ -1153,19 +1179,33 @@
 
     captureForm.addEventListener('submit', handleCapture);
 
-    // Consent checkbox → button visual state
+    // Consent checkbox + email validation → button visual state
     var captureBtn = captureForm.querySelector('.btn--capture');
     if (captureBtn && captureConsent) {
       captureBtn.classList.add('dimmed');
-      captureConsent.addEventListener('change', function () {
-        if (captureConsent.checked) {
+      var _captureWasReady = false;
+      function checkCaptureReady() {
+        var emailVal = document.getElementById('captureEmail') ? document.getElementById('captureEmail').value : '';
+        var checked = captureConsent.checked;
+        var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+        var isReady = validEmail && checked;
+        if (isReady) {
           captureBtn.classList.remove('dimmed');
           captureBtn.classList.add('ready');
+          if (!_captureWasReady) {
+            captureBtn.classList.remove('capture-ready');
+            void captureBtn.offsetWidth; // reflow to restart animation
+            captureBtn.classList.add('capture-ready');
+          }
         } else {
-          captureBtn.classList.remove('ready');
+          captureBtn.classList.remove('ready', 'capture-ready');
           captureBtn.classList.add('dimmed');
         }
-      });
+        _captureWasReady = isReady;
+      }
+      captureConsent.addEventListener('change', checkCaptureReady);
+      var captureEmailInput = document.getElementById('captureEmail');
+      if (captureEmailInput) captureEmailInput.addEventListener('input', checkCaptureReady);
     }
 
     // ---- Mobile email section entrance animation ----
@@ -1240,8 +1280,12 @@
         this.style.removeProperty('--my');
       });
 
-      // Click burst ring — expands from button center, navigates normally
+      // Click: burst ring + shutdown animation → navigate
       kBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var dest = kBtn.getAttribute('href');
+
+        // Burst ring (immediate visual feedback)
         var rect = this.getBoundingClientRect();
         var size = Math.max(rect.width, rect.height);
         var burst = document.createElement('div');
@@ -1252,6 +1296,20 @@
           'top:'  + (rect.top  + (rect.height - size) / 2) + 'px;';
         document.body.appendChild(burst);
         setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
+
+        // Shutdown sequence — fade ambient + overlay to black, then navigate
+        var overlay = document.getElementById('korfyrShutdown');
+        if (overlay) overlay.classList.add('active');
+        if (window._ambientSystem) window._ambientSystem.setIntensity(0);
+
+        setTimeout(function () {
+          window.open(dest, '_blank', 'noopener');
+          // Restore ambient after redirect
+          setTimeout(function () {
+            if (overlay) overlay.classList.remove('active');
+            if (window._ambientSystem) window._ambientSystem.setIntensity(1.0);
+          }, 400);
+        }, 850);
       });
     })();
 
@@ -1966,6 +2024,9 @@
         if (analyzingActive) {
           tSpeed = 3.5;
           progress = Math.max(progress, 3);
+        }
+        if (window._particleBoost) {
+          tSpeed = Math.max(tSpeed, 2.5);
         }
 
         // Smooth lerp (~2s convergence at 60fps)
