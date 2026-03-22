@@ -63,7 +63,8 @@
       freq: 78,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'You\u2019ve eliminated everything that doesn\u2019t earn its place. Your ritual is the intersection of control and stillness \u2014 a space so refined it practically hums.'
+        'You\u2019ve eliminated everything that doesn\u2019t earn its place. Your ritual is the intersection of control and stillness \u2014 a space so refined it practically hums.',
+        'The room is exactly the way you left it. The light is right. The temperature is right. There\u2019s nothing to fix, nothing to adjust. You didn\u2019t arrive at this by accident \u2014 you built it by removing everything that didn\u2019t belong. Most people fill their nights. You empty yours until what\u2019s left is the only thing worth keeping.'
       ],
       insight: 'You don\u2019t add. You subtract until it\u2019s perfect.'
     },
@@ -74,7 +75,8 @@
       freq: 82,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'Controlled chaos. Nothing random about it. You move with purpose, even when there\u2019s no destination. Every unplanned moment was, in its own way, engineered.'
+        'Controlled chaos. Nothing random about it. You move with purpose, even when there\u2019s no destination. Every unplanned moment was, in its own way, engineered.',
+        'The route you drove wasn\u2019t on a map, but you knew every turn before you took it. The playlist wasn\u2019t shuffled \u2014 it was sequenced. People see spontaneity. You see a system running exactly the way you designed it, with just enough room left for the night to surprise you on your own terms.'
       ],
       insight: 'You planned not to plan. And it worked.'
     },
@@ -85,7 +87,8 @@
       freq: 80,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'You build things at hours that don\u2019t exist. Precision meets creation \u2014 everything you make carries the mark of someone who cares about tolerances nobody else will notice.'
+        'You build things at hours that don\u2019t exist. Precision meets creation \u2014 everything you make carries the mark of someone who cares about tolerances nobody else will notice.',
+        'The version you finished at 3 AM is the one nobody else would have noticed was different from the one at midnight. But you noticed. You went back and fixed the thing that was only wrong to you. That\u2019s the work. Not the making \u2014 the refining. And you won\u2019t stop until it meets a standard that lives entirely inside your own head.'
       ],
       insight: 'It\u2019s not done until it\u2019s right. And \u201Cright\u201D has nothing to do with morning.'
     },
@@ -96,7 +99,8 @@
       freq: 70,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'Moving through silence. Both at the same time. You crave stillness but your body won\u2019t cooperate. Your ritual is finding the eye of the hurricane \u2014 motion around you, quiet within.'
+        'Moving through silence. Both at the same time. You crave stillness but your body won\u2019t cooperate. Your ritual is finding the eye of the hurricane \u2014 motion around you, quiet within.',
+        'The walk at 1 AM isn\u2019t going anywhere. That\u2019s the point. Your feet are moving but your mind has finally stopped. The world is asleep and you\u2019re the only thing in motion, and somehow that\u2019s the closest you get to being still. Other people meditate sitting down. You meditate at 4 miles an hour.'
       ],
       insight: 'You don\u2019t sit with silence. You chase it until it stops running.'
     },
@@ -107,7 +111,8 @@
       freq: 66,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'No audience. No deadline. No problem. You make things in silence \u2014 just the thing and your attention. Your ritual is the meditative repetition of hands doing what they know.'
+        'No audience. No deadline. No problem. You make things in silence \u2014 just the thing and your attention. Your ritual is the meditative repetition of hands doing what they know.',
+        'It\u2019s the sketch that takes an hour because you weren\u2019t thinking about time. The recipe that doesn\u2019t need measuring anymore. The way your hands already know where to go. There\u2019s no pressure to finish because finishing was never the point \u2014 the making is. And the silence isn\u2019t background. It\u2019s part of the material.'
       ],
       insight: 'The quiet isn\u2019t the absence of noise. It\u2019s the presence of focus.'
     },
@@ -118,7 +123,8 @@
       freq: 88,
       rarity: 'Fewer than 8% of people get this result.',
       body: [
-        'Sleep is a suggestion. Making things is the priority. You\u2019re the person who starts a project at midnight and surfaces four hours later having made something real. Your ritual is productive chaos with a purpose.'
+        'Sleep is a suggestion. Making things is the priority. You\u2019re the person who starts a project at midnight and surfaces four hours later having made something real. Your ritual is productive chaos with a purpose.',
+        'The thing you made last Tuesday at 3 AM \u2014 you barely remember starting it. One minute you were restless, the next you were deep in it, and somewhere between the second coffee and the birds starting up you had something that didn\u2019t exist before. That\u2019s not insomnia. That\u2019s your operating system running at native speed.'
       ],
       insight: 'You don\u2019t have a bedtime. You have a creative window.'
     }
@@ -489,7 +495,7 @@
 
     // Build body paragraphs with staggered delays
     resultBody.innerHTML = '';
-    var baseDelay = 1.4; // seconds (after share button at 0.8s)
+    var baseDelay = 0.6; // seconds — body text appears first to build resonance before share CTA
     arch.body.forEach(function (para, i) {
       var p = document.createElement('p');
       p.textContent = para;
@@ -554,6 +560,32 @@
       waPillEl.style.display = isMobile ? '' : 'none';
     }
 
+    // SMS/iMessage pill — mobile only
+    var smsPillEl = document.getElementById('shareSms');
+    if (smsPillEl) {
+      var smsBody = encodeURIComponent('My night mode is ' + arch.name + '. What\u2019s yours? ' + resultShareUrl);
+      var smsSep = /iPhone|iPad/i.test(navigator.userAgent) ? '&' : '?';
+      smsPillEl.href = 'sms:' + smsSep + 'body=' + smsBody;
+      smsPillEl.style.display = /Android|iPhone|iPad/i.test(navigator.userAgent) ? '' : 'none';
+    }
+
+    // Challenge a friend — directed share with higher conversion copy
+    var challengeBtn = document.getElementById('challengeBtn');
+    if (challengeBtn) {
+      challengeBtn.onclick = function () {
+        var challengeText = 'I got ' + arch.name + '. I bet you\u2019d get something different. Take it: ' + resultShareUrl;
+        if (navigator.share) {
+          navigator.share({ text: challengeText }).catch(function () {});
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(challengeText);
+          var span = challengeBtn;
+          var orig = span.textContent;
+          span.textContent = 'Copied. Send it.';
+          setTimeout(function () { span.textContent = orig; }, 2500);
+        }
+      };
+    }
+
     // Reset share button state on each render (handles retake)
     if (shareBtn) shareBtn.classList.remove('shared');
 
@@ -563,21 +595,23 @@
     var korfyrEl = document.querySelector('.korfyr');
     var captureEl = document.querySelector('.capture');
 
-    shareEl.style.setProperty('--delay-share', '0.8s');
-    // Body paragraphs start at 1.4s (set via baseDelay above)
+    // Timing: body text first (builds resonance), then share CTA at emotional peak
+    // Body paragraphs start at baseDelay (0.6s), each staggered by 0.2s
     var afterBody = baseDelay + arch.body.length * 0.2;
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.2) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 0.6) + 's');
+    shareEl.style.setProperty('--delay-share', (afterBody + 0.3) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 1.0) + 's');
 
-    // One-shot share button attention pulse (fires after name has been read)
+    // One-shot share button attention pulse (fires after share section appears)
+    var sharePulseDelay = (afterBody + 0.3 + 0.4) * 1000; // 0.4s after share section animates in
     setTimeout(function () {
       var se = document.querySelector('.result__share');
       if (se) {
         se.classList.add('share--pulse');
         setTimeout(function () { se.classList.remove('share--pulse'); }, 900);
       }
-    }, 1600);
+    }, sharePulseDelay);
 
     // Enhancement 1: populate and animate share preview mockup
     var previewEl = document.getElementById('sharePreview');
@@ -597,13 +631,13 @@
       }, 2200);
     }
 
-    // Enhancement 6: smooth scroll to share section after archetype name animates in
+    // Smooth scroll share section into view once it appears (only if below fold)
     setTimeout(function () {
       var shareEl2 = document.querySelector('.result__share');
-      if (shareEl2 && shareEl2.getBoundingClientRect().bottom > window.innerHeight) {
+      if (shareEl2 && shareEl2.getBoundingClientRect().top > window.innerHeight) {
         shareEl2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
-    }, 1200);
+    }, (afterBody + 0.5) * 1000);
 
     // Fire /api/result to record completion; also fetch stats for live rarity display
     var currentArchKey = arch.key;
@@ -889,6 +923,123 @@
     }
   }
 
+  // ---- Share card generator (1080x1920 for Instagram Stories / screenshot sharing) ----
+  function generateShareCard() {
+    var resultEl = document.querySelector('[data-screen="result"]');
+    var displayKey = resultEl ? resultEl.getAttribute('data-archetype') : null;
+    if (!displayKey) return;
+    var archLookup = urlKeyMap[displayKey];
+    if (!archLookup) return;
+    var arch = archetypes[archLookup];
+    if (!arch) return;
+    var c = archColors[arch.key] || { r: 196, g: 30, b: 30 };
+
+    var W = 1080, H = 1920;
+    var canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#0c0c0e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Accent glow (radial gradient from archetype color)
+    var grd = ctx.createRadialGradient(W / 2, H * 0.35, 0, W / 2, H * 0.35, W * 0.7);
+    grd.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.15)');
+    grd.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    // Concentric rings
+    ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.08)';
+    ctx.lineWidth = 1;
+    for (var i = 1; i <= 4; i++) {
+      ctx.beginPath();
+      ctx.arc(W / 2, H * 0.35, 80 * i, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // "MY NIGHT MODE" label
+    ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.7)';
+    ctx.font = '500 28px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '8px';
+    ctx.fillText('MY NIGHT MODE', W / 2, H * 0.25);
+
+    // Archetype name
+    ctx.fillStyle = '#f0ede8';
+    ctx.font = '700 96px "Space Grotesk", sans-serif';
+    ctx.letterSpacing = '-2px';
+    // Word-wrap archetype name
+    var nameLines = [];
+    var words = arch.name.toUpperCase().split(' ');
+    if (words.length <= 2) { nameLines = [arch.name.toUpperCase()]; }
+    else { nameLines = [words.slice(0, 2).join(' '), words.slice(2).join(' ')]; }
+    var nameY = H * 0.34;
+    nameLines.forEach(function (line, idx) {
+      ctx.fillText(line, W / 2, nameY + idx * 110);
+    });
+
+    // Freq tag
+    ctx.fillStyle = 'rgba(240,237,232,0.45)';
+    ctx.font = '500 26px "JetBrains Mono", monospace';
+    ctx.letterSpacing = '4px';
+    ctx.fillText(arch.freqTag.toUpperCase(), W / 2, nameY + nameLines.length * 110 + 40);
+
+    // Rarity
+    ctx.fillStyle = 'rgba(240,237,232,0.55)';
+    ctx.font = '400 32px "Inter", sans-serif';
+    ctx.letterSpacing = '0px';
+    ctx.fillText(arch.rarity, W / 2, H * 0.58);
+
+    // Insight quote
+    ctx.fillStyle = 'rgba(240,237,232,0.7)';
+    ctx.font = 'italic 500 36px "Space Grotesk", sans-serif';
+    ctx.fillText('\u201C' + arch.insight + '\u201D', W / 2, H * 0.68);
+
+    // Divider
+    ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.35, H * 0.78);
+    ctx.lineTo(W * 0.65, H * 0.78);
+    ctx.stroke();
+
+    // "What's yours?" prompt
+    ctx.fillStyle = '#f0ede8';
+    ctx.font = '600 44px "Space Grotesk", sans-serif';
+    ctx.fillText('What\u2019s yours?', W / 2, H * 0.84);
+
+    // URL
+    ctx.fillStyle = 'rgba(240,237,232,0.35)';
+    ctx.font = '400 24px "JetBrains Mono", monospace';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('DIGITALZEN.CLOUD', W / 2, H * 0.93);
+
+    // Export as blob and share/download
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      var file = new File([blob], 'my-night-mode.png', { type: 'image/png' });
+
+      // Try native share with file (iOS Safari, Android Chrome)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          text: 'I\u2019m ' + arch.name + '. What\u2019s your night mode? digitalzen.cloud'
+        }).catch(function () {});
+      } else {
+        // Fallback: download the image
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'my-night-mode.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      }
+    }, 'image/png');
+  }
+
   function updateMetaTags(arch, shareUrl) {
     var ogImage = 'https://digitalzen.cloud/og/' + arch.key + '.png';
     var title = 'I\u2019m ' + arch.name + '. What\u2019s your night mode?';
@@ -1132,6 +1283,12 @@
     });
 
     shareBtn.addEventListener('click', handleShare);
+
+    // Save Card button — renders share card for Instagram Stories / screenshots
+    var saveCardBtn = document.getElementById('saveCardBtn');
+    if (saveCardBtn) {
+      saveCardBtn.addEventListener('click', generateShareCard);
+    }
 
     // Copy Link pill — copies bare URL, shows inline feedback
     var shareCopyPill = document.getElementById('shareCopyPill');

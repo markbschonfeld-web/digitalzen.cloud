@@ -781,6 +781,44 @@ em, i, cite { font-style: normal; }
   border-color: rgba(196, 30, 30, 0.35);
 }
 
+/* ─── Save Card button ─── */
+.btn--save-card {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  opacity: 0;
+  animation: shareEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--delay-share, 2s) + 0.35s) both;
+}
+.btn--save-card:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Challenge link ─── */
+.challenge-link {
+  display: block;
+  margin-top: 1rem;
+  background: none; border: none;
+  font-family: var(--font-body);
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 150ms ease;
+  opacity: 0;
+  animation: shareEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--delay-share, 2s) + 0.45s) both;
+}
+.challenge-link:hover { color: var(--text-secondary); }
+
 /* ─── Capture primer ─── */
 .capture__primer {
   font-size: 0.82rem;
