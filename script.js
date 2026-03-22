@@ -1299,7 +1299,8 @@
         setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
 
         // Pre-open tab synchronously — stays in trusted gesture context, not blocked by popup blockers
-        var w = window.open('', '_blank', 'noopener');
+        // Note: no 'noopener' here — noopener causes window.open to return null, breaking the reference
+        var w = window.open('', '_blank');
 
         // Shutdown sequence — fade ambient + overlay to black, then navigate
         var overlay = document.getElementById('korfyrShutdown');
