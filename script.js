@@ -1298,22 +1298,15 @@
         document.body.appendChild(burst);
         setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
 
-        // Pre-open tab synchronously — stays in trusted gesture context, not blocked by popup blockers
-        // Note: no 'noopener' here — noopener causes window.open to return null, breaking the reference
-        var w = window.open('', '_blank');
-
-        // Shutdown sequence — fade ambient + overlay to black, then navigate
+        // Shutdown sequence — fade ambient + overlay to black, then navigate current tab
+        // (opening a blank tab synchronously to beat popup blockers caused it to steal focus,
+        //  hiding the animation and making it look like an instant redirect)
         var overlay = document.getElementById('korfyrShutdown');
         if (overlay) overlay.classList.add('active');
         if (window._ambientSystem) window._ambientSystem.setIntensity(0);
 
         setTimeout(function () {
-          if (w) w.location.href = dest;
-          // Restore ambient after redirect
-          setTimeout(function () {
-            if (overlay) overlay.classList.remove('active');
-            if (window._ambientSystem) window._ambientSystem.setIntensity(1.0);
-          }, 400);
+          window.location.href = dest;
         }, 850);
       });
     })();
