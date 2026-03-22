@@ -1298,13 +1298,16 @@
         document.body.appendChild(burst);
         setTimeout(function () { if (burst.parentNode) burst.parentNode.removeChild(burst); }, 750);
 
+        // Pre-open tab synchronously — stays in trusted gesture context, not blocked by popup blockers
+        var w = window.open('', '_blank', 'noopener');
+
         // Shutdown sequence — fade ambient + overlay to black, then navigate
         var overlay = document.getElementById('korfyrShutdown');
         if (overlay) overlay.classList.add('active');
         if (window._ambientSystem) window._ambientSystem.setIntensity(0);
 
         setTimeout(function () {
-          window.open(dest, '_blank', 'noopener');
+          if (w) w.location.href = dest;
           // Restore ambient after redirect
           setTimeout(function () {
             if (overlay) overlay.classList.remove('active');
