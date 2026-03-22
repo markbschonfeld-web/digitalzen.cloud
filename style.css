@@ -1163,6 +1163,16 @@ em, i, cite { font-style: normal; }
   .option:active { transform: translateX(3px) scale(0.985); }
 }
 
+/* ─── Option press state — touch feedback (replaces hover sweep on mobile) ─── */
+@media (hover: none) {
+  .option:active {
+    background: var(--bg-elevated);
+    box-shadow: inset 3px 0 0 var(--red), 0 0 12px rgba(196, 30, 30, 0.1);
+    transform: scale(0.99);
+    transition: transform 60ms linear, box-shadow 60ms linear;
+  }
+}
+
 /* ─── Option selected: lock-in with inner glow ─── */
 .option.selected {
   border-color: var(--border-active);
@@ -1359,6 +1369,20 @@ em, i, cite { font-style: normal; }
 }
 .quiz.shake {
   animation: microShake 0.12s linear;
+}
+/* Boost shake for touch — larger displacement + micro-scale so it reads on a held device */
+@media (hover: none) {
+  @keyframes microShakeMobile {
+    0%   { transform: translateX(0) scale(1); }
+    20%  { transform: translateX(-5px) scale(0.995); }
+    40%  { transform: translateX(5px) scale(1.005); }
+    60%  { transform: translateX(-3px) scale(0.997); }
+    80%  { transform: translateX(3px) scale(1.003); }
+    100% { transform: translateX(0) scale(1); }
+  }
+  .quiz.shake {
+    animation: microShakeMobile 0.18s linear;
+  }
 }
 
 /* (analyzing flash moved to enhanced section) */
@@ -1820,6 +1844,12 @@ em, i, cite { font-style: normal; }
     transform: none !important;
     transition: opacity 150ms linear !important;
   }
+  /* Shake fallback: opacity dim instead of transform (JS removes .shake class at 150ms) */
+  .quiz.shake {
+    animation: none !important;
+    transition: opacity 60ms linear !important;
+    opacity: 0.82 !important;
+  }
 }
 
 
@@ -2081,6 +2111,17 @@ em, i, cite { font-style: normal; }
   transform: scale(0.95) !important;
   transition: transform 80ms linear !important;
   box-shadow: none !important;
+}
+/* Touch spotlight flash — brighter center glow on tap (mobile has no hover) */
+@media (hover: none) {
+  .btn--pulse:active,
+  .btn--korfyr:active {
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.22) 0%,
+      transparent 60%
+    ) !important;
+  }
 }
 
 /* Burst ring (JS-injected on click) */

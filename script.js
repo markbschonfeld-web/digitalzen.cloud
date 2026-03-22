@@ -1263,6 +1263,11 @@
         this.style.removeProperty('--mx');
         this.style.removeProperty('--my');
       });
+      // Touch: lock spotlight to center so :active CSS can flash it brighter
+      btn.addEventListener('touchstart', function () {
+        this.style.setProperty('--mx', '50%');
+        this.style.setProperty('--my', '50%');
+      }, { passive: true });
     });
 
     startBtn.addEventListener('click', function () { fireBeginLaunch(startBtn); nextScreen(); });
@@ -1525,6 +1530,11 @@
         this.style.removeProperty('--mx');
         this.style.removeProperty('--my');
       });
+      // Touch: lock spotlight to center so :active CSS can flash it brighter
+      kBtn.addEventListener('touchstart', function () {
+        this.style.setProperty('--mx', '50%');
+        this.style.setProperty('--my', '50%');
+      }, { passive: true });
 
       // Click: burst ring + shutdown animation → navigate
       kBtn.addEventListener('click', function (e) {
