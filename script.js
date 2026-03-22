@@ -569,25 +569,8 @@
       smsPillEl.style.display = /Android|iPhone|iPad/i.test(navigator.userAgent) ? '' : 'none';
     }
 
-    // Challenge a friend — directed share with higher conversion copy
-    var challengeBtn = document.getElementById('challengeBtn');
-    if (challengeBtn) {
-      challengeBtn.onclick = function () {
-        var challengeText = 'I got ' + arch.name + '. I bet you\u2019d get something different. Take it: ' + resultShareUrl;
-        if (navigator.share) {
-          navigator.share({ text: challengeText }).catch(function () {});
-        } else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(challengeText);
-          var span = challengeBtn;
-          var orig = span.textContent;
-          span.textContent = 'Copied. Send it.';
-          setTimeout(function () { span.textContent = orig; }, 2500);
-        }
-      };
-    }
-
     // Reset share button state on each render (handles retake)
-    if (shareBtn) shareBtn.classList.remove('shared');
+    if (shareBtn) shareBtn.classList.remove('shared', 'share-alive');
 
     // Set timing — share button now appears before body copy
     var shareEl = document.querySelector('.result__share');
@@ -603,15 +586,11 @@
     korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
     captureEl.style.setProperty('--delay-capture', (afterBody + 1.0) + 's');
 
-    // One-shot share button attention pulse (fires after share section appears)
-    var sharePulseDelay = (afterBody + 0.3 + 0.4) * 1000; // 0.4s after share section animates in
+    // Start share button animations fresh once the button becomes visible
+    var shareAnimDelay = (afterBody + 0.3 + 0.35) * 1000; // 350ms after share section animates in
     setTimeout(function () {
-      var se = document.querySelector('.result__share');
-      if (se) {
-        se.classList.add('share--pulse');
-        setTimeout(function () { se.classList.remove('share--pulse'); }, 900);
-      }
-    }, sharePulseDelay);
+      if (shareBtn) shareBtn.classList.add('share-alive');
+    }, shareAnimDelay);
 
     // Enhancement 1: populate and animate share preview mockup
     var previewEl = document.getElementById('sharePreview');
