@@ -439,6 +439,15 @@
             }
           }
         }, 50);
+        // Share button attention animations — start fresh once the CTA is visible.
+        // Must fire from here (result screen activation), NOT from renderResult,
+        // because renderResult runs during the 4.8s analyzing phase and the animation
+        // would arrive at an arbitrary cycle phase by the time the screen appears.
+        // 800ms = 450ms share-section entry delay + 350ms animation duration.
+        setTimeout(function () {
+          var btn = document.getElementById('shareBtn');
+          if (btn && !btn.classList.contains('shared')) btn.classList.add('share-alive');
+        }, 800);
       }
     }, 260); // matches CSS fade-out duration
   }
@@ -551,6 +560,17 @@
       fbPillEl.href = 'https://www.facebook.com/sharer/sharer.php?u='
         + encodeURIComponent(resultShareUrl);
     }
+    var threadsPillEl = document.getElementById('shareThreads');
+    if (threadsPillEl) {
+      threadsPillEl.href = 'https://www.threads.net/intent/post?text='
+        + encodeURIComponent(resultShareText + ' ' + resultShareUrl);
+    }
+    var redditPillEl = document.getElementById('shareReddit');
+    if (redditPillEl) {
+      redditPillEl.href = 'https://www.reddit.com/submit?url='
+        + encodeURIComponent(resultShareUrl)
+        + '&title=' + encodeURIComponent(resultShareText);
+    }
 
     // Enhancement 7: WhatsApp pill — mobile only, fresh URL on each render
     var waPillEl = document.getElementById('shareWa');
@@ -571,6 +591,12 @@
       smsPillEl.style.display = (/Android|iPhone|iPad/i.test(navigator.userAgent)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) ? '' : 'none';
     }
+    var tgPillEl = document.getElementById('shareTelegram');
+    if (tgPillEl) {
+      tgPillEl.href = 'https://t.me/share/url?url='
+        + encodeURIComponent(resultShareUrl)
+        + '&text=' + encodeURIComponent(resultShareText);
+    }
 
     // Reset share button state on each render (handles retake)
     if (shareBtn) shareBtn.classList.remove('shared', 'share-alive');
@@ -579,6 +605,8 @@
     if (captureForm) captureForm.classList.remove('hidden');
     if (captureSuccess) captureSuccess.classList.remove('show');
     if (captureEmail) captureEmail.value = '';
+    var captureBtn = document.querySelector('.btn--capture');
+    if (captureBtn) captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
 
     // Set timing — share button now appears before body copy
     var shareEl = document.querySelector('.result__share');
@@ -586,19 +614,16 @@
     var korfyrEl = document.querySelector('.korfyr');
     var captureEl = document.querySelector('.capture');
 
-    // Timing: body text first (builds resonance), then share CTA at emotional peak
-    // Body paragraphs start at baseDelay (0.6s), each staggered by 0.2s
+    // Timing: share CTA appears right after the reveal for peak-dopamine capture.
+    // Body text and insight follow below to validate identity and deepen engagement.
     var afterBody = baseDelay + arch.body.length * 0.2;
+    shareEl.style.setProperty('--delay-share', '0.45s');
     insightEl.style.setProperty('--delay-insight', afterBody + 's');
-    shareEl.style.setProperty('--delay-share', (afterBody + 0.3) + 's');
-    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.6) + 's');
-    captureEl.style.setProperty('--delay-capture', (afterBody + 1.0) + 's');
+    korfyrEl.style.setProperty('--delay-korfyr', (afterBody + 0.3) + 's');
+    captureEl.style.setProperty('--delay-capture', (afterBody + 0.7) + 's');
 
-    // Start share button animations fresh once the button becomes visible
-    var shareAnimDelay = (afterBody + 0.3 + 0.35) * 1000; // 350ms after share section animates in
-    setTimeout(function () {
-      if (shareBtn) shareBtn.classList.add('share-alive');
-    }, shareAnimDelay);
+    // share-alive is added from the result screen activation handler (not here),
+    // so the ping/shimmer start fresh relative to when the user actually sees the CTA.
 
     // Enhancement 1: populate and animate share preview mockup
     var previewEl = document.getElementById('sharePreview');
@@ -617,14 +642,6 @@
         previewEl.classList.add('share-preview--played');
       }, 2200);
     }
-
-    // Smooth scroll share section into view once it appears (only if below fold)
-    setTimeout(function () {
-      var shareEl2 = document.querySelector('.result__share');
-      if (shareEl2 && shareEl2.getBoundingClientRect().top > window.innerHeight) {
-        shareEl2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, (afterBody + 0.5) * 1000);
 
     // Fire /api/result to record completion; also fetch stats for live rarity display
     var resultArchKey = arch.key;
@@ -797,8 +814,11 @@
     // Vignette deepening
     quiz.style.setProperty('--vignette', (quizProgress * 0.07).toFixed(3));
 
-    // Particle burst from click point
-    spawnBurst(e.clientX, e.clientY);
+    // Particle burst from click point (fallback to viewport center if coords absent on mobile)
+    spawnBurst(
+      e.clientX != null ? e.clientX : window.innerWidth / 2,
+      e.clientY != null ? e.clientY : window.innerHeight / 2
+    );
 
     // Micro-shake feedback
     quiz.classList.add('shake');
@@ -1312,8 +1332,8 @@
       });
     }
 
-    // X, Facebook, WhatsApp pills — mark main button as shared when user taps out
-    ['shareX', 'shareFb', 'shareWa', 'shareSms'].forEach(function (id) {
+    // Platform pills — mark main button as shared when user taps out
+    ['shareX', 'shareFb', 'shareThreads', 'shareReddit', 'shareWa', 'shareSms', 'shareTelegram'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', function () {
@@ -1331,11 +1351,24 @@
     if (captureBtn && captureConsent) {
       captureBtn.classList.add('dimmed');
       var _captureWasReady = false;
+      var _emailWasValid = false;
       function checkCaptureReady() {
         var emailVal = document.getElementById('captureEmail') ? document.getElementById('captureEmail').value : '';
         var checked = captureConsent.checked;
         var validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
         var isReady = validEmail && checked;
+
+        // Stage 1 — valid email alone: wake the button up with shimmer/glow
+        // so the user's eye is drawn to it even before they tick consent.
+        if (validEmail && !_emailWasValid) {
+          captureBtn.classList.remove('dimmed');
+          captureBtn.classList.add('capture-alive');
+        } else if (!validEmail) {
+          captureBtn.classList.remove('capture-alive', 'ready', 'capture-ready');
+          captureBtn.classList.add('dimmed');
+        }
+
+        // Stage 2 — email + consent: full ready state with unlock pop
         if (isReady) {
           captureBtn.classList.remove('dimmed');
           captureBtn.classList.add('ready');
@@ -1344,10 +1377,11 @@
             void captureBtn.offsetWidth; // reflow to restart animation
             captureBtn.classList.add('capture-ready');
           }
-        } else {
+        } else if (validEmail) {
           captureBtn.classList.remove('ready', 'capture-ready');
-          captureBtn.classList.add('dimmed');
         }
+
+        _emailWasValid = validEmail;
         _captureWasReady = isReady;
       }
       captureConsent.addEventListener('change', checkCaptureReady);
@@ -1551,7 +1585,7 @@
       var gridState = { lines: [], flashIdx: -1, flashTime: 0, nextFlash: 3000 };
       function initGrid() {
         gridState.lines = [];
-        var spacing = isMobile ? 100 : 90;
+        var spacing = 90;
         for (var x = spacing / 2; x < W + spacing; x += spacing + (Math.random() - 0.5) * 30) {
           gridState.lines.push({ x: x, y: 0, vertical: true, drift: (Math.random() - 0.5) * 0.15, bright: 0 });
         }
@@ -1591,7 +1625,7 @@
       var fogState = { blobs: [] };
       function initFog() {
         fogState.blobs = [];
-        var count = isMobile ? 2 : 3;
+        var count = 3;
         for (var i = 0; i < count; i++) {
           fogState.blobs.push({
             x: Math.random() * W, y: Math.random() * H,
@@ -1624,7 +1658,7 @@
       var streakState = { streaks: [] };
       function initStreaks() {
         streakState.streaks = [];
-        var count = isMobile ? 12 : 22;
+        var count = 22;
         var zones = [
           { angle: -0.3, weight: 0.4 },
           { angle: 0.8, weight: 0.35 },
@@ -1812,7 +1846,7 @@
       }
       function drawTraces(now) {
         var c = archColors.engineer;
-        var maxTraces = isMobile ? 2 : 3;
+        var maxTraces = 3;
         if (now > traceState.nextSpawn && traceState.traces.length < maxTraces) {
           traceState.traces.push(spawnTrace());
           traceState.nextSpawn = now + 2000 + Math.random() * 2000;
@@ -2005,7 +2039,7 @@
       var heatState = { zones: [] };
       function initHeat() {
         heatState.zones = [];
-        var count = isMobile ? 3 : 4;
+        var count = 4;
         for (var i = 0; i < count; i++) {
           heatState.zones.push({
             x: Math.random() * W, y: Math.random() * H,
